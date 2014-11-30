@@ -21,7 +21,10 @@
 #include <stdexcept>
 #include <vector>
 #include "Types.h"
+#include "../../Common/Types.h"
 
+using Common_Types::Byte;
+using Common_Types::ByteVector;
 using NetworkManagement_Types::PacketSize;
 
 namespace NetworkManagement_Types
@@ -59,7 +62,7 @@ namespace NetworkManagement_Types
              * @return the newly built and validated object
              * @throws <code>std::invalid_argument</code>, if the supplied data cannot be converted to a valid object
              */
-            static ConnectionRequest fromBytes(const std::vector<BYTE> & data)
+            static ConnectionRequest fromBytes(const ByteVector & data)
             {
                 ConnectionRequest result;
                 
@@ -92,12 +95,12 @@ namespace NetworkManagement_Types
              * @return the byte representation of the request
              * @throws <code>std::invalid_argument</code>, if the conversion cannot be done
              */
-            std::vector<BYTE> toBytes() const
+            ByteVector toBytes() const
             {
                 if(!isValid())
                     throw std::invalid_argument("ConnectionRequest::toBytes() > Cannot convert invalid object.");
                 
-                std::vector<BYTE> result;
+                ByteVector result;
                 
                 switch(senderPeerType)
                 {
@@ -164,14 +167,14 @@ namespace NetworkManagement_Types
              * @return the newly built object
              * @throws <code>std::invalid_argument</code>, if the supplied data cannot be converted
              */
-            static HeaderPacket fromNetworkBytes(const std::vector<BYTE> & data)
+            static HeaderPacket fromNetworkBytes(const ByteVector & data)
             {
                 if(HeaderPacket::BYTE_LENGTH != data.size())
                     throw std::invalid_argument("HeaderPacket::fromNetworkBytes() > Unexpected data length encountered.");
 
                 HeaderPacket result;
                 
-                BYTE nPayloadSize[data.size()];
+                Byte nPayloadSize[data.size()];
                 
                 for(std::size_t i = 0; i < data.size(); i++)
                     nPayloadSize[i] = data[i];
@@ -189,15 +192,15 @@ namespace NetworkManagement_Types
              * @return the byte representation of the request
              * @throws <code>std::invalid_argument</code>, if the conversion cannot be done
              */
-            std::vector<BYTE> toNetworkBytes()
+            ByteVector toNetworkBytes()
             {
                 auto nPayloadSize = htonl(payloadSize);
                 
                 if(sizeof nPayloadSize != HeaderPacket::BYTE_LENGTH)
                     throw std::invalid_argument("HeaderPacket::toNetworkBytes() > The converted payload size does not have the expected byte length.");
                 
-                std::vector<BYTE> result(HeaderPacket::BYTE_LENGTH);
-                BYTE* rawResult = static_cast<BYTE*>(static_cast<void*>(&nPayloadSize));
+                ByteVector result(HeaderPacket::BYTE_LENGTH);
+                Byte* rawResult = static_cast<Byte*>(static_cast<void*>(&nPayloadSize));
                 
                 for(std::size_t i = 0; i < (sizeof nPayloadSize); i++)
                     result[i] = rawResult[i];
@@ -213,7 +216,7 @@ namespace NetworkManagement_Types
              * @param target the container to be used for storing the result
              * @throws <code>std::invalid_argument</code>, if the conversion cannot be done
              */
-            void toNetworkBytes(std::vector<BYTE> & target)
+            void toNetworkBytes(ByteVector & target)
             {
                 if(target.size() != HeaderPacket::BYTE_LENGTH)
                     throw std::invalid_argument("HeaderPacket::toNetworkBytes() > The target container does not have the expected storage capacity.");
@@ -223,7 +226,7 @@ namespace NetworkManagement_Types
                 if(sizeof nPayloadSize != HeaderPacket::BYTE_LENGTH)
                     throw std::invalid_argument("HeaderPacket::toNetworkBytes() > The converted payload size does not have the expected byte length.");
                 
-                BYTE* rawResult = static_cast<BYTE*>(static_cast<void*>(&nPayloadSize));
+                Byte* rawResult = static_cast<Byte*>(static_cast<void*>(&nPayloadSize));
                 
                 for(std::size_t i = 0; i < (sizeof nPayloadSize); i++)
                     target[i] = rawResult[i];

@@ -23,6 +23,9 @@
 
 namespace Common_Types
 {
+    typedef unsigned char Byte;
+    typedef std::vector<Byte> ByteVector;
+    
     typedef unsigned long TransferredDataAmount;
     const TransferredDataAmount INVALID_TRANSFERRED_DATA_AMOUNT = 0; //TODO - value?
     

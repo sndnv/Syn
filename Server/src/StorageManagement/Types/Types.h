@@ -20,7 +20,14 @@
 
 namespace StorageManagement_Types
 {
+    typedef unsigned long StoredDataID;
+    const StoredDataID INVALID_STORED_DATA_ID = 0;
     
+    typedef unsigned long PoolSize;
+    const PoolSize INVALID_POOL_SIZE = 0;
+    
+    enum class DataPoolType { INVALID, LOCAL_FS, LOCAL_MEMORY, REMOTE_FS, REMOTE_MEMORY };
+    enum class PoolState { INVALID, READ_WRITE, READ_ONLY, ERROR };
 }
 
 #endif	/* STORAGE_MANAGEMENT_TYPES_H */

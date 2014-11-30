@@ -33,6 +33,9 @@
 #include "../NetworkManagement/Types/Types.h"
 #include "../NetworkManagement/Types/Packets.h"
 #include "../InstructionManagement/Types/Types.h"
+#include "../Common/Types.h"
+
+using Common_Types::Byte;
 
 using DatabaseManagement_Types::DatabaseObjectType;
 using DatabaseManagement_Types::DatabaseManagerOperationMode;
@@ -79,7 +82,7 @@ namespace Utilities
                 unsigned int resultLength = var.size() * 2;
                 char result[resultLength + 1];
                 
-                BYTE * varDataPtr = var.BytePtr();
+                Byte * varDataPtr = var.BytePtr();
                 
                 for(unsigned int i = 0; i < var.size(); i++)
                     snprintf(&result[2*i], resultLength+1, "%02X", varDataPtr[i]);
@@ -89,7 +92,7 @@ namespace Utilities
                 return std::string(result);
             }
             
-            static std::string toString(std::vector<BYTE> var)
+            static std::string toString(ByteVector var)
             {
                 unsigned int resultLength = var.size() * 2;
                 char result[resultLength + 1];

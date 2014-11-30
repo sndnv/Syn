@@ -32,6 +32,10 @@
 #include "../Types/Packets.h"
 #include "../../Utilities/Tools.h"
 #include "../../Utilities/FileLogger.h"
+#include "../../Common/Types.h"
+
+using Common_Types::Byte;
+using Common_Types::ByteVector;
 
 using NetworkManagement_Types::PeerType;
 using NetworkManagement_Types::SocketPtr;
@@ -137,7 +141,7 @@ namespace NetworkManagement_Connections
              * 
              * @param data the data to be sent
              */
-            void sendData(const std::vector<BYTE> & data);
+            void sendData(const ByteVector & data);
             
             /**
              * Sends the supplied data to the associated remote peer.
@@ -238,7 +242,7 @@ namespace NetworkManagement_Connections
              * @param function the event handler to be attached
              * @return the resulting signal connection object
              */
-            boost::signals2::connection onDataReceivedEventAttach(std::function<void(std::vector<BYTE>, PacketSize)> function) { return onDataReceived.connect(function); }
+            boost::signals2::connection onDataReceivedEventAttach(std::function<void(ByteVector, PacketSize)> function) { return onDataReceived.connect(function); }
             
             /**
              * Attaches the supplied handler to the <code>onWriteResultReceived</code> event.
@@ -275,7 +279,7 @@ namespace NetworkManagement_Connections
             //Data - Writing
             boost::mutex writeDataMutex;                //pending operations data mutex
             unsigned int pendingWriteOperations = 0;    //number of currently pending write operations
-            std::queue<const std::vector<BYTE> *>  pendingWritesData; //the data for all currently pending write operations
+            std::queue<const ByteVector *>  pendingWritesData; //the data for all currently pending write operations
             TransferredDataAmount sent = 0;             //send data (in bytes); Note: header transmission is not included
             
             //Utils
@@ -324,7 +328,7 @@ namespace NetworkManagement_Connections
              * 
              * @param data the data to be sent
              */
-            void queueNextWrite(const std::vector<BYTE> & data);
+            void queueNextWrite(const ByteVector & data);
             
             /**
              * Read handler for all incoming data.
@@ -353,7 +357,7 @@ namespace NetworkManagement_Connections
             
             boost::signals2::signal<void (RawNetworkSessionID)> onConnect;      //life cycle event
             boost::signals2::signal<void (RawNetworkSessionID)> onDisconnect;   //life cycle event
-            boost::signals2::signal<void (std::vector<BYTE>, PacketSize)> onDataReceived; //data event
+            boost::signals2::signal<void (ByteVector, PacketSize)> onDataReceived; //data event
             boost::signals2::signal<void (bool)> onWriteResultReceived;                   //data event
             //NOTE: this is used internally and the object can be assumed invalid, after a single handler finishes executing
             boost::signals2::signal<void (RawNetworkSessionID, ConnectionInitiation)> canBeDestroyed; //life cycle event
@@ -408,7 +412,7 @@ namespace NetworkManagement_Connections
              * @param data the bytes returned by the last read operation
              * @param remainingData the number of bytes remaining to be read
              */
-            void onDataReceivedEvent(std::vector<BYTE> data, PacketSize remainingData)
+            void onDataReceivedEvent(ByteVector data, PacketSize remainingData)
             {
                 {
                     boost::lock_guard<boost::mutex> eventsLock(eventsMutex);
