@@ -19,12 +19,18 @@
 #define	COMMON_TYPES_H
 
 #include <vector>
+#include <boost/shared_ptr.hpp>
+#include <boost/interprocess/smart_ptr/unique_ptr.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
 namespace Common_Types
 {
     typedef unsigned char Byte;
     typedef std::vector<Byte> ByteVector;
+    typedef boost::shared_ptr<ByteVector> ByteVectorPtr;
+    
+    //struct ByteVectorDeleter { void operator()(ByteVector * vector) {  delete vector; } };
+    //typedef boost::interprocess::unique_ptr<ByteVector, ByteVectorDeleter> ByteVectorUniquePtr;
     
     typedef unsigned long TransferredDataAmount;
     const TransferredDataAmount INVALID_TRANSFERRED_DATA_AMOUNT = 0; //TODO - value?
@@ -40,6 +46,15 @@ namespace Common_Types
     
     typedef boost::posix_time::ptime Timestamp;
     const boost::posix_time::ptime INVALID_DATE_TIME = boost::posix_time::ptime(boost::posix_time::min_date_time);
+    
+    typedef unsigned long DataPoolSize;
+    const DataPoolSize INVALID_DATA_POOL_SIZE = 0; //TODO - value?
+    
+    typedef std::string DataPoolPath;
+    const DataPoolPath INVALID_DATA_POOL_PATH = ""; //TODO - value?
+    
+    typedef unsigned long DataPoolRetention;
+    const DataPoolRetention INVALID_DATA_POOL_RETENTION = 0; //TODO - value?
 }
 
 #endif	/* COMMON_TYPES_H */

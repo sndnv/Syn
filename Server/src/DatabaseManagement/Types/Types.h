@@ -35,15 +35,6 @@ namespace DatabaseManagement_Types
     typedef unsigned long DatabaseRequestID;
     const DatabaseRequestID INVALID_DATABASE_REQUEST_ID = 0; //TODO - value?
     
-    typedef unsigned long DataPoolSize;
-    const DataPoolSize INVALID_DATA_POOL_SIZE = 0; //TODO - value?
-    
-    typedef std::string DataPoolPath;
-    const DataPoolPath INVALID_DATA_POOL_PATH = ""; //TODO - value?
-    
-    typedef unsigned long DataPoolRetention;
-    const DataPoolRetention INVALID_DATA_POOL_RETENTION = 0; //TODO - value?
-    
     typedef boost::uuids::uuid DBObjectID;
     const DBObjectID INVALID_OBJECT_ID = boost::uuids::nil_uuid();
     

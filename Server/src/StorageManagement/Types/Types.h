@@ -23,11 +23,17 @@ namespace StorageManagement_Types
     typedef unsigned long StoredDataID;
     const StoredDataID INVALID_STORED_DATA_ID = 0;
     
-    typedef unsigned long PoolSize;
-    const PoolSize INVALID_POOL_SIZE = 0;
+    typedef StoredDataID EntitiesCountType;
     
-    enum class DataPoolType { INVALID, LOCAL_FS, LOCAL_MEMORY, REMOTE_FS, REMOTE_MEMORY };
-    enum class PoolState { INVALID, READ_WRITE, READ_ONLY, ERROR };
+    typedef unsigned long DiskDataAddress;
+    const DiskDataAddress INVALID_DISK_DATA_ADDRESS = 0;
+    
+    typedef unsigned long DiskDataSize;
+    const DiskDataSize INVALID_DISK_DATA_SIZE = 0;
+    
+    enum class DataPoolType { INVALID, LOCAL_DISK, LOCAL_MEMORY, REMOTE_DISK, REMOTE_MEMORY };
+    enum class PoolState { INVALID, OPEN, CLOSED, FAILED };
+    enum class PoolMode { INVALID, READ_WRITE, READ_ONLY };
 }
 
 #endif	/* STORAGE_MANAGEMENT_TYPES_H */

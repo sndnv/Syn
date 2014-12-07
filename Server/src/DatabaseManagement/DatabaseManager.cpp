@@ -1028,7 +1028,7 @@ DataPoolSize SyncServer_Core::DatabaseManager::Functions_System::getPendingDataP
     if(container || container->getSystemParameterType() != SystemParameterType::PENDING_DATA_POOL_SIZE)
         return boost::any_cast<DataPoolSize>(container->getSystemParameterValue());
     else
-        return DatabaseManagement_Types::INVALID_DATA_POOL_SIZE;
+        return Common_Types::INVALID_DATA_POOL_SIZE;
 }
 
 DataPoolPath SyncServer_Core::DatabaseManager::Functions_System::getPendingDataPoolPath()
@@ -1038,7 +1038,7 @@ DataPoolPath SyncServer_Core::DatabaseManager::Functions_System::getPendingDataP
     if(container || container->getSystemParameterType() != SystemParameterType::PENDING_DATA_POOL_PATH)
         return boost::any_cast<DataPoolPath>(container->getSystemParameterValue());
     else
-        return DatabaseManagement_Types::INVALID_DATA_POOL_PATH;
+        return Common_Types::INVALID_DATA_POOL_PATH;
 }
 
 DataPoolRetention SyncServer_Core::DatabaseManager::Functions_System::getPendingDataPoolRetention()
@@ -1048,7 +1048,7 @@ DataPoolRetention SyncServer_Core::DatabaseManager::Functions_System::getPending
     if(container || container->getSystemParameterType() != SystemParameterType::PENDING_DATA_RETENTION)
         return boost::any_cast<DataPoolRetention>(container->getSystemParameterValue());
     else
-        return DatabaseManagement_Types::INVALID_DATA_POOL_RETENTION;
+        return Common_Types::INVALID_DATA_POOL_RETENTION;
 }
 
 DataPoolSize SyncServer_Core::DatabaseManager::Functions_System::getInMemoryDataPoolSize()
@@ -1058,7 +1058,7 @@ DataPoolSize SyncServer_Core::DatabaseManager::Functions_System::getInMemoryData
     if(container || container->getSystemParameterType() != SystemParameterType::IN_MEMORY_POOL_SIZE)
         return boost::any_cast<DataPoolSize>(container->getSystemParameterValue());
     else
-        return DatabaseManagement_Types::INVALID_DATA_POOL_SIZE;
+        return Common_Types::INVALID_DATA_POOL_SIZE;
 }
 
 DataPoolRetention SyncServer_Core::DatabaseManager::Functions_System::getInMemoryDataPoolRetention()
@@ -1068,7 +1068,7 @@ DataPoolRetention SyncServer_Core::DatabaseManager::Functions_System::getInMemor
     if(container || container->getSystemParameterType() != SystemParameterType::IN_MEMORY_POOL_RETENTION)
         return boost::any_cast<DataPoolRetention>(container->getSystemParameterValue());
     else
-        return DatabaseManagement_Types::INVALID_DATA_POOL_RETENTION;
+        return Common_Types::INVALID_DATA_POOL_RETENTION;
 }
 
 string SyncServer_Core::DatabaseManager::Functions_System::getSupportedProtocols()
