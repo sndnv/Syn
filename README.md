@@ -1,5 +1,5 @@
 <h1>Syn</h1>
-Client/Server & Peer-to-peer system for synchronizing/transferring data between clients, with emphasis on communication security and a flexible database management framework. 
+Client/Server & Peer-to-peer system for transferring data between clients, with emphasis on communication security, flexible management and scalability.
 
 <h1></h1>
 
