@@ -140,20 +140,20 @@ StorageManagement_Pools::DiskDataPool::EntityHeader StorageManagement_Pools::Dis
     EntityHeader result;
 
     Byte nEntityID[sizeof(StoredDataID)];
-    Byte nEntitySize[sizeof(DiskDataSize)];
+    Byte nEntitySize[sizeof(DataSize)];
     Byte nNextHeader[sizeof(DiskDataAddress)];
 
     for(std::size_t i = 0; i < sizeof(StoredDataID); i++)
         nEntityID[i] = data[i];
 
-    for(std::size_t i = sizeof(StoredDataID); i < (sizeof(StoredDataID) + sizeof(DiskDataSize)); i++)
+    for(std::size_t i = sizeof(StoredDataID); i < (sizeof(StoredDataID) + sizeof(DataSize)); i++)
         nEntitySize[i - (sizeof(StoredDataID))] = data[i];
 
-    for(std::size_t i = (sizeof(StoredDataID) + sizeof(DiskDataSize)); i < (sizeof(StoredDataID) + sizeof(DiskDataSize) + sizeof(DiskDataAddress)); i++)
-        nNextHeader[i - (sizeof(StoredDataID) + sizeof(DiskDataSize))] = data[i];
+    for(std::size_t i = (sizeof(StoredDataID) + sizeof(DataSize)); i < (sizeof(StoredDataID) + sizeof(DataSize) + sizeof(DiskDataAddress)); i++)
+        nNextHeader[i - (sizeof(StoredDataID) + sizeof(DataSize))] = data[i];
 
     result.id = ntohl(*static_cast<StoredDataID*>(static_cast<void*>(nEntityID)));
-    result.size = ntohl(*static_cast<DiskDataSize*>(static_cast<void*>(nEntitySize)));
+    result.size = ntohl(*static_cast<DataSize*>(static_cast<void*>(nEntitySize)));
     result.nextHeader = ntohl(*static_cast<DiskDataAddress*>(static_cast<void*>(nNextHeader)));
 
     return result;
@@ -175,6 +175,8 @@ StorageManagement_Pools::DiskDataPool::DiskDataPool(DiskDataPoolInitParameters p
         if(fileStream.fail() || !fileStream.is_open())
             throw std::runtime_error("DiskDataPool::() > Failed to open pool file; <" + getErrnoMessage() + ">.");
 
+        uuid = boost::uuids::random_generator()();
+        
         //writes the header & footer
         flushCompleteHeader();
         flushFooter();
@@ -191,7 +193,7 @@ StorageManagement_Pools::DiskDataPool::DiskDataPool(DiskDataPoolInitParameters p
         size = parameters.poolSize;
         totalFreeSpace = (parameters.poolSize - OVERHEAD_POOL_MANAGEMENT);
         std::deque<DiskDataAddress> initialFreeChunk;
-        initialFreeChunk.push_back(FILE_SIGNATURE.size() + sizeof(CURRENT_VERSION) + PoolHeader::BYTE_LENGTH);
+        initialFreeChunk.push_back(FILE_SIGNATURE.size() + sizeof(CURRENT_VERSION) + UUID_BYTE_LENGTH + PoolHeader::BYTE_LENGTH);
         freeChunks.insert({totalFreeSpace, initialFreeChunk});
         freeSpace.insert({initialFreeChunk.front(), totalFreeSpace});
         lastEntityInChain = INVALID_STORED_DATA_ID;
@@ -230,6 +232,12 @@ StorageManagement_Pools::DiskDataPool::DiskDataPool(DiskDataPoolLoadParameters p
     if(version != CURRENT_VERSION)
         throw std::runtime_error("DiskDataPool::() > The supplied file path does not point to a disk pool with a valid version.");
 
+    //reads the pool UUID
+    char rawUUID[UUID_BYTE_LENGTH + 1];
+    fileStream.read(rawUUID, UUID_BYTE_LENGTH);
+    rawUUID[UUID_BYTE_LENGTH] = '\0';
+    uuid = boost::uuids::string_generator()(rawUUID);
+    
     //retrieves the pool header
     ByteVector rawHeader(PoolHeader::BYTE_LENGTH);
     fileStream.read((char*)&rawHeader[0], PoolHeader::BYTE_LENGTH);
@@ -244,7 +252,7 @@ StorageManagement_Pools::DiskDataPool::DiskDataPool(DiskDataPoolLoadParameters p
     //initial pool configuration
     totalFreeSpace = (size - OVERHEAD_POOL_MANAGEMENT);
     std::deque<DiskDataAddress> initialFreeChunk;
-    initialFreeChunk.push_back(FILE_SIGNATURE.size() + sizeof(CURRENT_VERSION) + PoolHeader::BYTE_LENGTH);
+    initialFreeChunk.push_back(FILE_SIGNATURE.size() + sizeof(CURRENT_VERSION) + UUID_BYTE_LENGTH + PoolHeader::BYTE_LENGTH);
     freeSpace.insert({initialFreeChunk.front(), totalFreeSpace});
     lastEntityInChain = INVALID_STORED_DATA_ID;
 
@@ -289,7 +297,7 @@ StorageManagement_Pools::DiskDataPool::DiskDataPool(DiskDataPoolLoadParameters p
 
                 if(previousFreeChunk->first == currentEntityAddress)
                 {//entity is at the beginning of the chunk
-                    std::pair<DiskDataAddress, DiskDataSize> newChunk{previousFreeChunk->first + (currentDescriptor.rawHeader.size + EntityHeader::BYTE_LENGTH),
+                    std::pair<DiskDataAddress, DataSize> newChunk{previousFreeChunk->first + (currentDescriptor.rawHeader.size + EntityHeader::BYTE_LENGTH),
                                                                       previousFreeChunk->second - (currentDescriptor.rawHeader.size + EntityHeader::BYTE_LENGTH)};
                     freeSpace.erase(previousFreeChunk);
                     freeSpace.insert(newChunk);
@@ -301,10 +309,10 @@ StorageManagement_Pools::DiskDataPool::DiskDataPool(DiskDataPoolLoadParameters p
                 else
                 {//entity is inside the current chunk
                     DiskDataAddress newBackChunkAddress = currentEntityAddress + (currentDescriptor.rawHeader.size + EntityHeader::BYTE_LENGTH);
-                    DiskDataSize newBackChunkSize = previousFreeChunk->first + previousFreeChunk->second - newBackChunkAddress;
+                    DataSize newBackChunkSize = previousFreeChunk->first + previousFreeChunk->second - newBackChunkAddress;
 
                     DiskDataAddress newFrontChunkAddress = previousFreeChunk->first;
-                    DiskDataSize newFrontChunkSize = previousFreeChunk->second - (currentDescriptor.rawHeader.size + EntityHeader::BYTE_LENGTH) - newBackChunkSize;
+                    DataSize newFrontChunkSize = previousFreeChunk->second - (currentDescriptor.rawHeader.size + EntityHeader::BYTE_LENGTH) - newBackChunkSize;
 
                     freeSpace.erase(previousFreeChunk);
                     freeSpace.insert({newFrontChunkAddress, newFrontChunkSize});
@@ -498,7 +506,7 @@ void StorageManagement_Pools::DiskDataPool::discardDataWithoutLock(StoredDataID 
             //overwrites the existing data
             fileStream.seekp(requestedEntity->second.entityAddress);
             const char zeroVal = '\0';
-            for(DiskDataSize i = 0; i < (requestedEntity->second.rawHeader.size + EntityHeader::BYTE_LENGTH); i++)
+            for(DataSize i = 0; i < (requestedEntity->second.rawHeader.size + EntityHeader::BYTE_LENGTH); i++)
                 fileStream.write(&zeroVal, 1);
             fileStream.flush();
         }
@@ -539,7 +547,7 @@ void StorageManagement_Pools::DiskDataPool::clearPool()
 
     totalFreeSpace = (size - OVERHEAD_POOL_MANAGEMENT);
     std::deque<DiskDataAddress> initialFreeChunk;
-    initialFreeChunk.push_back(FILE_SIGNATURE.size() + sizeof(CURRENT_VERSION) + PoolHeader::BYTE_LENGTH);
+    initialFreeChunk.push_back(FILE_SIGNATURE.size() + sizeof(CURRENT_VERSION) + UUID_BYTE_LENGTH + PoolHeader::BYTE_LENGTH);
     freeSpace.insert({initialFreeChunk.front(), totalFreeSpace});
     freeChunks.insert({totalFreeSpace, initialFreeChunk});
     lastEntityInChain = INVALID_STORED_DATA_ID;
@@ -553,7 +561,7 @@ void StorageManagement_Pools::DiskDataPool::clearPool()
     }
 }
 
-DiskPoolInputStream StorageManagement_Pools::DiskDataPool::getInputStream(StoredDataID dataID)
+PoolInputStreamPtr StorageManagement_Pools::DiskDataPool::getInputStream(StoredDataID dataID)
 {
     boost::lock_guard<boost::mutex> fileLock(fileMutex);
 
@@ -565,19 +573,23 @@ DiskPoolInputStream StorageManagement_Pools::DiskDataPool::getInputStream(Stored
     {
         ++(requestedEntity->second.streamReadLocks);
         bytesRead += requestedEntity->second.rawHeader.size;
-        return DiskPoolInputStream(dataID, 
-                                   requestedEntity->second.rawHeader.size,
-                                   (requestedEntity->second.entityAddress + EntityHeader::BYTE_LENGTH),
-                                   fileMutex,
-                                   fileStream,
-                                   requestedEntity->second.streamReadLocks
-                                  );
+        
+        PoolInputStreamPtr result(new DiskPoolInputStream(dataID, 
+                                                          requestedEntity->second.rawHeader.size,
+                                                          (requestedEntity->second.entityAddress + EntityHeader::BYTE_LENGTH),
+                                                          fileMutex,
+                                                          fileStream,
+                                                          requestedEntity->second.streamReadLocks
+                                                         )
+                                 );
+        
+        return result;
     }
     else
-        throw std::runtime_error("DiskDataPool::getInputStream() > Failed to retrieve input stream; id not found.");
+        throw std::runtime_error("DiskDataPool::getInputStream() > Failed to retrieve input stream; ID not found.");
 }
 
-DiskPoolOutputStream StorageManagement_Pools::DiskDataPool::getOutputStream(DiskDataSize dataSize)
+PoolOutputStreamPtr StorageManagement_Pools::DiskDataPool::getOutputStream(DataSize dataSize)
 {
     boost::lock_guard<boost::mutex> fileLock(fileMutex);
 
@@ -638,25 +650,44 @@ DiskPoolOutputStream StorageManagement_Pools::DiskDataPool::getOutputStream(Disk
         }
         
         bytesWritten += dataSize;
-        return DiskPoolOutputStream(newEntityID, dataSize, (newEntityAddress + EntityHeader::BYTE_LENGTH), fileMutex, fileStream, entities[newEntityID].streamWriteLocked);
+        PoolOutputStreamPtr result(new DiskPoolOutputStream(newEntityID,
+                                                            dataSize,
+                                                            (newEntityAddress + EntityHeader::BYTE_LENGTH),
+                                                            fileMutex,
+                                                            fileStream,
+                                                            entities[newEntityID].streamWriteLocked
+                                                           )
+                                  );
+        
+        return result;
     }
     else
         throw std::invalid_argument("DiskDataPool::getOutputStream() > Failed to retrieve output stream; no data supplied.");
 }
 
-DiskDataAddress StorageManagement_Pools::DiskDataPool::allocateEntityChunk(DiskDataSize entitySize)
+DataSize StorageManagement_Pools::DiskDataPool::getEntitySize(StoredDataID id) const
+{
+    boost::lock_guard<boost::mutex> fileLock(fileMutex);
+    auto requestedEntity = entities.find(id);
+    if(requestedEntity != entities.end())
+        return requestedEntity->second.rawHeader.size;
+    else
+        return INVALID_DATA_SIZE;
+}
+
+DiskDataAddress StorageManagement_Pools::DiskDataPool::allocateEntityChunk(DataSize entitySize)
 {
     auto availableChunks = freeChunks.lower_bound(entitySize);
     
     if(availableChunks != freeChunks.end())
     {//suitable free chunk was found
-        DiskDataSize chunkSize = availableChunks->first;
+        DataSize chunkSize = availableChunks->first;
         std::deque<DiskDataAddress> & chunkQueue = availableChunks->second;
         DiskDataAddress chunkAddress = chunkQueue.front();
         
         if(chunkSize != entitySize)
         {//the chunk needs to be resized
-            DiskDataSize remainingChunkSize = chunkSize - entitySize;
+            DataSize remainingChunkSize = chunkSize - entitySize;
             DiskDataAddress newChunkAddress = chunkAddress + entitySize;
 
             //adds the resized chunk to the appropriate place in the table
@@ -686,7 +717,7 @@ DiskDataAddress StorageManagement_Pools::DiskDataPool::allocateEntityChunk(DiskD
         return INVALID_DISK_DATA_ADDRESS;
 }
 
-void StorageManagement_Pools::DiskDataPool::freeEntityChunk(DiskDataAddress entityAddress, DiskDataSize entitySize)
+void StorageManagement_Pools::DiskDataPool::freeEntityChunk(DiskDataAddress entityAddress, DataSize entitySize)
 {
     totalFreeSpace += entitySize;
     
@@ -709,7 +740,7 @@ void StorageManagement_Pools::DiskDataPool::freeEntityChunk(DiskDataAddress enti
     bool deleteNextChunk = false;
     bool deletePrevChunk = false;
     DiskDataAddress newChunkAddress = entityAddress;
-    DiskDataSize newChunkSize = entitySize;
+    DataSize newChunkSize = entitySize;
     
     if(nextFreeChunk != freeSpace.end())
     {

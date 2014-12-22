@@ -34,6 +34,7 @@
 #include "../NetworkManagement/Types/Packets.h"
 #include "../InstructionManagement/Types/Types.h"
 #include "../Common/Types.h"
+#include "../StorageManagement/Types/Types.h"
 
 using Common_Types::Byte;
 
@@ -61,6 +62,12 @@ using NetworkManagement_Types::PeerType;
 using NetworkManagement_Types::ConnectionInitiation;
 
 using InstructionManagement_Types::InstructionSetType;
+
+using StorageManagement_Types::PoolMode;
+using StorageManagement_Types::PoolState;
+using StorageManagement_Types::LinkActionType;
+using StorageManagement_Types::LinkActionConditionType;
+using StorageManagement_Types::DataPoolType;
 
 namespace Utilities
 {
@@ -486,6 +493,86 @@ namespace Utilities
                     return InstructionSetType::INVALID;
             }
             
+            static std::string toString(DataPoolType var)
+            {
+                if(dataPoolTypeToString.find(var) != dataPoolTypeToString.end())
+                    return dataPoolTypeToString.at(var);
+                else
+                    return "INVALID";
+            }
+            
+            static DataPoolType toDataPoolType(std::string var)
+            {
+                if(stringToDataPoolType.find(var) != stringToDataPoolType.end())
+                    return stringToDataPoolType.at(var);
+                else
+                    return DataPoolType::INVALID;
+            }
+            
+            static std::string toString(PoolMode var)
+            {
+                if(poolModeToString.find(var) != poolModeToString.end())
+                    return poolModeToString.at(var);
+                else
+                    return "INVALID";
+            }
+            
+            static PoolMode toPoolMode(std::string var)
+            {
+                if(stringToPoolMode.find(var) != stringToPoolMode.end())
+                    return stringToPoolMode.at(var);
+                else
+                    return PoolMode::INVALID;
+            }
+            
+            static std::string toString(PoolState var)
+            {
+                if(poolStateToString.find(var) != poolStateToString.end())
+                    return poolStateToString.at(var);
+                else
+                    return "INVALID";
+            }
+            
+            static PoolState toPoolState(std::string var)
+            {
+                if(stringToPoolState.find(var) != stringToPoolState.end())
+                    return stringToPoolState.at(var);
+                else
+                    return PoolState::INVALID;
+            }
+            
+            static std::string toString(LinkActionType var)
+            {
+                if(linkActionTypeToString.find(var) != linkActionTypeToString.end())
+                    return linkActionTypeToString.at(var);
+                else
+                    return "INVALID";
+            }
+            
+            static LinkActionType toLinkActionType(std::string var)
+            {
+                if(stringToLinkActionType.find(var) != stringToLinkActionType.end())
+                    return stringToLinkActionType.at(var);
+                else
+                    return LinkActionType::INVALID;
+            }
+            
+            static std::string toString(LinkActionConditionType var)
+            {
+                if(linkActionConditionTypeToString.find(var) != linkActionConditionTypeToString.end())
+                    return linkActionConditionTypeToString.at(var);
+                else
+                    return "INVALID";
+            }
+            
+            static LinkActionConditionType toLinkActionConditionType(std::string var)
+            {
+                if(stringToLinkActionConditionType.find(var) != stringToLinkActionConditionType.end())
+                    return stringToLinkActionConditionType.at(var);
+                else
+                    return LinkActionConditionType::INVALID;
+            }
+            
         private:
             Tools();
             
@@ -531,6 +618,17 @@ namespace Utilities
             
             static const boost::unordered_map<InstructionSetType, std::string> instructionSetTypeToString;
             static const boost::unordered_map<std::string, InstructionSetType> stringToInstructionSetType;
+            
+            static const boost::unordered_map<DataPoolType, std::string> dataPoolTypeToString;
+            static const boost::unordered_map<std::string, DataPoolType> stringToDataPoolType;
+            static const boost::unordered_map<PoolMode, std::string> poolModeToString;
+            static const boost::unordered_map<std::string, PoolMode> stringToPoolMode;
+            static const boost::unordered_map<PoolState, std::string> poolStateToString;
+            static const boost::unordered_map<std::string, PoolState> stringToPoolState;
+            static const boost::unordered_map<LinkActionType, std::string> linkActionTypeToString;
+            static const boost::unordered_map<std::string, LinkActionType> stringToLinkActionType;
+            static const boost::unordered_map<LinkActionConditionType, std::string> linkActionConditionTypeToString;
+            static const boost::unordered_map<std::string, LinkActionConditionType> stringToLinkActionConditionType;
     };
 }
 

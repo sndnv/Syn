@@ -18,6 +18,7 @@
 #ifndef MEMORYDATAPOOL_H
 #define	MEMORYDATAPOOL_H
 
+#include <stdexcept>
 #include <boost/thread/lock_guard.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/unordered_map.hpp>
@@ -33,6 +34,8 @@ using StorageManagement_Types::StoredDataID;
 using StorageManagement_Types::EntitiesCountType;
 using StorageManagement_Types::PoolState;
 using StorageManagement_Types::PoolMode;
+using StorageManagement_Pools::PoolInputStreamPtr;
+using StorageManagement_Pools::PoolOutputStreamPtr;
 
 namespace StorageManagement_Pools
 {
@@ -116,12 +119,22 @@ namespace StorageManagement_Pools
             DataPoolType getPoolType() const { return DataPoolType::LOCAL_MEMORY; }
             DataPoolSize getFreeSpace() const { return totalFreeSpace; }
             EntitiesCountType getStoredEntitiesNumber() const { return entities.size(); }
+            bool canStoreData(DataSize size) const { return (totalFreeSpace >= size); }
+            DataSize getEntityManagementStorageOverhead() const { return 0;}
+            DataSize getPoolManagementStorageOverhead() const { return 0; }
+            DataSize getEntitySize(StoredDataID id) const;
+            bool areInputStreamsSupported() const { return false; }
+            bool areOutputStreamsSupported() const { return false; }
+            PoolInputStreamPtr getInputStream(StoredDataID dataID)
+            { throw std::logic_error("MemoryDataPool::getInputStream() > Input streams are not supported."); }
+            PoolOutputStreamPtr getOutputStream(DataSize dataSize)
+            { throw std::logic_error("MemoryDataPool::getOutputStream() > Output streams are not supported."); }
             
         private:
-            StoredDataID lastEntityID;      //ID of the last entity stored in the pool
-            DiskDataSize totalFreeSpace;    //total amount of free space for the pool (in bytes)
+            StoredDataID lastEntityID;          //ID of the last entity stored in the pool
+            DataSize totalFreeSpace;            //total amount of free space for the pool (in bytes)
             
-            boost::mutex entitiesMutex;     //mutex synchronizing access to the entities table
+            mutable boost::mutex entitiesMutex; //mutex synchronizing access to the entities table
             boost::unordered_map<StoredDataID, ByteVectorPtr> entities;  //entities table
     };
 }

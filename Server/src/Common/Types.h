@@ -47,6 +47,8 @@ namespace Common_Types
     typedef boost::posix_time::ptime Timestamp;
     const boost::posix_time::ptime INVALID_DATE_TIME = boost::posix_time::ptime(boost::posix_time::min_date_time);
     
+    typedef unsigned long Seconds;
+    
     typedef unsigned long DataPoolSize;
     const DataPoolSize INVALID_DATA_POOL_SIZE = 0; //TODO - value?
     

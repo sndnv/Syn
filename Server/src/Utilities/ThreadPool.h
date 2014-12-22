@@ -24,10 +24,12 @@
 #include <boost/thread.hpp>
 #include <boost/uuid/random_generator.hpp>
 #include <boost/uuid/uuid_io.hpp>
+#include <boost/asio/deadline_timer.hpp>
 #include <boost/asio/io_service.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/unordered_map.hpp>
+#include <boost/date_time/posix_time/ptime.hpp>
 
 namespace Utilities
 {
@@ -70,6 +72,23 @@ namespace Utilities
             void assignTask(std::function<void(void)> task);
             
             /**
+             * Submits a new task for the thread pool to process after the specified
+             * wait time.
+             * 
+             * @param task the task to be processed by the pool
+             * @param waitTime the amount of time to wait before processing the task (in seconds)
+             */
+            void assignTimedTask(std::function<void(void)> task, unsigned long waitTime);
+            
+            /**
+             * Submits a new task for the thread pool to process at the specified time.
+             * 
+             * @param task the task to be processed by the pool
+             * @param time the time at which to process the task
+             */
+            void assignTimedTask(std::function<void(void)> task, boost::posix_time::ptime time);
+            
+            /**
              * Creates the requested number of new threads and adds them to the pool.
              * 
              * @param number the amount of new threads to create
@@ -91,6 +110,13 @@ namespace Utilities
              * Note: stopAllThreads() is identical to removeThreads(getPoolSize())
              */
             void stopAllThreads();
+            
+            /**
+             * Stops the thread pool and terminates all tasks immediately.
+             * 
+             * Note: No further work can be performed by the pool.
+             */
+            void stopThreadPool();
             
             /**
              * Retrieves the number of threads in the pool.

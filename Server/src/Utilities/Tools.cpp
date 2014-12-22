@@ -391,3 +391,108 @@ const boost::unordered_map<std::string, InstructionSetType> Tools::stringToInstr
     {"DATABASE_MANAGER", InstructionSetType::DATABASE_MANAGER},
     {"INVALID", InstructionSetType::INVALID}
 };
+
+const boost::unordered_map<DataPoolType, std::string> dataPoolTypeToString
+{
+    {DataPoolType::AGGREGATE,       "AGGREGATE"},
+    {DataPoolType::LOCAL_DISK,      "LOCAL_DISK"},
+    {DataPoolType::LOCAL_MEMORY,    "LOCAL_MEMORY"},
+    {DataPoolType::REMOTE_DISK,     "REMOTE_DISK"},
+    {DataPoolType::REMOTE_MEMORY,   "REMOTE_MEMORY"},
+    {DataPoolType::INVALID,         "INVALID"},
+};
+
+const boost::unordered_map<std::string, DataPoolType> stringToDataPoolType
+{
+    {"AGGREGATE",       DataPoolType::AGGREGATE},
+    {"LOCAL_DISK",      DataPoolType::LOCAL_DISK},
+    {"LOCAL_MEMORY",    DataPoolType::LOCAL_MEMORY},
+    {"REMOTE_DISK",     DataPoolType::REMOTE_DISK},
+    {"REMOTE_MEMORY",   DataPoolType::REMOTE_MEMORY},
+    {"INVALID",         DataPoolType::INVALID},
+};
+
+const boost::unordered_map<PoolMode, std::string> Tools::poolModeToString
+{
+    {PoolMode::READ_WRITE,  "READ_WRITE"},
+    {PoolMode::READ_ONLY,   "READ_ONLY"},
+    {PoolMode::INVALID,     "INVALID"}
+};
+
+const boost::unordered_map<std::string, PoolMode> Tools::stringToPoolMode
+{
+    {"READ_WRITE",  PoolMode::READ_WRITE},
+    {"READ_ONLY",   PoolMode::READ_ONLY},
+    {"INVALID",     PoolMode::INVALID}
+};
+
+const boost::unordered_map<PoolState, std::string> Tools::poolStateToString
+{
+    {PoolState::OPEN,       "OPEN"},
+    {PoolState::CLOSED,     "CLOSED"},
+    {PoolState::FAILED,     "FAILED"},
+    {PoolState::INVALID,    "INVALID"},
+};
+
+const boost::unordered_map<std::string, PoolState> Tools::stringToPoolState
+{
+    {"OPEN",    PoolState::OPEN},
+    {"CLOSED",  PoolState::CLOSED},
+    {"FAILED",  PoolState::FAILED},
+    {"INVALID", PoolState::INVALID}
+};
+
+const boost::unordered_map<LinkActionType, std::string> Tools::linkActionTypeToString
+{
+    {LinkActionType::DISTRIBUTE, "DISTRIBUTE"},
+    {LinkActionType::COPY,       "COPY"},
+    {LinkActionType::MOVE,       "MOVE"},
+    {LinkActionType::DISCARD,    "DISCARD"},
+    {LinkActionType::SKIP,       "SKIP"},
+    {LinkActionType::INVALID,    "INVALID"},
+};
+
+const boost::unordered_map<std::string, LinkActionType> Tools::stringToLinkActionType
+{
+    {"DISTRIBUTE",  LinkActionType::DISTRIBUTE},
+    {"COPY",        LinkActionType::COPY},
+    {"MOVE",        LinkActionType::MOVE},
+    {"DISCARD",     LinkActionType::DISCARD},
+    {"SKIP",        LinkActionType::SKIP},
+    {"INVALID",     LinkActionType::INVALID},
+};
+
+const boost::unordered_map<LinkActionConditionType, std::string> Tools::linkActionConditionTypeToString
+{
+    {LinkActionConditionType::NONE,                 "NONE"},
+    {LinkActionConditionType::TIMED,                "TIMED"},
+    {LinkActionConditionType::SOURCE_MIN_FULL,      "SOURCE_MIN_FULL"},
+    {LinkActionConditionType::TARGET_MIN_FULL,      "TARGET_MIN_FULL"},
+    {LinkActionConditionType::SOURCE_MAX_FULL,      "SOURCE_MAX_FULL"},
+    {LinkActionConditionType::TARGET_MAX_FULL,      "TARGET_MAX_FULL"},
+    {LinkActionConditionType::SOURCE_MIN_ENTITIES,  "SOURCE_MIN_ENTITIES"},
+    {LinkActionConditionType::SOURCE_MAX_ENTITIES,  "SOURCE_MAX_ENTITIES"},
+    {LinkActionConditionType::TARGET_MIN_ENTITIES,  "TARGET_MIN_ENTITIES"},
+    {LinkActionConditionType::TARGET_MAX_ENTITIES,  "TARGET_MAX_ENTITIES"},
+    {LinkActionConditionType::DATA_MIN_SIZE,        "DATA_MIN_SIZE"},
+    {LinkActionConditionType::DATA_MAX_SIZE,        "DATA_MAX_SIZE"},
+    {LinkActionConditionType::INVALID,              "INVALID"},
+};
+
+const boost::unordered_map<std::string, LinkActionConditionType> Tools::stringToLinkActionConditionType
+{
+    {"NONE",                LinkActionConditionType::NONE},
+    {"TIMED",               LinkActionConditionType::TIMED},
+    {"SOURCE_MIN_FULL",     LinkActionConditionType::SOURCE_MIN_FULL},
+    {"TARGET_MIN_FULL",     LinkActionConditionType::TARGET_MIN_FULL},
+    {"SOURCE_MAX_FULL",     LinkActionConditionType::SOURCE_MAX_FULL},
+    {"TARGET_MAX_FULL",     LinkActionConditionType::TARGET_MAX_FULL},
+    {"SOURCE_MIN_ENTITIES", LinkActionConditionType::SOURCE_MIN_ENTITIES},
+    {"SOURCE_MAX_ENTITIES", LinkActionConditionType::SOURCE_MAX_ENTITIES},
+    {"TARGET_MIN_ENTITIES", LinkActionConditionType::TARGET_MIN_ENTITIES},
+    {"TARGET_MAX_ENTITIES", LinkActionConditionType::TARGET_MAX_ENTITIES},
+    {"DATA_MIN_SIZE",       LinkActionConditionType::DATA_MIN_SIZE},
+    {"DATA_MAX_SIZE",       LinkActionConditionType::DATA_MAX_SIZE},
+    {"INVALID",             LinkActionConditionType::INVALID}
+};
+

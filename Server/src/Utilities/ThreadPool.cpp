@@ -50,6 +50,54 @@ void Utilities::ThreadPool::assignTask(std::function<void(void)> task)
     logMessage("New task added to pool.");
 }
 
+void Utilities::ThreadPool::assignTimedTask(std::function<void(void)> task, unsigned long waitTime)
+{
+    if(stopPool)
+        return;
+
+    boost::shared_ptr<boost::asio::deadline_timer> newTimer = boost::shared_ptr<boost::asio::deadline_timer>(new boost::asio::deadline_timer(threadService));
+
+    std::function<void(const boost::system::error_code &)> timedTask = [this, task, newTimer](const boost::system::error_code & timerError)
+    {
+        if(!timerError)
+        {
+            threadService.post(task);
+            logMessage("New timed task added to pool.");
+        }
+        else
+            logMessage("Timer error encountered: [" + timerError.message() + "]");
+    };
+
+    newTimer->expires_from_now(boost::posix_time::seconds(waitTime));
+    newTimer->async_wait(timedTask);
+
+    logMessage("New timed task waiting for processing.");
+}
+
+void Utilities::ThreadPool::assignTimedTask(std::function<void(void)> task, boost::posix_time::ptime time)
+{
+    if(stopPool)
+        return;
+
+    boost::shared_ptr<boost::asio::deadline_timer> newTimer = boost::shared_ptr<boost::asio::deadline_timer>(new boost::asio::deadline_timer(threadService));
+
+    std::function<void(const boost::system::error_code &)> timedTask = [this, task, newTimer](const boost::system::error_code & timerError)
+    {
+        if(!timerError)
+        {
+            threadService.post(task);
+            logMessage("New timed task added to pool.");
+        }
+        else
+            logMessage("Timer error encountered: [" + timerError.message() + "]");
+    };
+
+    newTimer->expires_at(time);
+    newTimer->async_wait(timedTask);
+    
+    logMessage("New timed task waiting for processing.");
+}
+
 void Utilities::ThreadPool::addThreads(unsigned long number)
 {
     if(stopPool)
@@ -85,6 +133,20 @@ void Utilities::ThreadPool::stopAllThreads()
         return;
     
     removeThreads(threadGroup.size());
+}
+
+void Utilities::ThreadPool::stopThreadPool()
+{
+    if(stopPool)
+        return;
+    
+    logMessage("Stopping thread pool.");
+    boost::lock_guard<boost::mutex> threadsLock(threadDataMutex);
+
+    stopPool = true;
+    poolWork.reset();
+    threadService.stop();
+    logMessage("Thread pool stopped.");
 }
 
 void Utilities::ThreadPool::threadHandler()

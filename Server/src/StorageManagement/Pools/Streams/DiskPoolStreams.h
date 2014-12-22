@@ -15,25 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef POOLSTREAMS_H
-#define	POOLSTREAMS_H
+#ifndef DISKPOOLSTREAMS_H
+#define	DISKPOOLSTREAMS_H
 
 #include <boost/filesystem/fstream.hpp>
-
 #include <boost/thread/lock_algorithms.hpp>
 #include <boost/thread/lock_guard.hpp>
 #include <boost/thread/mutex.hpp>
-#include <boost/iostreams/concepts.hpp>
 
-#include "../../Common/Types.h"
-#include "../Types/Types.h"
+#include "PoolStreams.h"
 
 using Common_Types::Byte;
 using Common_Types::ByteVector;
 using Common_Types::ByteVectorPtr;
 using StorageManagement_Types::StoredDataID;
-using StorageManagement_Types::DiskDataSize;
+using StorageManagement_Types::DataSize;
 using StorageManagement_Types::DiskDataAddress;
+using StorageManagement_Pools::PoolInputStream;
+using StorageManagement_Pools::PoolOutputStream;
 
 namespace StorageManagement_Pools
 {
@@ -45,12 +44,11 @@ namespace StorageManagement_Pools
      * Note: Streaming between internal streams is supported directly by the class
      * itself. Interoperability with C++ streams can be achieved with <code>boost::iostreams</code>.
      */
-    class DiskPoolInputStream
+    class DiskPoolInputStream : public PoolInputStream
     {
+        friend class DiskPoolOutputStream;
+        
         public:
-            typedef Byte char_type;
-            typedef boost::iostreams::source_tag category;
-            
             /**
              * Constructs a new input stream object.
              * 
@@ -63,7 +61,7 @@ namespace StorageManagement_Pools
              * @param inputFileStream file stream from which to read the data
              * @param readLocksCounter a reference to the read lock counter of the associated data
              */
-            DiskPoolInputStream(StoredDataID dataID, DiskDataSize maxData, DiskDataAddress startOffset,
+            DiskPoolInputStream(StoredDataID dataID, DataSize maxData, DiskDataAddress startOffset,
                                 boost::mutex & parentPoolReadMutex, boost::filesystem::fstream & inputFileStream,
                                 unsigned int & readLocksCounter)
             : id(dataID), remainingData(maxData), start(startOffset), poolReadMutex(parentPoolReadMutex), 
@@ -92,7 +90,7 @@ namespace StorageManagement_Pools
                     throw std::invalid_argument("DiskPoolInputStream::read() > The number of bytes to read must be larger than 0.");
                 
                 boost::lock_guard<boost::mutex> readLock(poolReadMutex);
-                if((DiskDataSize)n > remainingData)
+                if((DataSize)n > remainingData)
                     throw std::invalid_argument("DiskPoolInputStream::read() > Attempted to read more data than is allowed.");
                 
                 fileStream.seekg(start);
@@ -110,71 +108,13 @@ namespace StorageManagement_Pools
                 return n;
             }
             
-            /**
-             * Attempts to read one byte from the stream and to write it to the supplied buffer.
-             * 
-             * @param output the buffer to write to
-             * @return a reference to the current stream
-             */
-            DiskPoolInputStream & operator>> (Byte & output)
-            {
-                read(&output, 1);
-                return *this;
-            }
-            
-            /**
-             * Attempts to read as many bytes from the stream as can be written to the supplied buffer.
-             * 
-             * @param output the buffer to write to
-             * @return a reference to the current stream
-             * 
-             * @throw invalid_argument if the size of the output buffer is 0
-             */
-            DiskPoolInputStream & operator>> (ByteVector & output)
-            {
-                if(output.size() == 0)
-                    throw std::invalid_argument("DiskPoolInputStream::operator>>() > The size of the supplied buffer must be larger than 0.");
-                
-                read(&output[0], output.size());
-                return *this;
-            }
-            
-            /**
-             * Attempts to read as many bytes from the stream as can be written to the supplied buffer.
-             * 
-             * @param output the buffer to write to
-             * @return a reference to the current stream
-             * 
-             * @throw invalid_argument if the size of the output buffer is 0
-             */
-            DiskPoolInputStream & operator>> (ByteVectorPtr output)
-            {
-                if(output->size() == 0)
-                    throw std::invalid_argument("DiskPoolInputStream::operator>>() > The size of the supplied buffer must be larger than 0.");
-                
-                read(&(*output)[0], output->size());
-                return *this;
-            }
-            
-            friend DiskPoolOutputStream & operator<< (DiskPoolOutputStream & output, DiskPoolInputStream & input);
-            
-            /**
-             * Retrieves the data ID associated with the stream.
-             * 
-             * @return the data ID
-             */
             StoredDataID getDataID() const { return id; }
-            
-            /**
-             * Retrieves the maximum number of bytes that can be read to the stream.
-             * 
-             * @return the number of bytes that can be read
-             */
-            DiskDataSize getMaxReadableBytes() const { return remainingData; }
+            void resetDataID(StoredDataID newID) { id = newID; }
+            DataSize getMaxReadableBytes() const { return remainingData; }
             
         private:
             StoredDataID id;
-            DiskDataSize remainingData;
+            DataSize remainingData;
             DiskDataAddress start;
             boost::mutex & poolReadMutex;
             boost::filesystem::fstream & fileStream;
@@ -187,12 +127,9 @@ namespace StorageManagement_Pools
      * Note: Streaming between internal streams is supported directly by the class
      * itself. Interoperability with C++ streams can be achieved with <code>boost::iostreams</code>.
      */
-    class DiskPoolOutputStream
+    class DiskPoolOutputStream : public PoolOutputStream
     {
         public:
-            typedef Byte char_type;
-            typedef boost::iostreams::sink_tag category;
-            
             /**
              * Constructs a new output stream object.
              * 
@@ -205,7 +142,7 @@ namespace StorageManagement_Pools
              * @param outputFileStream file stream to which to write the data
              * @param writeLocked a reference to the write lock associated with the data
              */
-            DiskPoolOutputStream(StoredDataID dataID, DiskDataSize maxData, DiskDataAddress startOffset,
+            DiskPoolOutputStream(StoredDataID dataID, DataSize maxData, DiskDataAddress startOffset,
                                  boost::mutex & parentPoolWriteMutex, boost::filesystem::fstream & outputFileStream,
                                  bool & writeLocked)
             : id(dataID), remainingData(maxData), start(startOffset), poolWriteMutex(parentPoolWriteMutex), 
@@ -234,7 +171,7 @@ namespace StorageManagement_Pools
                 
                 boost::lock_guard<boost::mutex> writeLock(poolWriteMutex);
                 
-                if((DiskDataSize)n > remainingData)
+                if((DataSize)n > remainingData)
                     throw std::invalid_argument("DiskPoolOutputStream::write() > Attempted to write more data than is allowed.");
                 
                 fileStream.seekp(start);
@@ -253,82 +190,86 @@ namespace StorageManagement_Pools
             }
             
             /**
+             * Attempts to copy all available data from the input to the output stream.
+             * 
+             * @param input the stream to be read from
+             * 
+             * @throw logic_error if an unexpected input stream is encountered
+             */
+            void streamData(PoolInputStream & input)
+            {
+                try { streamDataFromDisk(dynamic_cast<DiskPoolInputStream &>(input)); return; } catch(std::bad_cast & ex) {}
+                //support for more streaming source is added here
+                //try { streamDataFromX(dynamic_cast<source class ref>(input)); return; } catc(const std::bac_cast &) {}
+                
+                throw std::logic_error("DiskPoolOutputStream::streamData() > Unexpected input stream type encountered.");
+            }
+            
+            /**
+             * Attempts to copy all available data from the disk input stream to the output stream.
+             * 
+             * @param input the stream to be read from
+             * 
+             * @throw invalid_argument if there is no data to be read from the input stream, or if the input
+             * stream has too much data for the output stream, or if both stream use the same underlying buffer
+             */
+            void streamDataFromDisk(DiskPoolInputStream & input)
+            {
+                boost::lock(poolWriteMutex, input.poolReadMutex);
+                boost::lock_guard<boost::mutex> writeLock(poolWriteMutex, boost::adopt_lock);
+                boost::lock_guard<boost::mutex> readLock(input.poolReadMutex, boost::adopt_lock);
+
+                if(input.remainingData == 0)
+                    throw std::invalid_argument("::operator<<(DiskPoolOutputStream, DiskPoolInputStream) > The number of bytes to write must be larger than 0.");
+
+                if(remainingData < input.remainingData)
+                    throw std::invalid_argument("::operator<<(DiskPoolOutputStream, DiskPoolInputStream) > The output stream is unable to store all the data available in the input stream.");
+
+                if(fileStream.rdbuf() == input.fileStream.rdbuf())
+                    throw std::invalid_argument("::operator<<(DiskPoolOutputStream, DiskPoolInputStream) > Both streams use the same buffer.");
+
+                //disables white-space skipping
+                input.fileStream >> std::noskipws;
+                fileStream >> std::noskipws;
+
+                input.fileStream.seekg(input.start);
+                fileStream.seekp(start);
+
+                DataSize bytesToRead = input.remainingData;
+                input.start += bytesToRead;
+                input.remainingData = 0;
+                start += bytesToRead;
+                remainingData -= bytesToRead;
+
+                std::copy_n(std::istream_iterator<DiskPoolInputStream::char_type>(input.fileStream), bytesToRead, std::ostream_iterator<DiskPoolOutputStream::char_type>(fileStream));
+
+                fileStream.flush();
+
+                //releases the locks
+                --input.readLocksCounter;
+                if(remainingData == 0)
+                    writeLocked = false;
+            }
+            
+            /**
              * Flushes the underlying stream.
              * 
              * @return reference to this stream
              */
-            DiskPoolOutputStream & flush()
+            PoolOutputStream & flush()
             {
                 boost::lock_guard<boost::mutex> writeLock(poolWriteMutex);
                 fileStream.flush();
                 return *this;
             }
             
-            friend DiskPoolOutputStream & operator<< (DiskPoolOutputStream & output, DiskPoolInputStream & input);
-            
-            /**
-             * Attempts to read one byte from the input and to write it to the stream.
-             * 
-             * @param input the buffer to read from
-             * @return a reference to the current stream
-             */
-            DiskPoolOutputStream & operator<< (const Byte & input)
-            {
-                write(&input, 1);
-                return *this;
-            }
-            
-            /**
-             * Attempts to write as many bytes to the stream as can be read from the supplied buffer.
-             * 
-             * @param input the buffer to read from
-             * @return a reference to the current stream
-             * 
-             * @throw invalid_argument if the size of the input buffer is 0
-             */
-            DiskPoolOutputStream & operator<< (const ByteVector & input)
-            {
-                if(input.size() == 0)
-                    throw std::invalid_argument("DiskPoolOutputStream::operator<<() > The number of bytes to write must be larger than 0.");
-                
-                write(&input[0], input.size());
-                return *this;
-            }
-            
-            /**
-             * Attempts to write as many bytes to the stream as can be read from the supplied buffer.
-             * 
-             * @param input the buffer to read from
-             * @return a reference to the current stream
-             * 
-             * @throw invalid_argument if the size of the input buffer is 0
-             */
-            DiskPoolOutputStream & operator<< (const ByteVectorPtr input)
-            {
-                if(input->size() == 0)
-                    throw std::invalid_argument("DiskPoolOutputStream::operator<<() > The number of bytes to write must be larger than 0.");
-                
-                write(&(*input)[0], input->size());
-                return *this;
-            }
-            
-            /**
-             * Retrieves the data ID associated with the stream.
-             * 
-             * @return the data ID
-             */
             StoredDataID getDataID() const { return id; }
-            
-            /**
-             * Retrieves the maximum number of bytes that can be written to the stream.
-             * 
-             * @return the number of bytes that can be written
-             */
-            DiskDataSize getMaxWritableBytes() const { return remainingData; }
+            void resetDataID(StoredDataID newID) { id = newID; }
+            DataSize getMaxWritableBytes() const { return remainingData; }
             
         private:
             StoredDataID id;
-            DiskDataSize remainingData;
+            DataSize remainingData;
             DiskDataAddress start;
             boost::mutex & poolWriteMutex;
             boost::filesystem::fstream & fileStream;
@@ -337,6 +278,8 @@ namespace StorageManagement_Pools
     
     /**
      * Attempts to copy all available data from the input to the output stream.
+     * 
+     * Note: Uses <code>DiskPoolOutputStream::streamData()</code> to perform the operation.
      * 
      * @param output the stream to be written to
      * @param input the stream to be read from
@@ -347,49 +290,14 @@ namespace StorageManagement_Pools
      */
     inline DiskPoolOutputStream & operator<< (DiskPoolOutputStream & output, DiskPoolInputStream & input)
     {
-        boost::lock(output.poolWriteMutex, input.poolReadMutex);
-        boost::lock_guard<boost::mutex> writeLock(output.poolWriteMutex, boost::adopt_lock);
-        boost::lock_guard<boost::mutex> readLock(input.poolReadMutex, boost::adopt_lock);
-        
-        if(input.remainingData == 0)
-            throw std::invalid_argument("::operator<<(DiskPoolOutputStream, DiskPoolInputStream) > The number of bytes to write must be larger than 0.");
-        
-        if(output.remainingData < input.remainingData)
-            throw std::invalid_argument("::operator<<(DiskPoolOutputStream, DiskPoolInputStream) > The output stream is unable to store all the data available in the input stream.");
-        
-        if(output.fileStream.rdbuf() == input.fileStream.rdbuf())
-            throw std::invalid_argument("::operator<<(DiskPoolOutputStream, DiskPoolInputStream) > Both streams use the same buffer.");
-        
-        //disables white-space skipping
-        input.fileStream >> std::noskipws;
-        output.fileStream >> std::noskipws;
-        
-        input.fileStream.seekg(input.start);
-        output.fileStream.seekp(output.start);
-
-        DiskDataSize bytesToRead = input.remainingData;
-        input.start += bytesToRead;
-        input.remainingData = 0;
-        output.start += bytesToRead;
-        output.remainingData -= bytesToRead;
-        
-        std::copy_n(std::istream_iterator<DiskPoolInputStream::char_type>(input.fileStream), bytesToRead, std::ostream_iterator<DiskPoolOutputStream::char_type>(output.fileStream));
-        
-        output.fileStream.flush();
-        
-        //releases the locks
-        --input.readLocksCounter;
-        if(output.remainingData == 0)
-            output.writeLocked = false;
-        
+        output.streamDataFromDisk(input);
         return output;
     }
     
     /**
      * Attempts to copy all available data from the input to the output stream.
      * 
-     * Note: Uses <code>StorageManagement_Pools::operator\<\<(DiskPoolOutputStream, DiskPoolInputStream)</code>
-     * to perform the operation.
+     * Note: Uses <code>DiskPoolOutputStream::streamData()</code> to perform the operation.
      * 
      * @param input the stream to be read from
      * @param output the stream to be written to
@@ -399,10 +307,10 @@ namespace StorageManagement_Pools
      */
     inline DiskPoolInputStream & operator>> (DiskPoolInputStream & input, DiskPoolOutputStream & output)
     {
-        output << input;
+        output.streamDataFromDisk(input);
         return input;
     }
 }
 
-#endif	/* POOLSTREAMS_H */
+#endif	/* DISKPOOLSTREAMS_H */
 

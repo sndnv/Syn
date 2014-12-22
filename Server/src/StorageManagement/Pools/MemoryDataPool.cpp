@@ -26,6 +26,7 @@ StorageManagement_Pools::MemoryDataPool::MemoryDataPool(MemoryDataPoolParameters
     totalFreeSpace = parameters.size;
     bytesRead = 0;
     bytesWritten = 0;
+    uuid = boost::uuids::random_generator()();
 }
 
 StorageManagement_Pools::MemoryDataPool::~MemoryDataPool()
@@ -110,5 +111,15 @@ void StorageManagement_Pools::MemoryDataPool::clearPool()
 
     entities.clear();
     totalFreeSpace = size;
+}
+
+DataSize StorageManagement_Pools::MemoryDataPool::getEntitySize(StoredDataID id) const
+{
+    boost::lock_guard<boost::mutex> entitiesLock(entitiesMutex);
+    auto requestedEntity = entities.find(id);
+    if(requestedEntity != entities.end())
+        return requestedEntity->second->size();
+    else
+        return StorageManagement_Types::INVALID_DATA_SIZE;
 }
 

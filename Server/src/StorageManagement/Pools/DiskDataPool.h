@@ -29,11 +29,12 @@
 #include <boost/thread/mutex.hpp>
 #include <boost/unordered_map.hpp>
 #include <boost/system/error_code.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include "../../Common/Types.h"
 #include "../Types/Types.h"
 #include "../Interfaces/DataPool.h"
-#include "PoolStreams.h"
+#include "Streams/DiskPoolStreams.h"
 
 #include "../../Utilities/Tools.h"
 #include "../../Utilities/FileLogger.h"
@@ -47,13 +48,17 @@ using StorageManagement_Types::DataPoolType;
 using StorageManagement_Types::StoredDataID;
 using StorageManagement_Types::EntitiesCountType;
 using StorageManagement_Types::DiskDataAddress;
-using StorageManagement_Types::DiskDataSize;
+using StorageManagement_Types::DataSize;
 using StorageManagement_Types::PoolState;
 using StorageManagement_Types::PoolMode;
+using StorageManagement_Types::PoolUUID;
 
+using StorageManagement_Types::INVALID_DATA_SIZE;
 using StorageManagement_Types::INVALID_STORED_DATA_ID;
 using StorageManagement_Types::INVALID_DISK_DATA_ADDRESS;
 
+using StorageManagement_Pools::PoolInputStreamPtr;
+using StorageManagement_Pools::PoolOutputStreamPtr;
 using StorageManagement_Pools::DiskPoolInputStream;
 using StorageManagement_Pools::DiskPoolOutputStream;
 
@@ -72,6 +77,8 @@ namespace StorageManagement_Pools
             const std::string FILE_SIGNATURE = "DDP";
             /** Disk pool version */
             const char CURRENT_VERSION = '1';
+            /** Pool UUID size (in bytes) */
+            const DataSize UUID_BYTE_LENGTH = 36;
             
             /** Parameters structure holding <code>DiskDataPool</code> configuration for new pool initialization. */
             struct DiskDataPoolInitParameters
@@ -93,10 +100,10 @@ namespace StorageManagement_Pools
                 PoolMode mode;
                 /** Denotes whether already written data should be erased if a store operation fails (see <code>discardData()<code/>)  */
                 bool eraseDataOnFailure;
-                /** Amount of data read from the pool during previous runs (n bytes) */
-                DiskDataSize bytesRead;
+                /** Amount of data read from the pool during previous runs (in bytes) */
+                DataSize bytesRead;
                 /** Amount of data written to the pool during previous runs (in bytes) */
-                DiskDataSize bytesWritten;
+                DataSize bytesWritten;
             };
             
             /** Data structure holding an in-memory representation of the disk pool header. */
@@ -165,12 +172,12 @@ namespace StorageManagement_Pools
             struct EntityHeader
             {
                 /** Size of the entity header, when converted into bytes */
-                static const std::size_t BYTE_LENGTH = sizeof(StoredDataID) + sizeof(DiskDataSize) + sizeof(DiskDataAddress);
+                static const std::size_t BYTE_LENGTH = sizeof(StoredDataID) + sizeof(DataSize) + sizeof(DiskDataAddress);
                 
                 /** ID associated with the stored data */
                 StoredDataID id;
                 /** Size of the stored data */
-                DiskDataSize size;
+                DataSize size;
                 /** Address of the next entity header (if any) */
                 DiskDataAddress nextHeader;
                 
@@ -224,9 +231,10 @@ namespace StorageManagement_Pools
             };
             
             /** Storage overhead for managing the disk pool (in bytes) */
-            const DiskDataSize OVERHEAD_POOL_MANAGEMENT = (FILE_SIGNATURE.size() + sizeof(CURRENT_VERSION) + PoolHeader::BYTE_LENGTH + PoolFooter::BYTE_LENGTH);
+            const DataSize OVERHEAD_POOL_MANAGEMENT = (FILE_SIGNATURE.size() + sizeof(CURRENT_VERSION) + UUID_BYTE_LENGTH
+                                                       + PoolHeader::BYTE_LENGTH + PoolFooter::BYTE_LENGTH);
             /** Storage overhead for managing each entity (piece of data) stored (in bytes; per entity) */
-            const DiskDataSize OVERHEAD_ENTITY_MANAGEMENT = sizeof(EntityHeader);
+            const DataSize OVERHEAD_ENTITY_MANAGEMENT = sizeof(EntityHeader);
             
             /**
              * Constructs a new disk data pool management object and creates
@@ -320,7 +328,7 @@ namespace StorageManagement_Pools
              * 
              * @throw runtime_error if the stream is not in an open state or if the specified ID could not be found
              */
-            DiskPoolInputStream getInputStream(StoredDataID dataID);
+            PoolInputStreamPtr getInputStream(StoredDataID dataID);
             
             /**
              * Retrieves a stream for writing data to the pool.
@@ -334,11 +342,17 @@ namespace StorageManagement_Pools
              * or if the pool is not in the correct state/mode
              * @throw invalid_argument if an empty or invalid data container was supplied
              */
-            DiskPoolOutputStream getOutputStream(DiskDataSize dataSize);
+            PoolOutputStreamPtr getOutputStream(DataSize dataSize);
             
             DataPoolType getPoolType() const { return DataPoolType::LOCAL_DISK; }
-            DiskDataSize getFreeSpace() const { return totalFreeSpace; }
+            DataSize getFreeSpace() const { return totalFreeSpace; }
             EntitiesCountType getStoredEntitiesNumber() const { return entities.size(); }
+            bool canStoreData(DataSize size) const { return (freeChunks.lower_bound(size) != freeChunks.end()); }
+            DataSize getEntityManagementStorageOverhead() const { return OVERHEAD_ENTITY_MANAGEMENT;}
+            DataSize getPoolManagementStorageOverhead() const { return OVERHEAD_POOL_MANAGEMENT; }
+            DataSize getEntitySize(StoredDataID id) const;
+            bool areInputStreamsSupported() const { return true; }
+            bool areOutputStreamsSupported() const { return true; }
             
         private:
             //Pool state/configuration
@@ -348,7 +362,7 @@ namespace StorageManagement_Pools
             PoolHeader header;      //pool header
             PoolFooter footer;      //pool footer (flushed on each operation that modifies it) 
             
-            boost::mutex fileMutex;                 //mutex synchronizing access to the pool file
+            mutable boost::mutex fileMutex;         //mutex synchronizing access to the pool file
             boost::filesystem::fstream fileStream;  //input/output stream to the pool file
             
             //Entities
@@ -356,9 +370,9 @@ namespace StorageManagement_Pools
             boost::unordered_map<StoredDataID, EntityDescriptor> entities;  //entities table
             
             //Free Space
-            DiskDataSize totalFreeSpace; //total amount of free space for the pool (in bytes)
-            std::map<DiskDataSize, std::deque<DiskDataAddress>> freeChunks; //free space fragments, organised by available size
-            std::map<DiskDataAddress, DiskDataSize> freeSpace;              //free space fragments, organised by address
+            DataSize totalFreeSpace; //total amount of free space for the pool (in bytes)
+            std::map<DataSize, std::deque<DiskDataAddress>> freeChunks; //free space fragments, organised by available size
+            std::map<DiskDataAddress, DataSize> freeSpace;              //free space fragments, organised by address
             
             /**
              * Writes the current file signature, version and header to the pool
@@ -371,6 +385,7 @@ namespace StorageManagement_Pools
                 fileStream.seekp(0);
                 fileStream.write(FILE_SIGNATURE.c_str(), FILE_SIGNATURE.size());
                 fileStream.write(&CURRENT_VERSION, sizeof(CURRENT_VERSION));
+                fileStream.write(Utilities::Tools::toString(uuid).c_str(), UUID_BYTE_LENGTH);
 
                 ByteVector rawHeader = header.toBytes();
                 fileStream.write((const char*)&rawHeader[0], PoolHeader::BYTE_LENGTH);
@@ -404,7 +419,7 @@ namespace StorageManagement_Pools
              * @return the address of the new chunk or <code>INVALID_DISK_DATA_ADDRESS</code>,
              * if no chunk is found, big enough to hold the requested amount of data
              */
-            DiskDataAddress allocateEntityChunk(DiskDataSize entitySize);
+            DiskDataAddress allocateEntityChunk(DataSize entitySize);
             
             /**
              * Marks the specified amount of data, starting at the specified address, 
@@ -417,7 +432,7 @@ namespace StorageManagement_Pools
              * @param entityAddress the starting address of the chunk to be freed
              * @param entitySize the size of the chunk to be freed
              */
-            void freeEntityChunk(DiskDataAddress entityAddress, DiskDataSize entitySize);
+            void freeEntityChunk(DiskDataAddress entityAddress, DataSize entitySize);
             
             /**
              * Uses the current value of <code>errno</code> to generate an error message.
