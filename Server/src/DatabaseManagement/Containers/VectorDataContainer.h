@@ -32,7 +32,7 @@ namespace DatabaseManagement_Containers
     class VectorDataContainer : public DatabaseManagement_Containers::DataContainer
     {
         public:
-            VectorDataContainer() : DataContainer(DatabaseManagement_Types::INVALID_OBJECT_ID, DatabaseObjectType::VECTOR) {}
+            VectorDataContainer() : DataContainer(Common_Types::INVALID_OBJECT_ID, DatabaseObjectType::VECTOR) {}
             
             VectorDataContainer(const VectorDataContainer&) = default;              //Default copy constructor
             ~VectorDataContainer() = default;                                       //Default destructor

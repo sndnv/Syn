@@ -26,7 +26,7 @@
 #include <boost/uuid/random_generator.hpp>
 
 using DatabaseManagement_Types::LogSeverity;
-using DatabaseManagement_Types::LogID;
+using Common_Types::LogID;
 
 namespace DatabaseManagement_Containers
 {

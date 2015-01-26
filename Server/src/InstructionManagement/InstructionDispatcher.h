@@ -22,6 +22,7 @@
 #include <string>
 #include <boost/unordered_map.hpp>
 #include <boost/thread/future.hpp>
+#include "../Common/Types.h"
 #include "Types/Types.h"
 #include "Sets/InstructionSet.h"
 #include "../Utilities/FileLogger.h"
@@ -30,6 +31,10 @@
 #include "Interfaces/InstructionSource.h"
 #include "Interfaces/InstructionTarget.h"
 
+#include "../SecurityManagement/Types/SecurityTokens.h"
+
+using Common_Types::UserAccessLevel;
+using SecurityManagement_Types::AuthorizationTokenPtr;
 using InstructionManagement_Sets::InstructionPtr;
 using InstructionManagement_Sets::InstructionSet;
 using InstructionManagement_Sets::InstructionSetPtr;
@@ -140,6 +145,23 @@ namespace SyncServer_Core
                     logDebugMessage("(registerInstructionTarget) > The supplied target is already registered.");
             }
             
+            /**
+             * Retrieves the minimum required user access level for the specified 
+             * instruction set type.
+             * 
+             * @param set the set type for which to retrieve the access level
+             * @return the requested minimum access level or <code>INVALID</code>,
+             * if the set is not found
+             */
+            UserAccessLevel getMinimumAccessLevelForSet(InstructionSetType set) const
+            {
+                auto setData = targetSets.find(set);
+                if(setData != targetSets.end())
+                    return setData->second->getMinimumAccessLevel();
+                else
+                    return UserAccessLevel::INVALID;
+            }
+            
         private:
             //Configuration
             std::vector<InstructionSetType> expectedSetTypes;
@@ -157,8 +179,9 @@ namespace SyncServer_Core
              * 
              * @param sourceID the ID of the source that sent the instruction
              * @param instruction the instruction to be processed
+             * @param token the authorization token associated with the instruction
              */
-            void processInstruction(InstructionSourceID sourceID, InstructionBasePtr instruction);
+            void processInstruction(InstructionSourceID sourceID, InstructionBasePtr instruction, AuthorizationTokenPtr token);
             
             /**
              * Logs the specified message, if a debugging file logger is assigned to the dispatcher.

@@ -85,14 +85,16 @@ const boost::unordered_map<UserAccessLevel, std::string> Tools::userAccessLevelT
 {
     {UserAccessLevel::ADMIN,    "ADMIN"},
     {UserAccessLevel::NONE,     "NONE"},
-    {UserAccessLevel::USER,     "USER"}
+    {UserAccessLevel::USER,     "USER"},
+    {UserAccessLevel::INVALID,  "INVALID"}
 };
 
 const boost::unordered_map<std::string, UserAccessLevel> Tools::stringToUserAccessLevel
 {
     {"ADMIN",   UserAccessLevel::ADMIN},
     {"NONE",    UserAccessLevel::NONE},
-    {"USER",    UserAccessLevel::USER}
+    {"USER",    UserAccessLevel::USER},
+    {"INVALID", UserAccessLevel::INVALID}
 };
 
 const boost::unordered_map<StatisticType, std::string> Tools::statisticTypeToString
@@ -495,4 +497,73 @@ const boost::unordered_map<std::string, LinkActionConditionType> Tools::stringTo
     {"DATA_MAX_SIZE",       LinkActionConditionType::DATA_MAX_SIZE},
     {"INVALID",             LinkActionConditionType::INVALID}
 };
+
+const boost::unordered_map<SecurableComponentType, std::string> Tools::securableComponentTypeToString
+{
+    {SecurableComponentType::DATABASE_MANAGER,  "DATABASE_MANAGER"},
+    {SecurableComponentType::NETWORK_MANAGER,   "NETWORK_MANAGER"},
+    {SecurableComponentType::SECURITY_MANAGER,  "SECURITY_MANAGER"},
+    {SecurableComponentType::STORAGE_MANAGER,   "STORAGE_MANAGER"},
+    {SecurableComponentType::SESSION_MANAGER,   "SESSION_MANAGER"},
+    {SecurableComponentType::INVALID,           "INVALID"},
+};
+
+const boost::unordered_map<std::string, SecurableComponentType> Tools::stringToSecurableComponentType
+{
+    {"DATABASE_MANAGER",    SecurableComponentType::DATABASE_MANAGER},
+    {"NETWORK_MANAGER",     SecurableComponentType::NETWORK_MANAGER},
+    {"SECURITY_MANAGER",    SecurableComponentType::SECURITY_MANAGER},
+    {"STORAGE_MANAGER",     SecurableComponentType::STORAGE_MANAGER},
+    {"SESSION_MANAGER",     SecurableComponentType::SESSION_MANAGER},
+    {"INVALID",             SecurableComponentType::INVALID},
+};
+
+const boost::unordered_map<CacheEvictionType, std::string> Tools::cacheEvictionTypeToString
+{
+    {CacheEvictionType::LRU,     "LRU"},
+    {CacheEvictionType::MRU,     "MRU"},
+    {CacheEvictionType::INVALID, "INVALID"},
+};
+
+const boost::unordered_map<std::string, CacheEvictionType> Tools::stringToCacheEvictionType
+{
+    {"LRU",     CacheEvictionType::LRU},
+    {"MRU",     CacheEvictionType::MRU},
+    {"INVALID", CacheEvictionType::INVALID},
+};
+
+const boost::unordered_map<HashAlgorithmType, std::string> Tools::hashAlgorithmTypeToString
+{
+    {HashAlgorithmType::RIPEMD_160, "RIPEMD_160"},
+    {HashAlgorithmType::RIPEMD_256, "RIPEMD_256"},
+    {HashAlgorithmType::RIPEMD_320, "RIPEMD_320"},
+    {HashAlgorithmType::SHA3_224,   "SHA3_224"},
+    {HashAlgorithmType::SHA3_256,   "SHA3_256"},
+    {HashAlgorithmType::SHA3_384,   "SHA3_384"},
+    {HashAlgorithmType::SHA3_512,   "SHA3_512"},
+    {HashAlgorithmType::SHA_224,    "SHA_224"},
+    {HashAlgorithmType::SHA_256,    "SHA_256"},
+    {HashAlgorithmType::SHA_384,    "SHA_384"},
+    {HashAlgorithmType::SHA_512,    "SHA_512"},
+    {HashAlgorithmType::WHIRLPOOL,  "WHIRLPOOL"},
+    {HashAlgorithmType::INVALID,    "INVALID"}  
+};
+
+const boost::unordered_map<std::string, HashAlgorithmType> Tools::stringToHashAlgorithmType
+{
+    {"RIPEMD_160",  HashAlgorithmType::RIPEMD_160},
+    {"RIPEMD_256",  HashAlgorithmType::RIPEMD_256},
+    {"RIPEMD_320",  HashAlgorithmType::RIPEMD_320},
+    {"SHA3_224",    HashAlgorithmType::SHA3_224},
+    {"SHA3_256",    HashAlgorithmType::SHA3_256},
+    {"SHA3_384",    HashAlgorithmType::SHA3_384},
+    {"SHA3_512",    HashAlgorithmType::SHA3_512},
+    {"SHA_224",     HashAlgorithmType::SHA_224},
+    {"SHA_256",     HashAlgorithmType::SHA_256},
+    {"SHA_384",     HashAlgorithmType::SHA_384},
+    {"SHA_512",     HashAlgorithmType::SHA_512},
+    {"WHIRLPOOL",   HashAlgorithmType::WHIRLPOOL},
+    {"INVALID",     HashAlgorithmType::INVALID}   
+};
+
 

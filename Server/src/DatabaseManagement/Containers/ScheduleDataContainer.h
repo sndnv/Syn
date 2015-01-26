@@ -26,7 +26,7 @@
 #include "../Types/Types.h"
 
 using DatabaseManagement_Types::ScheduleIntervalType;
-using DatabaseManagement_Types::ScheduleID;
+using Common_Types::ScheduleID;
 
 namespace DatabaseManagement_Containers
 {

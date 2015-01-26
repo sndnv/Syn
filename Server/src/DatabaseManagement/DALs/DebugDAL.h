@@ -18,6 +18,7 @@
 #ifndef DEBUGDAL_H
 #define	DEBUGDAL_H
 
+#include <deque>
 #include <string>
 #include <atomic>
 #include <iostream>
@@ -48,6 +49,8 @@
 #include "../Containers/ScheduleDataContainer.h"
 #include "../Containers/SyncDataContainer.h"
 #include "../Containers/VectorDataContainer.h"
+#include "../../SecurityManagement/Rules/AuthorizationRules.h"
+#include "../../InstructionManagement/Types/Types.h"
 #include "boost/uuid/random_generator.hpp"
 
 
@@ -61,17 +64,17 @@ using Common_Types::IPPort;
 using Common_Types::DataPoolSize;
 using Common_Types::DataPoolPath;
 using Common_Types::DataPoolRetention;
+using Common_Types::DBObjectID;
+using Common_Types::LogID;
+using Common_Types::SessionID;
+using Common_Types::SyncID;
+using Common_Types::UserID;
+using Common_Types::DeviceID;
+using Common_Types::ScheduleID;
 using DatabaseManagement_Types::DatabaseIDType;
-using DatabaseManagement_Types::DBObjectID;
 using DatabaseManagement_Types::DatabaseRequestID;
 using DatabaseManagement_Types::DatabaseObjectType;
 using DatabaseManagement_Types::DatabaseAbstractionLayerID;
-using DatabaseManagement_Types::LogID;
-using DatabaseManagement_Types::SessionID;
-using DatabaseManagement_Types::SyncID;
-using DatabaseManagement_Types::UserID;
-using DatabaseManagement_Types::DeviceID;
-using DatabaseManagement_Types::ScheduleID;
 using DatabaseManagement_Types::DatabaseRequestID;
 using DatabaseManagement_Types::ObjectCacheAge;
 
@@ -96,6 +99,8 @@ using DatabaseManagement_Containers::ScheduleDataContainer;
 using DatabaseManagement_Containers::SyncDataContainer;
 using DatabaseManagement_Containers::VectorDataContainer;
 
+using SecurityManagement_Rules::UserAuthorizationRule;
+using SecurityManagement_Types::PasswordData;
 
 using boost::tuples::tuple;
 using boost::unordered_map;
@@ -237,9 +242,23 @@ namespace DatabaseManagement_DALs
                 currentToken++;
                 std::string deviceName = *currentToken;
                 currentToken++;
+                PasswordData password = Tools::toSecByteBlock(*currentToken);
+                currentToken++;
                 std::string deviceInfo = *currentToken;
+                currentToken++;
+                bool locked = ((*currentToken).compare("TRUE") == 0);
+                currentToken++;
+                boost::posix_time::ptime timestampLastSuccessfulAuth = Tools::toTimestamp(*currentToken);
+                currentToken++;
+                boost::posix_time::ptime timestampLastFailedAuth = Tools::toTimestamp(*currentToken);
+                currentToken++;
+                unsigned int failedAttempts = boost::lexical_cast<unsigned int>(*currentToken);
 
-                return DeviceDataContainerPtr(new DeviceDataContainer(id, providedID, deviceName, ownerID, address, port, xferType, deviceInfo));
+                return DeviceDataContainerPtr(
+                        new DeviceDataContainer(id, providedID, deviceName, password, ownerID, 
+                                                address, port, xferType, deviceInfo, locked,
+                                                timestampLastSuccessfulAuth, timestampLastFailedAuth,
+                                                failedAttempts));
             }
 
             static LogDataContainerPtr toLog(std::string value, DBObjectID id)
@@ -465,6 +484,8 @@ namespace DatabaseManagement_DALs
 
                 std::string username = *currentToken;
                 currentToken++;
+                PasswordData password = Tools::toSecByteBlock(*currentToken);
+                currentToken++;
                 unsigned long maxSize = boost::lexical_cast<unsigned long>(*currentToken);
                 currentToken++;
                 unsigned long maxNum = boost::lexical_cast<unsigned long>(*currentToken);
@@ -478,8 +499,15 @@ namespace DatabaseManagement_DALs
                 boost::posix_time::ptime create = Tools::toTimestamp(*currentToken);
                 currentToken++;
                 boost::posix_time::ptime login = Tools::toTimestamp(*currentToken);
+                currentToken++;
+                boost::posix_time::ptime timestampLastFailedAuth = Tools::toTimestamp(*currentToken);
+                currentToken++;
+                unsigned int failedAttempts = boost::lexical_cast<unsigned int>(*currentToken);
+                
+                std::deque<UserAuthorizationRule> rules;
+                rules.push_back(UserAuthorizationRule(InstructionManagement_Types::InstructionSetType::DATABASE_MANAGER));
 
-                return UserDataContainerPtr(new UserDataContainer(id, username, "NO_PASS", maxSize, maxNum, level, pwReset, locked, create, login));
+                return UserDataContainerPtr(new UserDataContainer(id, username, password, maxSize, maxNum, level, pwReset, locked, create, login, timestampLastFailedAuth, failedAttempts, rules));
             }
 
             static DataContainerPtr toContainer(std::string value, DatabaseObjectType type, DBObjectID id)
@@ -527,7 +555,11 @@ namespace DatabaseManagement_DALs
             static std::string toString(DeviceDataContainerPtr container)
             {
                 return container->toString() + "," + Tools::toString(container->getDeviceOwner()) + "," + container->getDeviceAddress() + "," + Tools::toString(container->getDevicePort())
-                       + "," + Tools::toString(container->getTransferType()) + "," + container->getDeviceProvidedID() + "," + container->getDeviceName() + "," + container->getDeviceInfo();
+                       + "," + Tools::toString(container->getTransferType()) + "," + container->getDeviceProvidedID() + "," + container->getDeviceName()
+                       + "," + Tools::toString(container->getPasswordData()) + "," + container->getDeviceInfo() + "," + Tools::toString(container->isDeviceLocked()) 
+                       + "," + Tools::toString(container->getLastSuccessfulAuthenticationTimestamp())
+                       + "," + Tools::toString(container->getLastFailedAuthenticationTimestamp())
+                       + "," + Tools::toString(container->getFailedAuthenticationAttempts());
             }
 
             static std::string toString(LogDataContainerPtr container)
@@ -624,9 +656,13 @@ namespace DatabaseManagement_DALs
 
             static std::string toString(UserDataContainerPtr container)
             {
-                return container->toString() + "," + container->getUsername() + "," + Tools::toString(container->getMaxFileSize()) + "," + Tools::toString(container->getMaxNumberOfFiles())
-                       + "," + Tools::toString(container->getUserAccessLevel()) + "," + Tools::toString(container->getForcePasswordReset()) + "," + Tools::toString(container->getLockedState())
-                       + "," + Tools::toString(container->getCreationTimestamp()) + "," + Tools::toString(container->getLastLoginTimestamp());
+                return container->toString() + "," + container->getUsername() + "," + Tools::toString(container->getPasswordData()) + "," 
+                        + Tools::toString(container->getMaxFileSize()) + "," + Tools::toString(container->getMaxNumberOfFiles())
+                        + "," + Tools::toString(container->getUserAccessLevel()) + "," + Tools::toString(container->getForcePasswordReset()) 
+                        + "," + Tools::toString(container->isUserLocked()) + "," + Tools::toString(container->getCreationTimestamp()) 
+                        + "," + Tools::toString(container->getLastSuccessfulAuthenticationTimestamp())
+                        + "," + Tools::toString(container->getLastFailedAuthenticationTimestamp())
+                        + "," + Tools::toString(container->getFailedAuthenticationAttempts());
             }
 
             static std::string toString(VectorDataContainerPtr container)

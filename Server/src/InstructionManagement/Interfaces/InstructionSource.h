@@ -20,6 +20,7 @@
 
 #include "../Types/Types.h"
 #include "../Sets/InstructionSet.h"
+#include "../../SecurityManagement/Types/SecurityTokens.h"
 
 namespace InstructionManagement_Interfaces
 {
@@ -38,12 +39,14 @@ namespace InstructionManagement_Interfaces
              * Note #1: It is advised that, for security reasons, handler registration is allowed
              * to be done only once and it is up to the source to ensure such behaviour.
              * 
-             * Note #2: The signature of the handler is: <code>void(InstructionManagement_Sets::InstructionBasePtr)</code>.
+             * Note #2: The signature of the handler is:
+             * <code>void(InstructionManagement_Sets::InstructionBasePtr, SecurityManagement_Types::AuthorizationTokenPtr)</code>.
              * 
              * @param handler the handler to be used by the source to send instructions
              * @return <code>true</code>, if the registration was successful
              */
-            virtual bool registerInstructionHandler(const std::function<void(InstructionManagement_Sets::InstructionBasePtr)> handler) = 0;
+            virtual bool registerInstructionHandler(const std::function<void(InstructionManagement_Sets::InstructionBasePtr,
+                                                                             SecurityManagement_Types::AuthorizationTokenPtr)> handler) = 0;
             
             /**
              * Retrieves the types of instructions that the source will request.\n

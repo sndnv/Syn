@@ -33,7 +33,6 @@ DatabaseManagement_DALs::DebugDAL::~DebugDAL()
         boost::lock_guard<boost::mutex> dataLock(mainThreadMutex);
         stopDebugger = true;
         
-
         mainThreadLockCondition.notify_all();
     }
     
@@ -262,7 +261,28 @@ void DatabaseManagement_DALs::DebugDAL::mainThread()
                     {
                         DBObjectID objectID = Tools::getIDFromConstraint(dalType, currentRequestData->get<1>(), currentRequestData->get<2>());
                         
-                        if(objectID != DatabaseManagement_Types::INVALID_OBJECT_ID)
+                        if(dalType == DatabaseObjectType::USER 
+                                && boost::any_cast<DatabaseSelectConstraints::USERS>(currentRequestData->get<1>()) == DatabaseSelectConstraints::USERS::LIMIT_BY_NAME)
+                        {
+                            bool done = false;
+                            
+                            for(const std::pair<DBObjectID, std::string> & currentPair : data)
+                            {
+                                if(currentPair.second.find(boost::any_cast<std::string>(currentRequestData->get<2>())) != std::string::npos)
+                                {
+                                    onSuccess(dalID, currentRequest, Stringifier::toUser(currentPair.second, currentPair.first));
+                                    done = true;
+                                    break;
+                                }
+                            }
+                            
+                            if(!done)
+                                onFailure(dalID, currentRequest, objectID);
+                            
+                            break;
+                        }
+                        
+                        if(objectID != Common_Types::INVALID_OBJECT_ID)
                         {
                             if(data.find(objectID) != data.end())
                                 onSuccess(dalID, currentRequest, Stringifier::toContainer(data[objectID], dalType, objectID));

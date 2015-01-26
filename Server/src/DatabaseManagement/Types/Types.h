@@ -19,8 +19,6 @@
 #define	DATABASE_MANAGEMENT_TYPES_H
 
 #include <string>
-#include <boost/uuid/uuid.hpp>
-#include <boost/uuid/nil_generator.hpp>
 #include "../../Common/Types.h"
 
 namespace DatabaseManagement_Types
@@ -34,32 +32,10 @@ namespace DatabaseManagement_Types
     
     typedef unsigned long DatabaseRequestID;
     const DatabaseRequestID INVALID_DATABASE_REQUEST_ID = 0; //TODO - value?
-    
-    typedef boost::uuids::uuid DBObjectID;
-    const DBObjectID INVALID_OBJECT_ID = boost::uuids::nil_uuid();
-    
-    typedef DBObjectID LogID;
-    const LogID INVALID_LOG_ID = boost::uuids::nil_uuid();
-    
-    typedef DBObjectID SessionID;
-    const SessionID INVALID_SESSION_ID = boost::uuids::nil_uuid();
-    
-    typedef DBObjectID UserID;
-    const UserID INVALID_USER_ID = boost::uuids::nil_uuid();
-    
-    typedef DBObjectID DeviceID;
-    const DeviceID INVALID_DEVICE_ID = boost::uuids::nil_uuid();
-    
-    typedef DBObjectID SyncID;
-    const SyncID INVALID_SYNC_ID = boost::uuids::nil_uuid();
-    
-    typedef DBObjectID ScheduleID;
-    const ScheduleID INVALID_SCHEDULE_ID = boost::uuids::nil_uuid();
         
     enum class DatabaseObjectType { INVALID, VECTOR, STATISTICS, SYSTEM_SETTINGS, SYNC_FILE, DEVICE, SCHEDULE, USER, LOG, SESSION };
     enum class DatabaseManagerOperationMode { PRPW, PRCW, CRCW, INVALID };
     enum class DatabaseFailureAction { INVALID, IGNORE_FAILURE, DROP_IF_NOT_LAST, DROP_DAL, PUSH_TO_BACK, INITIATE_RECONNECT };
-    enum class UserAccessLevel { NONE, USER, ADMIN };
     enum class StatisticType { INSTALL_TIMESTAMP, START_TIMESTAMP, TOTAL_TRANSFERRED_DATA, TOTAL_TRANSFERRED_FILES, TOTAL_FAILED_TRANSFERS, TOTAL_RETRIED_TRANSFERS };
     enum class SystemParameterType { DATA_IP_ADDRESS, DATA_IP_PORT, COMMAND_IP_ADDRESS, COMMAND_IP_PORT, FORCE_COMMAND_ENCRYPTION, FORCE_DATA_ENCRYPTION, 
                                      FORCE_DATA_COMPRESSION, PENDING_DATA_POOL_SIZE, PENDING_DATA_POOL_PATH, PENDING_DATA_RETENTION, IN_MEMORY_POOL_SIZE, 

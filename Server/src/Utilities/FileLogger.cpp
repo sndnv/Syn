@@ -67,8 +67,12 @@ Utilities::FileLogger::FileLogger(FileLoggerParameters parameters) : FileLogger(
 
 Utilities::FileLogger::~FileLogger()
 {
-    stopLogger = true;
-    threadLockCondition.notify_all();
+    {
+        boost::unique_lock<boost::mutex> dataLock(threadMutex);
+        stopLogger = true;
+        threadLockCondition.notify_all();
+    }
+    
     mainThread->join();
     delete mainThread;
 }
@@ -125,7 +129,7 @@ void Utilities::FileLogger::mainLoggerThread()
     {
         boost::unique_lock<boost::mutex> dataLock(threadMutex);
         
-        if(messages.size() == 0)
+        if(messages.size() == 0 && !stopLogger)
             threadLockCondition.wait(dataLock);
         
         for(unsigned int i = 0; i < messages.size(); i++)

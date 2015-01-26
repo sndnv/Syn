@@ -45,8 +45,8 @@ using std::queue;
 using std::vector;
 using DatabaseManagement_Interfaces::DALPtr;
 
+using Common_Types::DBObjectID;
 using DatabaseManagement_Types::DatabaseManagerOperationMode;
-using DatabaseManagement_Types::DBObjectID;
 using DatabaseManagement_Types::DatabaseFailureAction;
 using DatabaseManagement_Types::DatabaseRequestID;
 using DatabaseManagement_Types::DatabaseAbstractionLayerID;
@@ -153,7 +153,10 @@ namespace SyncServer_Core
                  * @param constraintParameter parameter associated with the constraint (if any)
                  * @return the ID assigned to the new request
                  */
-                DatabaseRequestID addSelectRequest(const boost::any constraintType, const boost::any constraintParameter) { return addRequestToQueue(RequestType::SELECT, constraintType, constraintParameter); }
+                DatabaseRequestID addSelectRequest(const boost::any constraintType, const boost::any constraintParameter)
+                {
+                    return addRequestToQueue(RequestType::SELECT, constraintType, constraintParameter);
+                }
 
                 /**
                  * Adds a new INSERT request to the queue.
@@ -161,7 +164,10 @@ namespace SyncServer_Core
                  * @param data the container to be inserted
                  * @return the ID assigned to the new request
                  */
-                DatabaseRequestID addInsertRequest(const DataContainerPtr data) { return addRequestToQueue(RequestType::INSERT, data); }
+                DatabaseRequestID addInsertRequest(const DataContainerPtr data)
+                {
+                    return addRequestToQueue(RequestType::INSERT, data);
+                }
 
                 /**
                  * Adds a new UPDATE request to the queue.
@@ -169,7 +175,10 @@ namespace SyncServer_Core
                  * @param data the container to be updated
                  * @return the ID assigned to the new request
                  */
-                DatabaseRequestID addUpdateRequest(const DataContainerPtr data) { return addRequestToQueue(RequestType::UPDATE, data); }
+                DatabaseRequestID addUpdateRequest(const DataContainerPtr data)
+                {
+                    return addRequestToQueue(RequestType::UPDATE, data);
+                }
 
                 /**
                  * Adds a new DELETE request to the queue.
@@ -177,7 +186,10 @@ namespace SyncServer_Core
                  * @param id the ID of the object to be removed
                  * @return the ID assigned to the new request
                  */
-                DatabaseRequestID addDeleteRequest(const DBObjectID id) { return addRequestToQueue(RequestType::REMOVE, id); }
+                DatabaseRequestID addDeleteRequest(const DBObjectID id)
+                {
+                    return addRequestToQueue(RequestType::REMOVE, id);
+                }
 
                 /**
                  * Attaches the specified event handler to the "onFailure" event of the queue.
@@ -185,7 +197,10 @@ namespace SyncServer_Core
                  * @param function the handler to be attached
                  * @return the associated connection object
                  */
-                boost::signals2::connection onFailureEventAttach(std::function<void(DatabaseRequestID, DBObjectID)> function) { return onFailure.connect(function); }
+                boost::signals2::connection onFailureEventAttach(std::function<void(DatabaseRequestID, DBObjectID)> function)
+                {
+                    return onFailure.connect(function);
+                }
 
                 /**
                  * Attaches the specified event handler to the "onSuccess" event of the queue.
@@ -193,7 +208,10 @@ namespace SyncServer_Core
                  * @param function the handler to be attached
                  * @return the associated connection object
                  */
-                boost::signals2::connection onSuccessEventAttach(std::function<void(DatabaseRequestID, DataContainerPtr)> function) { return onSuccess.connect(function); }
+                boost::signals2::connection onSuccessEventAttach(std::function<void(DatabaseRequestID, DataContainerPtr)> function)
+                {
+                    return onSuccess.connect(function);
+                }
 
                 /**
                  * Adds a new DAL to the queue.

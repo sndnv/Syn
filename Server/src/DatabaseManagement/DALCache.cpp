@@ -471,7 +471,7 @@ void SyncServer_Core::DatabaseManagement::DALCache::requestsThread()
                 {
                     DBObjectID objectID = Tools::getIDFromConstraint(cacheType, currentRequestData->get<1>(), currentRequestData->get<2>());
                     
-                    if(objectID != DatabaseManagement_Types::INVALID_OBJECT_ID)
+                    if(objectID != Common_Types::INVALID_OBJECT_ID)
                     {
                         bool inCache = false;
                         bool pendingRemoval = false;

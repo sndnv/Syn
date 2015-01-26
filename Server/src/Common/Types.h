@@ -18,7 +18,10 @@
 #ifndef COMMON_TYPES_H
 #define	COMMON_TYPES_H
 
+#include <limits>
 #include <vector>
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/nil_generator.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/interprocess/smart_ptr/unique_ptr.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
@@ -29,34 +32,109 @@ namespace Common_Types
     typedef std::vector<Byte> ByteVector;
     typedef boost::shared_ptr<ByteVector> ByteVectorPtr;
     
-    //struct ByteVectorDeleter { void operator()(ByteVector * vector) {  delete vector; } };
-    //typedef boost::interprocess::unique_ptr<ByteVector, ByteVectorDeleter> ByteVectorUniquePtr;
-    
     typedef unsigned long TransferredDataAmount;
-    const TransferredDataAmount INVALID_TRANSFERRED_DATA_AMOUNT = 0; //TODO - value?
+    const TransferredDataAmount INVALID_TRANSFERRED_DATA_AMOUNT = 0;
     
     typedef unsigned long TransferredFilesAmount;
-    const TransferredFilesAmount INVALID_TRANSFERRED_FILES_AMOUNT = 0; //TODO - value?
+    const TransferredFilesAmount INVALID_TRANSFERRED_FILES_AMOUNT = 0;
     
     typedef std::string IPAddress;
     const IPAddress INVALID_IP_ADDRESS = "0/0"; //for IPv4 and IPv6
     
     typedef unsigned int IPPort;
-    const IPPort INVALID_IP_PORT = 0; //TODO - value?
+    const IPPort INVALID_IP_PORT = 0;
     
     typedef boost::posix_time::ptime Timestamp;
     const boost::posix_time::ptime INVALID_DATE_TIME = boost::posix_time::ptime(boost::posix_time::min_date_time);
     
     typedef unsigned long Seconds;
+    const Seconds MAX_SECONDS = ULONG_MAX;
     
+    //Database Management Types
+    typedef boost::uuids::uuid DBObjectID;
+    const DBObjectID INVALID_OBJECT_ID = boost::uuids::nil_uuid();
+    
+    typedef DBObjectID LogID;
+    const LogID INVALID_LOG_ID = boost::uuids::nil_uuid();
+    
+    typedef DBObjectID SessionID;
+    const SessionID INVALID_SESSION_ID = boost::uuids::nil_uuid();
+    
+    typedef DBObjectID UserID;
+    const UserID INVALID_USER_ID = boost::uuids::nil_uuid();
+    
+    typedef DBObjectID DeviceID;
+    const DeviceID INVALID_DEVICE_ID = boost::uuids::nil_uuid();
+    
+    typedef DBObjectID SyncID;
+    const SyncID INVALID_SYNC_ID = boost::uuids::nil_uuid();
+    
+    typedef DBObjectID ScheduleID;
+    const ScheduleID INVALID_SCHEDULE_ID = boost::uuids::nil_uuid();
+    
+    //Data Pools Management Types
     typedef unsigned long DataPoolSize;
-    const DataPoolSize INVALID_DATA_POOL_SIZE = 0; //TODO - value?
+    const DataPoolSize INVALID_DATA_POOL_SIZE = 0;
     
     typedef std::string DataPoolPath;
-    const DataPoolPath INVALID_DATA_POOL_PATH = ""; //TODO - value?
+    const DataPoolPath INVALID_DATA_POOL_PATH = "";
     
     typedef unsigned long DataPoolRetention;
-    const DataPoolRetention INVALID_DATA_POOL_RETENTION = 0; //TODO - value?
+    const DataPoolRetention INVALID_DATA_POOL_RETENTION = 0;
+    
+    //User Management Types
+    enum class UserLockType { NONE, FAILED_LOGIN, ADMIN_FORCED, USER_FORCED, INACTIVITY }; //TODO - implement
+    
+    enum class UserAccessLevel { INVALID, NONE, USER, ADMIN };
+    
+    /**
+     * Converts the specified user access level to an integer.
+     * 
+     * The following rules hold for the values returned by the function:<br>
+     * - <code>UserAccessLevel::ADMIN</code> will always be the highest possible value<br>
+     * - An invalid/unexpected value will always throw an exception<br>
+     * - All values in between will be ordered based on the level of access that the
+     * value implies (for example: ADMIN(UINT_MAX) > USER(1) > NONE(0))<br>
+     * 
+     * Warning: The actual value returned by the function can change from one
+     * code revision to another and, therefore, should not be used anywhere
+     * as a hard-coded integer or for permanent storage.
+     * 
+     * @param level the access level to be converted
+     * @return the representation of the access level as an integer
+     * 
+     * @throw logic_error if an unexpected/invalid access level is encountered
+     */
+    inline unsigned int userAccessLevelToInt(const UserAccessLevel level)
+    {
+        switch(level)
+        {
+            case UserAccessLevel::NONE: return 0;
+            case UserAccessLevel::USER: return 1;
+            case UserAccessLevel::ADMIN: return UINT_MAX;
+            default: throw std::logic_error("userAccessLevelToInt() > An unexpected user access level was encountered.");
+        }
+    }
+    
+    inline bool operator>(const UserAccessLevel a, const UserAccessLevel b)
+    {
+        return (userAccessLevelToInt(a) > userAccessLevelToInt(b));
+    }
+    
+    inline bool operator<(const UserAccessLevel a, const UserAccessLevel b)
+    {
+        return (userAccessLevelToInt(a) < userAccessLevelToInt(b));
+    }
+    
+    inline bool operator>=(const UserAccessLevel a, const UserAccessLevel b)
+    {
+        return (userAccessLevelToInt(a) >= userAccessLevelToInt(b));
+    }
+    
+    inline bool operator<=(const UserAccessLevel a, const UserAccessLevel b)
+    {
+        return (userAccessLevelToInt(a) <= userAccessLevelToInt(b));
+    }
 }
 
 #endif	/* COMMON_TYPES_H */

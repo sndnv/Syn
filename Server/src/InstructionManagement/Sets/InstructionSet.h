@@ -23,6 +23,8 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/thread/future.hpp>
 #include "../Types/Types.h"
+#include "../../Common/Types.h"
+#include "../../SecurityManagement/Types/SecurityTokens.h"
 
 namespace InstructionManagement_Sets
 {
@@ -87,7 +89,7 @@ namespace InstructionManagement_Sets
     };
     
     /**
-     * Base class template for instruction results.\n
+     * Base class template for instruction results.
      * 
      * Note: Provides no functionality.
      * 
@@ -122,7 +124,7 @@ namespace InstructionManagement_Sets
     typedef boost::shared_ptr<InstructionBase> InstructionBasePtr;
     
     /**
-     * Base class template for instructions.\n
+     * Base class template for instructions.
      * 
      * @param (template) TInstructionTypeEnum template parameter denoting the type of instructions
      * that will be processed
@@ -133,6 +135,8 @@ namespace InstructionManagement_Sets
         //restricts the template parameter
         static_assert(std::is_enum<TInstructionTypeEnum>::value, "Instruction > Supplied instruction type for <TInstructionTypeEnum> is not an enum class.");
         
+        friend class InstructionSet<TInstructionTypeEnum>;
+        
         public:
             virtual ~Instruction() {}
             /** Retrieves a reference to the promise object used by the instruction.\n\n@return the promise object reference */
@@ -141,15 +145,20 @@ namespace InstructionManagement_Sets
             InstructionResultFuture<TInstructionTypeEnum> getFuture() { return promise.get_future(); }
             /** Retrieves the type of type of the instruction.\n\n@return the instruction type */
             TInstructionTypeEnum getType() const { return type; }
+            /** Retrieves the associated authorization token.\n\n@return the requested token (if it has been set) or an empty shared_ptr */
+            SecurityManagement_Types::AuthorizationTokenPtr getToken() const { return authorizationToken; }
             
         protected:
             Instruction(InstructionManagement_Types::InstructionSetType setType, TInstructionTypeEnum instructionType) : InstructionBase(setType), type(instructionType) {}
             InstructionResultPromise<TInstructionTypeEnum> promise;
             TInstructionTypeEnum type;
+            
+        private:
+            SecurityManagement_Types::AuthorizationTokenPtr authorizationToken;
     };
     
     /**
-     * Base class for all instruction sets.\n
+     * Base class for all instruction sets.
      * 
      * Note: Provides no functionality.
      */
@@ -157,12 +166,13 @@ namespace InstructionManagement_Sets
     {
         public:
             virtual ~InstructionSetBase() {}
-            virtual void processInstruction(InstructionBasePtr instruction) = 0;
+            virtual void processInstruction(InstructionBasePtr instruction, SecurityManagement_Types::AuthorizationTokenPtr token) = 0;
+            virtual Common_Types::UserAccessLevel getMinimumAccessLevel() const = 0;
     };
     typedef boost::shared_ptr<InstructionSetBase> InstructionSetBasePtr;
     
     /**
-     * Class template for instruction sets.\n
+     * Class template for instruction sets.
      * 
      * @param (template) TInstructionTypeEnum template parameter denoting the type of instructions
      * that will be processed
@@ -175,12 +185,15 @@ namespace InstructionManagement_Sets
         
         public:
             /** Creates a new instruction set and initialises its instructions table. */
-            InstructionSet() { buildTable(); }
+            InstructionSet()
+            : minAccessLevel(Common_Types::UserAccessLevel::INVALID)
+            { buildTable(); }
+            
             /** Disables the instruction set and clears the instructions table. */
             virtual ~InstructionSet() { closed = true; instructionHandlers.clear(); }
             
             /**
-             * Binds the specified handler to the specified instruction identifier/type.\n
+             * Binds the specified handler to the specified instruction identifier/type.
              * 
              * Note: The handler signature must be: <code>void(InstructionPtr<TInstructionTypeEnum>)</code>
              * 
@@ -217,8 +230,9 @@ namespace InstructionManagement_Sets
              * Begins processing the specified instruction.
              * 
              * @param instruction the instruction to be processed
+             * @param token the authorization token associated with the instruction
              */
-            void processInstruction(InstructionPtr<TInstructionTypeEnum> instruction)
+            void processInstruction(InstructionPtr<TInstructionTypeEnum> instruction, SecurityManagement_Types::AuthorizationTokenPtr token)
             {
                 if(closed)
                 {
@@ -228,39 +242,73 @@ namespace InstructionManagement_Sets
                 }
                 
                 if(instructionHandlers.find(instruction->getType()) != instructionHandlers.end())
+                {
+                    instruction->authorizationToken = token;
                     instructionHandlers[instruction->getType()](instruction);
+                }
                 else
                 {
-                    try {  boost::throw_exception(InstructionNotRecognisedException()); }
+                    try { boost::throw_exception(InstructionNotRecognisedException()); }
                     catch(const InstructionNotRecognisedException &) { instruction->getPromise().set_exception(boost::current_exception()); }
                 }
             }
             
             /**
-             * Attempts to process the specified instruction.\n
+             * Attempts to process the specified instruction.
              * 
              * Note: The instruction is dynamically cast to the type expected by
              * the instruction set. An exception is thrown if the cast fails.
              * 
              * @param instruction the instruction to be processed
+             * @param token the authorization token associated with the instruction
              * @throw std::invalid_argument if the specified instruction is not of the expected type
              */
-            void processInstruction(InstructionBasePtr instruction)
+            void processInstruction(InstructionBasePtr instruction, SecurityManagement_Types::AuthorizationTokenPtr token)
             {
                 InstructionPtr<TInstructionTypeEnum> actualInstruction = boost::dynamic_pointer_cast<Instruction<TInstructionTypeEnum>>(instruction);
                 if(actualInstruction)
-                    processInstruction(actualInstruction);
+                    processInstruction(actualInstruction, token);
                 else
                     throw std::invalid_argument("InstructionSet::processInstruction(InstructionBasePtr) > Supplied instruction is not of the expected type.");
             }
             
+            /**
+             * Sets the minimum access level for the instruction set.
+             * 
+             * Note: The access level should be set by the target component at registration
+             * time and it can be set only once.
+             * 
+             * @param minimumAccessLevel the minimum access level required for using 
+             * any instructions in the set
+             * 
+             * @throw logic_error if the access level has already been set
+             */
+            void setMinimumAccessLevel(Common_Types::UserAccessLevel minimumAccessLevel)
+            {
+                if(minAccessLevel == Common_Types::UserAccessLevel::INVALID)
+                    minAccessLevel = minimumAccessLevel;
+                else
+                    throw std::logic_error("InstructionSet::setMinimumAccessLevel() > The minimum access level has already been set.");
+            }
+            
+            /**
+             * Retrieves the minimum access level required for using any instructions in the set.
+             * 
+             * @return the minimum access level
+             */
+            Common_Types::UserAccessLevel getMinimumAccessLevel() const
+            {
+                return minAccessLevel;
+            }
+            
         protected:
             std::atomic<bool> closed{false}; //denotes whether the set can be used
+            Common_Types::UserAccessLevel minAccessLevel; //the minimum user access level required for working with the set
             boost::unordered_map<TInstructionTypeEnum, std::function<void(InstructionPtr<TInstructionTypeEnum>)>> instructionHandlers;
             
             /**
              * Instruction handler placeholder which signifies that a proper
-             * handler was not specified during the initial instruction registration.\n
+             * handler was not specified during the initial instruction registration.
              * 
              * An exception is set as the promise result.
              * 

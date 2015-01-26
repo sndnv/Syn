@@ -27,8 +27,8 @@
 #include "DatabaseSettingsContainer.h"
 #include "DatabaseInformationContainer.h"
 
+using Common_Types::DBObjectID;
 using DatabaseManagement_Types::DatabaseObjectType;
-using DatabaseManagement_Types::DBObjectID;
 using DatabaseManagement_Types::DatabaseRequestID;
 using DatabaseManagement_Types::DatabaseAbstractionLayerID;
 

@@ -136,29 +136,61 @@ namespace SecurityManagement_Crypto
              */
             KeyGenerator(DerivedKeysParameters dkParams, SymmetricKeysParameters skParams, 
                          AsymmetricKeysParameters akParams, Utilities::FileLogger * logger = nullptr)
-            : debugLogger(logger), defaultSymmetricCipher(skParams.defaultSymmetricCipher), defaultSymmetricCipherMode(skParams.defaultSymmetricCipherMode),
-              defaultIVSize(skParams.defaultIVSize), minSymmetricKeySize(skParams.minSymmetricKeySize), defaultSymmetricKeySize(skParams.defaultSymmetricKeySize),
-              minRSAKeySize(akParams.minRSAKeySize), defaultRSAKeySize(akParams.defaultRSAKeySize), defaultEllipticCurve(akParams.defaultEllipticCurve),
-              derivedKeyIterations(dkParams.derivedKeyIterations), derivedKeySize(dkParams.derivedKeySize), derivedKeyMinSaltSize(dkParams.derivedKeyMinSaltSize),
+            : debugLogger(logger), defaultSymmetricCipher(skParams.defaultSymmetricCipher),
+              defaultSymmetricCipherMode(skParams.defaultSymmetricCipherMode),
+              defaultIVSize(skParams.defaultIVSize), minSymmetricKeySize(skParams.minSymmetricKeySize),
+              defaultSymmetricKeySize(skParams.defaultSymmetricKeySize),
+              minRSAKeySize(akParams.minRSAKeySize), defaultRSAKeySize(akParams.defaultRSAKeySize),
+              defaultEllipticCurve(akParams.defaultEllipticCurve),
+              derivedKeyIterations(dkParams.derivedKeyIterations), derivedKeySize(dkParams.derivedKeySize),
+              derivedKeyMinSaltSize(dkParams.derivedKeyMinSaltSize),
               derivedKeyDefaultSaltSize(dkParams.derivedKeyDefaultSaltSize)
             {
                 if(derivedKeyMinSaltSize > derivedKeyDefaultSaltSize)
-                    throw std::invalid_argument("KeyGenerator::() > The default derived key salt size must be larger than or equal to the minimum derived key salt size.");
+                {
+                    throw std::invalid_argument("KeyGenerator::() > The default derived key salt size must be "
+                                                "larger than or equal to the minimum derived key salt size.");
+                }
                 
                 if(minSymmetricKeySize > defaultSymmetricKeySize)
-                    throw std::invalid_argument("KeyGenerator::() > The default symmetric key size must be larger than or equal to the minimum symmetric key size.");
+                {
+                    throw std::invalid_argument("KeyGenerator::() > The default symmetric key size must be "
+                                                "larger than or equal to the minimum symmetric key size.");
+                }
                 
                 if(minRSAKeySize > defaultRSAKeySize)
-                    throw std::invalid_argument("KeyGenerator::() > The default RSA key size must be larger than or equal to the minimum RSA key size.");
+                {
+                    throw std::invalid_argument("KeyGenerator::() > The default RSA key size must be "
+                                                "larger than or equal to the minimum RSA key size.");
+                }
                 
                 switch(dkParams.derivedKeyFunction)
                 {
-                    case PasswordDerivationFunction::PBKDF2_SHA256: { derivedKeyGenerator = new CryptoPP::PKCS5_PBKDF2_HMAC<CryptoPP::SHA256>(); } break;
-                    case PasswordDerivationFunction::PBKDF2_SHA512: { derivedKeyGenerator = new CryptoPP::PKCS5_PBKDF2_HMAC<CryptoPP::SHA512>(); } break;
-                    case PasswordDerivationFunction::PBKDF2_SHA3_256: { derivedKeyGenerator = new CryptoPP::PKCS5_PBKDF2_HMAC<CryptoPP::SHA3_256>(); } break;
-                    case PasswordDerivationFunction::PBKDF2_SHA3_512: { derivedKeyGenerator = new CryptoPP::PKCS5_PBKDF2_HMAC<CryptoPP::SHA3_512>(); } break;
+                    case PasswordDerivationFunction::PBKDF2_SHA256:
+                    {
+                        derivedKeyGenerator = new CryptoPP::PKCS5_PBKDF2_HMAC<CryptoPP::SHA256>();
+                    } break;
+                        
+                    case PasswordDerivationFunction::PBKDF2_SHA512:
+                    {
+                        derivedKeyGenerator = new CryptoPP::PKCS5_PBKDF2_HMAC<CryptoPP::SHA512>();
+                    } break;
                     
-                    default: throw std::invalid_argument("KeyGenerator::() > Unexpected password derivation function encountered.");
+                    //TODO - fix issues with HMAC & SHA3
+                    //case PasswordDerivationFunction::PBKDF2_SHA3_256:
+                    //{
+                    //    derivedKeyGenerator = new CryptoPP::PKCS5_PBKDF2_HMAC<CryptoPP::SHA3_256>();
+                    //} break;
+                    //case PasswordDerivationFunction::PBKDF2_SHA3_512:
+                    //{
+                    //    derivedKeyGenerator = new CryptoPP::PKCS5_PBKDF2_HMAC<CryptoPP::SHA3_512>();
+                    //} break;
+                    
+                    default:
+                    {
+                        throw std::invalid_argument("KeyGenerator::() > Unexpected password derivation "
+                                                    "function encountered.");
+                    };
                 }
                 
                 switch(akParams.keyValidationLevel)
@@ -168,7 +200,11 @@ namespace SecurityManagement_Crypto
                     case AsymmetricKeyValidationLevel::HIGH_2: keyValidationLevel = 2; break;
                     case AsymmetricKeyValidationLevel::FULL_3: keyValidationLevel = 3; break;
                     
-                    default: throw std::invalid_argument("KeyGenerator::() > Unexpected key validation level encountered.");
+                    default:
+                    {
+                        throw std::invalid_argument("KeyGenerator::() > Unexpected key validation "
+                                                    "level encountered.");
+                    };
                 }
             }
             
@@ -184,9 +220,9 @@ namespace SecurityManagement_Crypto
                 debugLogger = nullptr;
             }
             
-            KeyGenerator() = delete;                                    //No default constructor
-            KeyGenerator(const KeyGenerator& orig) = delete;            //Copying not allowed (pass/access only by reference/pointer)
-            KeyGenerator& operator=(const KeyGenerator& orig) = delete; //Copying not allowed (pass/access only by reference/pointer)
+            KeyGenerator() = delete;
+            KeyGenerator(const KeyGenerator& orig) = delete;
+            KeyGenerator& operator=(const KeyGenerator& orig) = delete;
             
             //<editor-fold defaultstate="collapsed" desc="Symmetric Crypto">
             /**
@@ -206,7 +242,8 @@ namespace SecurityManagement_Crypto
              * @param iv the IV associated with the key
              * @return the generated data
              */
-            SymmetricCryptoDataContainerPtr getSymmetricCryptoData(const KeyData & key, const IVData & iv) const
+            SymmetricCryptoDataContainerPtr getSymmetricCryptoData
+            (const KeyData & key, const IVData & iv) const
             {
                 return getSymmetricCryptoData(defaultSymmetricCipher, defaultSymmetricCipherMode, key, iv);
             }
@@ -218,7 +255,8 @@ namespace SecurityManagement_Crypto
              * @param mode the cipher mode to be used
              * @return the generated data
              */
-            SymmetricCryptoDataContainerPtr getSymmetricCryptoData(SymmetricCipherType cipher, AuthenticatedSymmetricCipherModeType mode) const
+            SymmetricCryptoDataContainerPtr getSymmetricCryptoData
+            (SymmetricCipherType cipher, AuthenticatedSymmetricCipherModeType mode) const
             {
                 switch(cipher)
                 {
@@ -239,7 +277,8 @@ namespace SecurityManagement_Crypto
              * @param iv the IV associated with the key
              * @return the generated data
              */
-            SymmetricCryptoDataContainerPtr getSymmetricCryptoData(SymmetricCipherType cipher, AuthenticatedSymmetricCipherModeType mode, const KeyData & key, const IVData & iv) const
+            SymmetricCryptoDataContainerPtr getSymmetricCryptoData
+            (SymmetricCipherType cipher, AuthenticatedSymmetricCipherModeType mode, const KeyData & key, const IVData & iv) const
             {
                 switch(cipher)
                 {
@@ -261,7 +300,8 @@ namespace SecurityManagement_Crypto
              * @return the generated data
              */
             template <typename TCipher>
-            SymmetricCryptoDataContainerPtr getSymmetricCryptoDataForCipher(AuthenticatedSymmetricCipherModeType mode, const KeyData & key, const IVData & iv) const
+            SymmetricCryptoDataContainerPtr getSymmetricCryptoDataForCipher
+            (AuthenticatedSymmetricCipherModeType mode, const KeyData & key, const IVData & iv) const
             {
                 if(key.size() < minSymmetricKeySize)
                     throw std::invalid_argument("KeyGenerator::getSymmetricCryptoDataForCipher() > Insufficiently large key was supplied.");
@@ -275,7 +315,10 @@ namespace SecurityManagement_Crypto
                     case AuthenticatedSymmetricCipherModeType::GCM:
                     {
                         if(iv.size() < GCM_MIN_IV_SIZE)
-                            throw std::invalid_argument("KeyGenerator::getSymmetricCryptoDataForCipher() > Insufficiently large IV was supplied.");
+                        {
+                            throw std::invalid_argument("KeyGenerator::getSymmetricCryptoDataForCipher() > "
+                                                        "Insufficiently large IV was supplied.");
+                        }
                         
                         //ownership of the en/decryptors is given to the crypto container
                         typename CryptoPP::GCM<TCipher>::Encryption * encr = new typename CryptoPP::GCM<TCipher>::Encryption();
@@ -290,11 +333,15 @@ namespace SecurityManagement_Crypto
                     {
                         bool truncateIV = false;
                         if(iv.size() < CCM_MIN_IV_SIZE)
-                            throw std::invalid_argument("KeyGenerator::getSymmetricCryptoDataForCipher() > Insufficiently large IV was supplied.");
+                        {
+                            throw std::invalid_argument("KeyGenerator::getSymmetricCryptoDataForCipher() > "
+                                                        "Insufficiently large IV was supplied.");
+                        }
                         else if(iv.size() > CCM_MAX_IV_SIZE)
                         {
                             truncateIV = true;
-                            logDebugMessage("(getSymmetricCryptoDataForCipher) > The supplied IV is too large for CCM mode; the IV will be truncated to the maximum IV size for CCM.");
+                            logDebugMessage("(getSymmetricCryptoDataForCipher) > The supplied IV is too large for CCM mode;"
+                                            " the IV will be truncated to the maximum IV size for CCM.");
                         }
                         
                         //ownership of the en/decryptors is given to the crypto container
@@ -317,19 +364,25 @@ namespace SecurityManagement_Crypto
                         result = SymmetricCryptoDataContainerPtr(new SymmetricCryptoDataContainer(iv, SaltData(), key, encr, decr));
                     } break;
                     
-                    default: throw std::invalid_argument("KeyGenerator::getSymmetricCryptoDataForCipher() > Unexpected cipher mode encountered.");
+                    default:
+                    {
+                        throw std::invalid_argument("KeyGenerator::getSymmetricCryptoDataForCipher() > "
+                                                    "Unexpected cipher mode encountered.");
+                    };
                 }
                 
                 return result;
             }
             
             /**
-             * Generates new symmetric crypto data using the specified passphrase, with the default symmetric key generation configuration.
+             * Generates new symmetric crypto data using the specified passphrase,
+             * with the default symmetric key generation configuration.
              * 
              * @param passphrase the passphrase to be used
              * @return the generated data
              */
-            SymmetricCryptoDataContainerPtr getSymmetricCryptoDataFromPassphrase(const std::string passphrase) const
+            SymmetricCryptoDataContainerPtr getSymmetricCryptoDataFromPassphrase
+            (const std::string & passphrase) const
             {
                 SaltData salt = SaltGenerator::getRandomSalt(derivedKeyDefaultSaltSize);
                 KeyData key = getDerivedSymmetricKey(passphrase, salt);
@@ -341,14 +394,16 @@ namespace SecurityManagement_Crypto
             }
             
             /**
-             * Generates symmetric crypto data using the specified parameters, with the default symmetric key generation configuration.
+             * Generates symmetric crypto data using the specified parameters,
+             * with the default symmetric key generation configuration.
              * 
              * @param passphrase the passphrase to be used
              * @param salt the salt associated with the passphrase
              * @param iv the IV associated with the passphrase
              * @return the generated data
              */
-            SymmetricCryptoDataContainerPtr getSymmetricCryptoDataFromPassphrase(const std::string passphrase, const SaltData & salt, const IVData & iv) const
+            SymmetricCryptoDataContainerPtr getSymmetricCryptoDataFromPassphrase
+            (const std::string & passphrase, const SaltData & salt, const IVData & iv) const
             {
                 KeyData key = getDerivedSymmetricKey(passphrase, salt);
                 SymmetricCryptoDataContainerPtr result = getSymmetricCryptoData(key, iv);
@@ -364,7 +419,8 @@ namespace SecurityManagement_Crypto
              * @param passphrase the passphrase to be used
              * @return the generated data
              */
-            SymmetricCryptoDataContainerPtr getSymmetricCryptoDataFromPassphrase(SymmetricCipherType cipher, AuthenticatedSymmetricCipherModeType mode, const std::string passphrase) const
+            SymmetricCryptoDataContainerPtr getSymmetricCryptoDataFromPassphrase
+            (SymmetricCipherType cipher, AuthenticatedSymmetricCipherModeType mode, const std::string & passphrase) const
             {
                 SaltData salt = SaltGenerator::getRandomSalt(derivedKeyDefaultSaltSize);
                 KeyData key = getDerivedSymmetricKey(passphrase, salt);
@@ -384,7 +440,9 @@ namespace SecurityManagement_Crypto
              * @param iv the IV associated with the passphrase
              * @return the generated data
              */
-            SymmetricCryptoDataContainerPtr getSymmetricCryptoDataFromPassphrase(SymmetricCipherType cipher, AuthenticatedSymmetricCipherModeType mode, const std::string passphrase, const SaltData & salt, const IVData & iv) const
+            SymmetricCryptoDataContainerPtr getSymmetricCryptoDataFromPassphrase
+            (SymmetricCipherType cipher, AuthenticatedSymmetricCipherModeType mode, 
+             const std::string & passphrase, const SaltData & salt, const IVData & iv) const
             {
                 KeyData key = getDerivedSymmetricKey(passphrase, salt);
                 SymmetricCryptoDataContainerPtr result = getSymmetricCryptoData(cipher, mode, key, iv);
@@ -400,7 +458,7 @@ namespace SecurityManagement_Crypto
              * @param keySize the size of the RSA key (in bytes); 0 == default size
              * @return the generated data
              */
-            RSACryptoDataContainerPtr getRSACryptoData(KeySize keySize = 0)
+            RSACryptoDataContainerPtr getRSACryptoData(KeySize keySize = 0) const
             {
                 if(keySize == 0)
                     keySize = defaultRSAKeySize;
@@ -426,7 +484,7 @@ namespace SecurityManagement_Crypto
              * @param privateKey the private key to be used
              * @return the generated data
              */
-            RSACryptoDataContainerPtr getRSACryptoData(CryptoPP::RSA::PrivateKey privateKey)
+            RSACryptoDataContainerPtr getRSACryptoData(const CryptoPP::RSA::PrivateKey & privateKey) const
             {
                 CryptoPP::AutoSeededRandomPool rnd;
                 if(!privateKey.Validate(rnd, keyValidationLevel))
@@ -443,7 +501,7 @@ namespace SecurityManagement_Crypto
              * 
              * @return the generated data
              */
-            ECCryptoDataContainerPtr getECCryptoData()
+            ECCryptoDataContainerPtr getECCryptoData() const
             {
                 return getECCryptoData(defaultEllipticCurve);
             }
@@ -454,7 +512,7 @@ namespace SecurityManagement_Crypto
              * @param curveType the curve to be used
              * @return the generated data
              */
-            ECCryptoDataContainerPtr getECCryptoData(EllipticCurveType curve)
+            ECCryptoDataContainerPtr getECCryptoData(EllipticCurveType curve) const
             {
                 CryptoPP::AutoSeededRandomPool rnd;
                 
@@ -491,7 +549,7 @@ namespace SecurityManagement_Crypto
              * @param privateKey the private key to be used
              * @return the generated data
              */
-            ECCryptoDataContainerPtr getECCryptoData(CryptoPP::PrivateKey & privateKey)
+            ECCryptoDataContainerPtr getECCryptoData(const CryptoPP::PrivateKey & privateKey) const
             {
                 CryptoPP::AutoSeededRandomPool rnd;
                 if(!privateKey.Validate(rnd, keyValidationLevel))
@@ -512,7 +570,7 @@ namespace SecurityManagement_Crypto
              * @param salt the salt associated with the passphrase
              * @return the generated key
              */
-            KeyData getDerivedSymmetricKey(const std::string passphrase, const SaltData salt) const
+            KeyData getDerivedSymmetricKey(const std::string & passphrase, const SaltData & salt) const
             {
                 if(derivedKeyMinSaltSize > salt.size())
                     throw std::invalid_argument("KeyGenerator::deriveKey() > Insufficiently large salt was supplied.");
@@ -559,7 +617,10 @@ namespace SecurityManagement_Crypto
                 }
                 
                 if(keySize > maxKeySize)
-                    throw std::invalid_argument("KeyGenerator::getSymmetricKey() > The requested key size is too large for the specified cipher <" + algorithmName + ">.");
+                {
+                    throw std::invalid_argument("KeyGenerator::getSymmetricKey() > The requested key size is"
+                                                " too large for the specified cipher <" + algorithmName + ">.");
+                }
                 
                 KeyData key(keySize);
                 rnd.GenerateBlock(key, key.size());
@@ -585,8 +646,11 @@ namespace SecurityManagement_Crypto
                     logDebugMessage("(getSymmetricKey) > The supplied symmetric key size is smaller than the default size.");
                 
                 if(keySize > TCipher::MAX_KEYLENGTH)
-                    throw std::invalid_argument("KeyGenerator::getSymmetricKey() > The requested key size is too large for the specified cipher <" + std::string(TCipher::StaticAlgorithmName()) + ">.");
-                    
+                {
+                    throw std::invalid_argument("KeyGenerator::getSymmetricKey() > The requested key size is too large"
+                                                " for the specified cipher <" + std::string(TCipher::StaticAlgorithmName()) + ">.");
+                }
+                
                 CryptoPP::AutoSeededRandomPool rnd;
                 KeyData key(keySize);
                 rnd.GenerateBlock(key, key.size());

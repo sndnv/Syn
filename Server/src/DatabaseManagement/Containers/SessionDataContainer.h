@@ -30,13 +30,13 @@
 
 using Common_Types::Timestamp;
 using Common_Types::INVALID_DATE_TIME;
-using DatabaseManagement_Types::SessionType;
-using DatabaseManagement_Types::DeviceID;
-using DatabaseManagement_Types::SessionID;
-using DatabaseManagement_Types::UserID;
-using DatabaseManagement_Types::SyncID;
+using Common_Types::DeviceID;
+using Common_Types::SessionID;
+using Common_Types::UserID;
+using Common_Types::SyncID;
 using Common_Types::TransferredDataAmount;
 using Common_Types::INVALID_TRANSFERRED_DATA_AMOUNT;
+using DatabaseManagement_Types::SessionType;
 
 namespace DatabaseManagement_Containers
 {

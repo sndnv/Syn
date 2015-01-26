@@ -388,12 +388,12 @@ bool SyncServer_Core::DatabaseManager::Functions_Statistics::updateStatistic(Sta
 
 bool SyncServer_Core::DatabaseManager::Functions_Statistics::setSystemInstallTimestamp()
 {
-    return updateStatistic(StatisticType::INSTALL_TIMESTAMP, boost::posix_time::second_clock::local_time());
+    return updateStatistic(StatisticType::INSTALL_TIMESTAMP, boost::posix_time::second_clock::universal_time());
 }
 
 bool SyncServer_Core::DatabaseManager::Functions_Statistics::setSystenStartTimestamp()
 {
-    return updateStatistic(StatisticType::START_TIMESTAMP, boost::posix_time::second_clock::local_time());
+    return updateStatistic(StatisticType::START_TIMESTAMP, boost::posix_time::second_clock::universal_time());
 }
 
 bool SyncServer_Core::DatabaseManager::Functions_Statistics::incrementTotalTransferredData(TransferredDataAmount amount)
@@ -1148,7 +1148,7 @@ unsigned long SyncServer_Core::DatabaseManager::Functions_System::getDBCacheFlus
     if(container || container->getSystemParameterType() != SystemParameterType::DB_CACHE_FLUSH_INTERVAL)
         return boost::any_cast<unsigned long>(container->getSystemParameterValue());
     else
-        return 0; //TODO - value?
+        return 0;
 }
 
 DatabaseManagerOperationMode SyncServer_Core::DatabaseManager::Functions_System::getDBOperationMode()
@@ -1514,7 +1514,6 @@ vector<SyncDataContainerPtr> SyncServer_Core::DatabaseManager::Functions_SyncFil
     {
         for(DataContainerPtr currentContainer : containersWrapper->getContainers())
         {
-            std::cout << "CW - " + Tools::toString(currentContainer->getContainerID()) << std::endl;
             result.push_back(boost::dynamic_pointer_cast<DatabaseManagement_Containers::SyncDataContainer>(currentContainer));
         }
     }
@@ -2750,16 +2749,6 @@ vector<UserDataContainerPtr> SyncServer_Core::DatabaseManager::Functions_Users::
 {
     return getUsersByConstraint(DatabaseSelectConstraints::USERS::LIMIT_BY_LOCKED_STATE, isUserLocked);
 }
-
-bool SyncServer_Core::DatabaseManager::Functions_Users::userPasswordMatch(UserID user, string password)
-{
-    return false; //TODO - impl
-}
-
-bool SyncServer_Core::DatabaseManager::Functions_Users::userPasswordMatch(string username, string password)
-{
-    return false; //TODO - impl
-}
 //</editor-fold>
 
 //<editor-fold defaultstate="collapsed" desc="Functions_Logs">
@@ -3330,6 +3319,8 @@ bool SyncServer_Core::DatabaseManager::registerInstructionSet(InstructionManagem
 {
     if(set)
     {
+        set->setMinimumAccessLevel(UserAccessLevel::ADMIN);
+        
         try
         {
             //<editor-fold defaultstate="collapsed" desc="CORE Instructions">

@@ -37,11 +37,12 @@ using boost::tuples::tuple;
 using boost::unordered::unordered_map;
 
 using std::queue;
+
+using Common_Types::DBObjectID;
 using DatabaseManagement_Interfaces::DALPtr;
 using DatabaseManagement_Interfaces::DatabaseSettingsContainer;
 using DatabaseManagement_Interfaces::DatabaseInformationContainer;
 
-using DatabaseManagement_Types::DBObjectID;
 using DatabaseManagement_Types::DatabaseRequestID;
 using DatabaseManagement_Types::DatabaseAbstractionLayerID;
 using DatabaseManagement_Types::ObjectCacheAge;
@@ -83,9 +84,9 @@ namespace SyncServer_Core
                     /** Minimum number of changes between commits. */
                     unsigned int minimumCommitUpdates = 0;
                     /** Denotes whether to always remove eligible objects, even if the cache is not full. */
-                    bool alwaysEvictObjects = 0;
+                    bool alwaysEvictObjects = false;
                     /** Denotes whether to remove the age data for an object once it's removed from the cache. */
-                    bool alwaysClearObjectAge = 0;
+                    bool alwaysClearObjectAge = false;
                     /**
                      * Denotes the maximum number of objects the cache should try to maintain at any one time.\n
                      * 

@@ -24,8 +24,8 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/uuid/uuid.hpp>
 
+using Common_Types::DBObjectID;
 using DatabaseManagement_Types::DatabaseObjectType;
-using DatabaseManagement_Types::DBObjectID;
 
 namespace DatabaseManagement_Containers
 {

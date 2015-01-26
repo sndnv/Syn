@@ -52,9 +52,9 @@ void SyncServer_Core::InstructionDispatcher::registerInstructionSource(Instructi
     }
 
     InstructionSourceID currentSourceID = ++nextSourceID;
-    auto currentSourceInstructionHandler = [&, currentSourceID](InstructionBasePtr instruction)
+    auto currentSourceInstructionHandler = [&, currentSourceID](InstructionBasePtr instruction, AuthorizationTokenPtr token)
     {
-        processInstruction(currentSourceID, instruction);
+        processInstruction(currentSourceID, instruction, token);
     };
 
     if(source.registerInstructionHandler(currentSourceInstructionHandler))
@@ -63,7 +63,7 @@ void SyncServer_Core::InstructionDispatcher::registerInstructionSource(Instructi
         logDebugMessage("(registerInstructionSource) > Failed to register a new instruction handler with the supplied source.");
 }
 
-void SyncServer_Core::InstructionDispatcher::processInstruction(InstructionSourceID sourceID, InstructionBasePtr instruction)
+void SyncServer_Core::InstructionDispatcher::processInstruction(InstructionSourceID sourceID, InstructionBasePtr instruction, AuthorizationTokenPtr token)
 {
     if(!instruction->isValid())
     {
@@ -76,7 +76,7 @@ void SyncServer_Core::InstructionDispatcher::processInstruction(InstructionSourc
     {
         if(std::find((*source).second.begin(), (*source).second.end(), instruction->getParentSet()) != (*source).second.end())
         {
-            targetSets[instruction->getParentSet()]->processInstruction(instruction);
+            targetSets[instruction->getParentSet()]->processInstruction(instruction, token);
             logDebugMessage("(processInstruction) > Instruction from source [" + Utilities::Tools::toString(sourceID) + "] sent to target [" 
                             + Utilities::Tools::toString(instruction->getParentSet()) + "].");
         }

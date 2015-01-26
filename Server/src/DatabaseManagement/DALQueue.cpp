@@ -497,7 +497,7 @@ void SyncServer_Core::DatabaseManagement::DALQueue::onFailureHandler(DatabaseAbs
             }
         }
         
-        std::remove(pendingRequests[requestID].begin(), pendingRequests[requestID].end(), dalID);
+        pendingRequests[requestID].erase(std::remove(pendingRequests[requestID].begin(), pendingRequests[requestID].end(), dalID));
         if(pendingRequests[requestID].size() == 0)
             pendingRequests.erase(requestID);
 
@@ -533,7 +533,7 @@ void SyncServer_Core::DatabaseManagement::DALQueue::onSuccessHandler(DatabaseAbs
             dals[dalID]->get<2>() = 0;
         }
         
-        std::remove(pendingRequests[requestID].begin(), pendingRequests[requestID].end(), dalID);
+        pendingRequests[requestID].erase(std::remove(pendingRequests[requestID].begin(), pendingRequests[requestID].end(), dalID));
         if(pendingRequests[requestID].size() == 0)
             pendingRequests.erase(requestID);
 

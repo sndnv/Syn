@@ -35,13 +35,14 @@
 #include "../InstructionManagement/Types/Types.h"
 #include "../Common/Types.h"
 #include "../StorageManagement/Types/Types.h"
+#include "../SecurityManagement/Types/Types.h"
 
 using Common_Types::Byte;
+using Common_Types::UserAccessLevel;
 
 using DatabaseManagement_Types::DatabaseObjectType;
 using DatabaseManagement_Types::DatabaseManagerOperationMode;
 using DatabaseManagement_Types::DatabaseFailureAction;
-using DatabaseManagement_Types::UserAccessLevel;
 using DatabaseManagement_Types::StatisticType;
 using DatabaseManagement_Types::SystemParameterType;
 using DatabaseManagement_Types::LogSeverity;
@@ -69,11 +70,32 @@ using StorageManagement_Types::LinkActionType;
 using StorageManagement_Types::LinkActionConditionType;
 using StorageManagement_Types::DataPoolType;
 
+using SecurityManagement_Types::SecurableComponentType;
+using SecurityManagement_Types::CacheEvictionType;
+using SecurityManagement_Types::HashAlgorithmType;
+using SecurityManagement_Types::CryptoPPByte;
+
 namespace Utilities
 {
     class Tools
     {
         public:
+            static unsigned long powerof(unsigned long base, unsigned long exponent)
+            {
+                if(exponent != 0)
+                {
+                    unsigned long intermediateResult = powerof(base, (exponent - 1));
+                    unsigned long result = base*intermediateResult;
+                    
+                    if(result/intermediateResult != base)
+                        throw std::overflow_error("Tools::powerof() > Overflow encountered.");
+                    else
+                        return result;
+                }
+                else
+                    return 1;
+            }
+            
             static std::string toString(bool var) { return (var) ? "TRUE" : "FALSE"; }
             static std::string toString(int var) { return boost::lexical_cast<std::string>(var); }
             static std::string toString(long var) { return boost::lexical_cast<std::string>(var); }
@@ -81,6 +103,7 @@ namespace Utilities
             static std::string toString(unsigned int var) { return boost::lexical_cast<std::string>(var); }
             static std::string toString(unsigned long var) { return boost::lexical_cast<std::string>(var); }
             static std::string toString(unsigned short var) { return boost::lexical_cast<std::string>(var); }
+            static std::string toString(unsigned long long var) { return boost::lexical_cast<std::string>(var); }
             static std::string toString(boost::uuids::uuid var) { return boost::lexical_cast<std::string>(var); }
             static std::string toString(boost::thread::id var) { return boost::lexical_cast<std::string>(var); }
             
@@ -97,6 +120,22 @@ namespace Utilities
                 result[resultLength] = '\0';
                 
                 return std::string(result);
+            }
+            
+            static CryptoPP::SecByteBlock toSecByteBlock(std::string var)
+            {
+                if(var.size() == 0 || var.size() % 2 != 0)
+                    return CryptoPP::SecByteBlock();
+                
+                std::size_t blockSize = var.size()/2;
+                CryptoPP::SecByteBlock result(blockSize);
+                for(std::size_t i = 0; i < blockSize; i++)
+                {
+                    std::string currentRawByte = var.substr(i*2, 2);
+                    result.data()[i] = strtol(currentRawByte.c_str(), 0, 16);
+                }
+                
+                return result;
             }
             
             static std::string toString(ByteVector var)
@@ -325,40 +364,40 @@ namespace Utilities
                 return stringToSyncResult.at(var);
             }
             
-            static DatabaseManagement_Types::DBObjectID getIDFromString(std::string var)
+            static Common_Types::DBObjectID getIDFromString(std::string var)
             {
                 try { return boost::lexical_cast<boost::uuids::uuid>(var); }
-                catch(boost::bad_lexical_cast) { return DatabaseManagement_Types::INVALID_OBJECT_ID;}
+                catch(boost::bad_lexical_cast) { return Common_Types::INVALID_OBJECT_ID;}
             }
             
-            static DatabaseManagement_Types::DBObjectID getIDFromConstraint(DatabaseObjectType objectType, boost::any constraintType, boost::any constraintValue)
+            static Common_Types::DBObjectID getIDFromConstraint(DatabaseObjectType objectType, boost::any constraintType, boost::any constraintValue)
             {
-                DatabaseManagement_Types::DBObjectID objectID = DatabaseManagement_Types::INVALID_OBJECT_ID;
+                Common_Types::DBObjectID objectID = Common_Types::INVALID_OBJECT_ID;
 
                 switch(objectType)
                 {
                     case DatabaseObjectType::DEVICE:
                     {
                         if(boost::any_cast<DatabaseSelectConstraints::DEVICES>(constraintType) == DatabaseSelectConstraints::DEVICES::LIMIT_BY_ID)
-                            objectID = boost::any_cast<DatabaseManagement_Types::DeviceID>(constraintValue);
+                            objectID = boost::any_cast<Common_Types::DeviceID>(constraintValue);
                     } break;
 
                     case DatabaseObjectType::LOG:
                     {
                         if(boost::any_cast<DatabaseSelectConstraints::LOGS>(constraintType) == DatabaseSelectConstraints::LOGS::LIMIT_BY_ID)
-                            objectID = boost::any_cast<DatabaseManagement_Types::LogID>(constraintValue);
+                            objectID = boost::any_cast<Common_Types::LogID>(constraintValue);
                     } break;
 
                     case DatabaseObjectType::SCHEDULE:
                     {
                         if(boost::any_cast<DatabaseSelectConstraints::SCHEDULES>(constraintType) == DatabaseSelectConstraints::SCHEDULES::LIMIT_BY_ID)
-                            objectID = boost::any_cast<DatabaseManagement_Types::ScheduleID>(constraintValue);
+                            objectID = boost::any_cast<Common_Types::ScheduleID>(constraintValue);
                     } break;
 
                     case DatabaseObjectType::SESSION:
                     {
                         if(boost::any_cast<DatabaseSelectConstraints::SESSIONS>(constraintType) == DatabaseSelectConstraints::SESSIONS::LIMIT_BY_ID)
-                            objectID = boost::any_cast<DatabaseManagement_Types::SessionID>(constraintValue);
+                            objectID = boost::any_cast<Common_Types::SessionID>(constraintValue);
                     } break;
 
                     case DatabaseObjectType::STATISTICS:
@@ -370,7 +409,7 @@ namespace Utilities
                     case DatabaseObjectType::SYNC_FILE:
                     {
                         if(boost::any_cast<DatabaseSelectConstraints::SYNC>(constraintType) == DatabaseSelectConstraints::SYNC::LIMIT_BY_ID)
-                            objectID = boost::any_cast<DatabaseManagement_Types::SyncID>(constraintValue);
+                            objectID = boost::any_cast<Common_Types::SyncID>(constraintValue);
                     } break;
 
                     case DatabaseObjectType::SYSTEM_SETTINGS:
@@ -382,7 +421,7 @@ namespace Utilities
                     case DatabaseObjectType::USER:
                     {
                         if(boost::any_cast<DatabaseSelectConstraints::USERS>(constraintType) == DatabaseSelectConstraints::USERS::LIMIT_BY_ID)
-                            objectID = boost::any_cast<DatabaseManagement_Types::UserID>(constraintValue);
+                            objectID = boost::any_cast<Common_Types::UserID>(constraintValue);
                     } break;
 
                     default: ; break; //ignore
@@ -573,6 +612,54 @@ namespace Utilities
                     return LinkActionConditionType::INVALID;
             }
             
+            static std::string toString(SecurableComponentType var)
+            {
+                if(securableComponentTypeToString.find(var) != securableComponentTypeToString.end())
+                    return securableComponentTypeToString.at(var);
+                else
+                    return "INVALID";
+            }
+            
+            static SecurableComponentType toSecurableComponentType(std::string var)
+            {
+                if(stringToSecurableComponentType.find(var) != stringToSecurableComponentType.end())
+                    return stringToSecurableComponentType.at(var);
+                else
+                    return SecurableComponentType::INVALID;
+            }
+            
+            static std::string toString(CacheEvictionType var)
+            {
+                if(cacheEvictionTypeToString.find(var) != cacheEvictionTypeToString.end())
+                    return cacheEvictionTypeToString.at(var);
+                else
+                    return "INVALID";
+            }
+            
+            static CacheEvictionType toCacheEvictionType(std::string var)
+            {
+                if(stringToCacheEvictionType.find(var) != stringToCacheEvictionType.end())
+                    return stringToCacheEvictionType.at(var);
+                else
+                    return CacheEvictionType::INVALID;
+            }
+            
+            static std::string toString(HashAlgorithmType var)
+            {
+                if(hashAlgorithmTypeToString.find(var) != hashAlgorithmTypeToString.end())
+                    return hashAlgorithmTypeToString.at(var);
+                else
+                    return "INVALID";
+            }
+            
+            static HashAlgorithmType toHashAlgorithmType(std::string var)
+            {
+                if(stringToHashAlgorithmType.find(var) != stringToHashAlgorithmType.end())
+                    return stringToHashAlgorithmType.at(var);
+                else
+                    return HashAlgorithmType::INVALID;
+            }
+            
         private:
             Tools();
             
@@ -629,6 +716,13 @@ namespace Utilities
             static const boost::unordered_map<std::string, LinkActionType> stringToLinkActionType;
             static const boost::unordered_map<LinkActionConditionType, std::string> linkActionConditionTypeToString;
             static const boost::unordered_map<std::string, LinkActionConditionType> stringToLinkActionConditionType;
+            
+            static const boost::unordered_map<SecurableComponentType, std::string> securableComponentTypeToString;
+            static const boost::unordered_map<std::string, SecurableComponentType> stringToSecurableComponentType;
+            static const boost::unordered_map<CacheEvictionType, std::string> cacheEvictionTypeToString;
+            static const boost::unordered_map<std::string, CacheEvictionType> stringToCacheEvictionType;
+            static const boost::unordered_map<HashAlgorithmType, std::string> hashAlgorithmTypeToString;
+            static const boost::unordered_map<std::string, HashAlgorithmType> stringToHashAlgorithmType;
     };
 }
 

@@ -18,7 +18,8 @@
 #ifndef CRYPTO_CONTAINERS_H
 #define	CRYPTO_CONTAINERS_H
 
-#include <boost/interprocess/smart_ptr/unique_ptr.hpp>
+#include <boost/thread/future.hpp>
+#include <boost/shared_ptr.hpp>
 #include <cryptopp/sha.h>
 #include <cryptopp/rsa.h>
 #include <cryptopp/authenc.h>
@@ -47,7 +48,7 @@ namespace SecurityManagement_Crypto
     {
         public:
             /**
-             * Creates a new container with the supplied data.\n
+             * Creates a new container with the supplied data.
              * 
              * Note: Once the encryptor & decryptor are assigned to a container,
              * it becomes responsible for managing their life-cycle and they will
@@ -74,10 +75,12 @@ namespace SecurityManagement_Crypto
                 delete encryptor;
             }
             
-            //TODO default constructors, move assignments, etc ?
+            SymmetricCryptoDataContainer() = delete;
+            SymmetricCryptoDataContainer(const SymmetricCryptoDataContainer&) = delete;
+            SymmetricCryptoDataContainer& operator=(const SymmetricCryptoDataContainer&) = delete;
             
             /**
-             * Updates the salt associated with the container.\n
+             * Updates the salt associated with the container.
              * 
              * Note: Can only be done if there is no salt set already (size==0).
              * 
@@ -102,7 +105,10 @@ namespace SecurityManagement_Crypto
             AuthenticatedSymmetricCipherBase * getDecryptor()
             {
                 if(decryptor == nullptr)
-                    throw std::runtime_error("SymmetricCryptoDataContainer::getDecryptor() > The decryptor is not set.");
+                {
+                    throw std::runtime_error("SymmetricCryptoDataContainer::getDecryptor() > "
+                                             "The decryptor is not set.");
+                }
                 else
                     return decryptor;
             }
@@ -117,7 +123,10 @@ namespace SecurityManagement_Crypto
             AuthenticatedSymmetricCipherBase * getEncryptor()
             {
                 if(encryptor == nullptr)
-                    throw std::runtime_error("SymmetricCryptoDataContainer::getDecryptor() > The encryptor is not set.");
+                {
+                    throw std::runtime_error("SymmetricCryptoDataContainer::getDecryptor() > "
+                                             "The encryptor is not set.");
+                }
                 else
                     return encryptor;
             }
@@ -130,9 +139,9 @@ namespace SecurityManagement_Crypto
             AuthenticatedSymmetricCipherBase * encryptor;
     };
     
-    /** Boost unique_ptr deleter for symmetric crypto data containers. */
-    struct SymmetricCryptoDataContainerDeleter { void operator()(SymmetricCryptoDataContainer * container) {  delete container; } };
-    typedef boost::interprocess::unique_ptr<SymmetricCryptoDataContainer, SymmetricCryptoDataContainerDeleter> SymmetricCryptoDataContainerPtr;
+    typedef boost::shared_ptr<SymmetricCryptoDataContainer> SymmetricCryptoDataContainerPtr;
+    typedef boost::promise<SymmetricCryptoDataContainerPtr> SymmetricCryptoDataContainerPromise;
+    typedef boost::shared_ptr<SymmetricCryptoDataContainerPromise> SymmetricCryptoDataContainerPromisePtr;
     
     /**
      * Container class for RSA crypto data.
@@ -141,7 +150,7 @@ namespace SecurityManagement_Crypto
     {
         public:
             /**
-             * Creates a new container with the supplied data.\n
+             * Creates a new container with the supplied data.
              * 
              * Note: Once the encryptor & decryptor are assigned to a container,
              * it becomes responsible for managing their life-cycle and they will
@@ -163,6 +172,10 @@ namespace SecurityManagement_Crypto
                 delete encryptor;
             }
             
+            RSACryptoDataContainer() = delete;
+            RSACryptoDataContainer(const RSACryptoDataContainer&) = delete;
+            RSACryptoDataContainer& operator=(const RSACryptoDataContainer&) = delete;
+            
             /**
              * Retrieves a pointer to the stored decryptor.
              * 
@@ -173,7 +186,10 @@ namespace SecurityManagement_Crypto
             RSADecryptor * getDecryptor()
             {
                 if(decryptor == nullptr)
-                    throw std::runtime_error("RSACryptoDataContainer::getDecryptor() > The decryptor is not set.");
+                {
+                    throw std::runtime_error("RSACryptoDataContainer::getDecryptor() > "
+                                             "The decryptor is not set.");
+                }
                 else
                     return decryptor;
             }
@@ -188,7 +204,10 @@ namespace SecurityManagement_Crypto
             RSAEncryptor * getEncryptor()
             {
                 if(encryptor == nullptr)
-                    throw std::runtime_error("RSACryptoDataContainer::getDecryptor() > The encryptor is not set.");
+                {
+                    throw std::runtime_error("RSACryptoDataContainer::getDecryptor() > "
+                                             "The encryptor is not set.");
+                }
                 else
                     return encryptor;
             }
@@ -205,7 +224,7 @@ namespace SecurityManagement_Crypto
     {
         public:
             /**
-             * Creates a new container with the supplied data.\n
+             * Creates a new container with the supplied data.
              * 
              * Note: Once the encryptor & decryptor are assigned to a container,
              * it becomes responsible for managing their life-cycle and they will
@@ -227,6 +246,10 @@ namespace SecurityManagement_Crypto
                 delete encryptor;
             }
             
+            ECCryptoDataContainer() = delete;
+            ECCryptoDataContainer(const ECCryptoDataContainer&) = delete;
+            ECCryptoDataContainer& operator=(const ECCryptoDataContainer&) = delete;
+            
             /**
              * Retrieves a pointer to the stored decryptor.
              * 
@@ -237,7 +260,10 @@ namespace SecurityManagement_Crypto
             ECDecryptor * getDecryptor()
             {
                 if(decryptor == nullptr)
-                    throw std::runtime_error("ECCryptoDataContainer::getDecryptor() > The decryptor is not set.");
+                {
+                    throw std::runtime_error("ECCryptoDataContainer::getDecryptor() > "
+                                             "The decryptor is not set.");
+                }
                 else
                     return decryptor;
             }
@@ -252,7 +278,10 @@ namespace SecurityManagement_Crypto
             ECEncryptor * getEncryptor()
             {
                 if(encryptor == nullptr)
-                    throw std::runtime_error("ECCryptoDataContainer::getDecryptor() > The encryptor is not set.");
+                {
+                    throw std::runtime_error("ECCryptoDataContainer::getDecryptor() > "
+                                             "The encryptor is not set.");
+                }
                 else
                     return encryptor;
             }
@@ -262,15 +291,8 @@ namespace SecurityManagement_Crypto
             ECEncryptor * encryptor;
     };
     
-    /** Boost unique_ptr deleter for asymmetric crypto data containers. */
-    struct AsymmetricCryptoDataContainerDeleter
-    {
-        void operator()(RSACryptoDataContainer * container) { delete container; }
-        void operator()(ECCryptoDataContainer * container) { delete container; }
-    };
-    
-    typedef boost::interprocess::unique_ptr<RSACryptoDataContainer, AsymmetricCryptoDataContainerDeleter> RSACryptoDataContainerPtr;
-    typedef boost::interprocess::unique_ptr<ECCryptoDataContainer, AsymmetricCryptoDataContainerDeleter> ECCryptoDataContainerPtr;
+    typedef boost::shared_ptr<RSACryptoDataContainer> RSACryptoDataContainerPtr;
+    typedef boost::shared_ptr<ECCryptoDataContainer> ECCryptoDataContainerPtr;
 }
 
 #endif	/* CRYPTO_CONTAINERS_H */

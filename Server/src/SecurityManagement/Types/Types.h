@@ -18,6 +18,7 @@
 #ifndef SECURITY_MANAGEMENT_TYPES_H
 #define	SECURITY_MANAGEMENT_TYPES_H
 
+#include <limits>
 #include <vector>
 #include <cryptopp/config.h>
 #include <cryptopp/eccrypto.h>
@@ -33,10 +34,15 @@ namespace SecurityManagement_Types
     typedef unsigned int IVSize;
     const IVSize INVALID_IV_SIZE = 0;
     
+    typedef unsigned int RandomDataSize;
+    const RandomDataSize INVALID_RANDOM_DATA_SIZE = 0;
+    
     typedef CryptoPP::SecByteBlock KeyData;
     typedef CryptoPP::SecByteBlock IVData;
     typedef CryptoPP::SecByteBlock SaltData;
     typedef CryptoPP::SecByteBlock HashData;
+    typedef CryptoPP::SecByteBlock RandomData;
+    typedef CryptoPP::SecByteBlock PasswordData; // == SaltData+HashData
     
     enum class SymmetricCipherType { INVALID, AES, TWOFISH, SERPENT };
     enum class AuthenticatedSymmetricCipherModeType { INVALID, GCM, CCM, EAX };
@@ -69,6 +75,36 @@ namespace SecurityManagement_Types
     
     typedef CryptoPP::RSAES_OAEP_SHA_Decryptor RSADecryptor;
     typedef CryptoPP::RSAES_OAEP_SHA_Encryptor RSAEncryptor;
+    
+    enum class SecurableComponentType
+    {
+        INVALID,
+        DATABASE_MANAGER,   //
+        SECURITY_MANAGER,   //
+        NETWORK_MANAGER,    //
+        STORAGE_MANAGER,    //
+        SESSION_MANAGER     //
+    };
+    
+    //TODO - make common & update DALCache
+    typedef unsigned long CacheSize;
+    typedef unsigned long CacheHits;
+    const CacheHits MAX_CACHE_HITS = ULONG_MAX;
+    
+    enum class CacheEvictionType
+    {
+        INVALID,
+        LRU,    //least recently used
+        MRU     //most recently used
+    };
+    
+    enum class DelayEscalationType
+    {
+        INVALID,
+        CONSTANT, //1
+        LINEAR,   //N
+        QUADRATIC //N^2
+    };
 }
 
 #endif	/* SECURITY_MANAGEMENT_TYPES_H */

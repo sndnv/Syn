@@ -26,17 +26,17 @@
 #include "../Types/Types.h"
 #include "../../Common/Types.h"
 
-using Common_Types::INVALID_DATE_TIME;
+using Common_Types::SyncID;
+using Common_Types::DeviceID;
+using Common_Types::UserID;
+using Common_Types::SessionID;
 using Common_Types::Timestamp;
+using Common_Types::INVALID_DATE_TIME;
+using Common_Types::INVALID_SESSION_ID;
 using DatabaseManagement_Types::ConflictResolutionRule_Directory;
 using DatabaseManagement_Types::ConflictResolutionRule_File;
 using DatabaseManagement_Types::SyncFailureAction;
 using DatabaseManagement_Types::SyncResult;
-using DatabaseManagement_Types::SyncID;
-using DatabaseManagement_Types::DeviceID;
-using DatabaseManagement_Types::UserID;
-using DatabaseManagement_Types::SessionID;
-using DatabaseManagement_Types::INVALID_SESSION_ID;
 
 namespace DatabaseManagement_Containers
 {
