@@ -25,8 +25,10 @@
 #include "../Common/Types.h"
 #include "Types/Types.h"
 #include "Sets/InstructionSet.h"
+
+#include "../Utilities/Strings/Common.h"
+#include "../Utilities/Strings/Instructions.h"
 #include "../Utilities/FileLogger.h"
-#include "../Utilities/Tools.h"
 
 #include "Interfaces/InstructionSource.h"
 #include "Interfaces/InstructionTarget.h"
@@ -46,6 +48,8 @@ using InstructionManagement_Types::InstructionSourceID;
 using InstructionManagement_Types::INVALID_INSTRUCTION_SOURCE_ID;
 using InstructionManagement_Interfaces::InstructionSource;
 using InstructionManagement_Interfaces::InstructionTarget;
+
+namespace Convert = Utilities::Strings;
 
 namespace SyncServer_Core
 {

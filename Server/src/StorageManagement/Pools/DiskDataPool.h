@@ -23,6 +23,7 @@
 #include <vector>
 #include <deque>
 #include <iostream>
+#include <winsock2.h> //TODO - remove/impl htonl()
 
 #include <boost/filesystem.hpp>
 #include <boost/thread/lock_guard.hpp>
@@ -36,7 +37,7 @@
 #include "../Interfaces/DataPool.h"
 #include "Streams/DiskPoolStreams.h"
 
-#include "../../Utilities/Tools.h"
+#include "../../Utilities/Strings/Common.h"
 #include "../../Utilities/FileLogger.h"
 
 using Common_Types::Byte;
@@ -61,6 +62,8 @@ using StorageManagement_Pools::PoolInputStreamPtr;
 using StorageManagement_Pools::PoolOutputStreamPtr;
 using StorageManagement_Pools::DiskPoolInputStream;
 using StorageManagement_Pools::DiskPoolOutputStream;
+
+namespace Convert = Utilities::Strings;
 
 namespace StorageManagement_Pools
 {
@@ -385,7 +388,7 @@ namespace StorageManagement_Pools
                 fileStream.seekp(0);
                 fileStream.write(FILE_SIGNATURE.c_str(), FILE_SIGNATURE.size());
                 fileStream.write(&CURRENT_VERSION, sizeof(CURRENT_VERSION));
-                fileStream.write(Utilities::Tools::toString(uuid).c_str(), UUID_BYTE_LENGTH);
+                fileStream.write(Convert::toString(uuid).c_str(), UUID_BYTE_LENGTH);
 
                 ByteVector rawHeader = header.toBytes();
                 fileStream.write((const char*)&rawHeader[0], PoolHeader::BYTE_LENGTH);

@@ -26,7 +26,8 @@
 #include <boost/unordered_map.hpp>
 
 #include "../Common/Types.h"
-#include "../Utilities/Tools.h"
+#include "../Utilities/Strings/Security.h"
+#include "../Utilities/Strings/Common.h"
 #include "../Utilities/FileLogger.h"
 #include "../Utilities/ThreadPool.h"
 #include "../DatabaseManagement/DatabaseManager.h"
@@ -118,6 +119,8 @@ using SecurityManagement_Types::INVALID_TOKEN_ID;
 using SecurityManagement_Types::INVALID_RANDOM_DATA_SIZE;
 
 using SecurityManagement_Interfaces::Securable;
+
+namespace Convert = Utilities::Strings;
 
 namespace SyncServer_Core
 {

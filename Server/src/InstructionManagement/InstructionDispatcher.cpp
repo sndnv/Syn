@@ -77,8 +77,8 @@ void SyncServer_Core::InstructionDispatcher::processInstruction(InstructionSourc
         if(std::find((*source).second.begin(), (*source).second.end(), instruction->getParentSet()) != (*source).second.end())
         {
             targetSets[instruction->getParentSet()]->processInstruction(instruction, token);
-            logDebugMessage("(processInstruction) > Instruction from source [" + Utilities::Tools::toString(sourceID) + "] sent to target [" 
-                            + Utilities::Tools::toString(instruction->getParentSet()) + "].");
+            logDebugMessage("(processInstruction) > Instruction from source [" + Convert::toString(sourceID) + "] sent to target [" 
+                            + Convert::toString(instruction->getParentSet()) + "].");
         }
         else
             logDebugMessage("(processInstruction) > Instruction processing failed; the required instruction set is not allowed for the specified source.");

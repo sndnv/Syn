@@ -17,12 +17,13 @@
 
 #include "Connection.h"
 
-NetworkManagement_Connections::Connection::Connection(ConnectionParamters connectionParams, boost::asio::streambuf * externalReadBuffer, Utilities::FileLogger * debugLogger)
-    : debugLogger(debugLogger), writeStrand(connectionParams.socket->get_io_service()),
-      readStrand(connectionParams.socket->get_io_service()), socket(connectionParams.socket),
-      connectionID(connectionParams.connectionID), localPeerType(connectionParams.localPeerType),
-      connectionType(connectionParams.expectedConnection), state(ConnectionState::INVALID),
-      lastSubstate(ConnectionSubstate::NONE), initiation(connectionParams.initiation)
+NetworkManagement_Connections::Connection::Connection
+(ConnectionParamters connectionParams, boost::asio::streambuf * externalReadBuffer, Utilities::FileLogger * debugLogger)
+: debugLogger(debugLogger), writeStrand(connectionParams.socket->get_io_service()),
+  readStrand(connectionParams.socket->get_io_service()), socket(connectionParams.socket),
+  connectionID(connectionParams.connectionID), localPeerType(connectionParams.localPeerType),
+  connectionType(connectionParams.expectedConnection), state(ConnectionState::INVALID),
+  lastSubstate(ConnectionSubstate::NONE), initiation(connectionParams.initiation)
 {
     if(externalReadBuffer != nullptr)
     {//use an external buffer
@@ -35,16 +36,18 @@ NetworkManagement_Connections::Connection::Connection(ConnectionParamters connec
         isExternalReadBufferUsed = false;
     }
 
-    boost::asio::async_read(*socket, readBuffer->prepare(ConnectionRequest::BYTE_LENGTH), readStrand.wrap(boost::bind(&NetworkManagement_Connections::Connection::initialReadRequestHandler, this, _1, _2)));
+    boost::asio::async_read(*socket, readBuffer->prepare(ConnectionRequest::BYTE_LENGTH),
+            readStrand.wrap(boost::bind(&NetworkManagement_Connections::Connection::initialReadRequestHandler, this, _1, _2)));
 }
 
-NetworkManagement_Connections::Connection::Connection(ConnectionParamters connectionParams, ConnectionRequest requestParams,
-                                                      boost::asio::streambuf * externalReadBuffer, Utilities::FileLogger * debugLogger)
-    : debugLogger(debugLogger), writeStrand(connectionParams.socket->get_io_service()),
-      readStrand(connectionParams.socket->get_io_service()), socket(connectionParams.socket),
-      connectionID(connectionParams.connectionID), localPeerType(connectionParams.localPeerType),
-      connectionType(connectionParams.expectedConnection), state(ConnectionState::INVALID),
-      lastSubstate(ConnectionSubstate::NONE), initiation(connectionParams.initiation)
+NetworkManagement_Connections::Connection::Connection
+(ConnectionParamters connectionParams, ConnectionRequest requestParams,
+ boost::asio::streambuf * externalReadBuffer, Utilities::FileLogger * debugLogger)
+: debugLogger(debugLogger), writeStrand(connectionParams.socket->get_io_service()),
+  readStrand(connectionParams.socket->get_io_service()), socket(connectionParams.socket),
+  connectionID(connectionParams.connectionID), localPeerType(connectionParams.localPeerType),
+  connectionType(connectionParams.expectedConnection), state(ConnectionState::INVALID),
+  lastSubstate(ConnectionSubstate::NONE), initiation(connectionParams.initiation)
 {
     if(externalReadBuffer != nullptr)
     {//use an external buffer
@@ -58,12 +61,14 @@ NetworkManagement_Connections::Connection::Connection(ConnectionParamters connec
     }
     
     connectionRequest = requestParams;
-    boost::asio::async_write(*socket, boost::asio::buffer(connectionRequest.toBytes(), ConnectionRequest::BYTE_LENGTH), writeStrand.wrap(boost::bind(&NetworkManagement_Connections::Connection::initialWriteRequestHandler, this, _1, _2)));
+    boost::asio::async_write(*socket, boost::asio::buffer(connectionRequest.toBytes(), ConnectionRequest::BYTE_LENGTH), 
+            writeStrand.wrap(boost::bind(&NetworkManagement_Connections::Connection::initialWriteRequestHandler, this, _1, _2)));
 }
 
 NetworkManagement_Connections::Connection::~Connection()
 {
-    debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "Connection / " + Tools::toString(connectionType) + " (~) [" + Tools::toString(connectionID) + "] > Destruction initiated.");
+    debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "Connection / " + Convert::toString(connectionType) 
+        + " (~) [" + Convert::toString(connectionID) + "] > Destruction initiated.");
     
     disconnect();
     socket.reset();
@@ -83,7 +88,8 @@ NetworkManagement_Connections::Connection::~Connection()
     if(!isExternalReadBufferUsed)
         delete readBuffer;
     
-    debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "Connection / " + Tools::toString(connectionType) + " (~) [" + Tools::toString(connectionID) + "] > Destruction completed.");
+    debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "Connection / " + Convert::toString(connectionType)
+        + " (~) [" + Convert::toString(connectionID) + "] > Destruction completed.");
     
     debugLogger = nullptr;
 }
@@ -99,7 +105,8 @@ void NetworkManagement_Connections::Connection::disconnect()
     socket->shutdown(boost::asio::ip::tcp::socket::shutdown_both);
     socket->close();
     
-    debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "Connection / " + Tools::toString(connectionType) + " (Disconnect) [" + Tools::toString(connectionID) + "] > Disconnected.");
+    debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "Connection / " + Convert::toString(connectionType)
+        + " (Disconnect) [" + Convert::toString(connectionID) + "] > Disconnected.");
     onDisconnectEvent();
     canBeDestroyedEvent();
 }
@@ -146,7 +153,12 @@ void NetworkManagement_Connections::Connection::enableLifecycleEvents()
                 case EventType::CAN_BE_DESTROYED:       eventsToFire.push(EventType::CAN_BE_DESTROYED); break;
                 case EventType::DATA_RECEIVED:          { remainingEvents.push(currentEventID); erase = false; } break;
                 case EventType::WRITE_RESULT_RECEIVED:  { remainingEvents.push(currentEventID); erase = false; } break;
-                default: debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "Connection / " + Tools::toString(connectionType) + " (Enable Lifecycle Events) [" + Tools::toString(connectionID) + "] > Unexpected event type encountered."); break;
+                default:
+                {
+                    debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "Connection / "
+                        + Convert::toString(connectionType) + " (Enable Lifecycle Events) [" 
+                        + Convert::toString(connectionID) + "] > Unexpected event type encountered.");
+                } break;
             }
             
             if(erase)
@@ -175,7 +187,12 @@ void NetworkManagement_Connections::Connection::enableLifecycleEvents()
                 case EventType::CONNECT:                onConnect(connectionID); break;
                 case EventType::DISCONNECT:             onDisconnect(connectionID); break;
                 case EventType::CAN_BE_DESTROYED:       canBeDestroyed(connectionID, initiation); break;
-                default: debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "Connection / " + Tools::toString(connectionType) + " (Enable Lifecycle Events) [" + Tools::toString(connectionID) + "] > Unexpected event type encountered."); break;
+                default:
+                {
+                    debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "Connection / "
+                        + Convert::toString(connectionType) + " (Enable Lifecycle Events) ["
+                        + Convert::toString(connectionID) + "] > Unexpected event type encountered.");
+                } break;
             }
         }
     }
@@ -211,7 +228,12 @@ void NetworkManagement_Connections::Connection::enableDataEvents()
                 case EventType::CONNECT:                { remainingEvents.push(currentEventID); erase = false; } break;
                 case EventType::DISCONNECT:             { remainingEvents.push(currentEventID); erase = false; } break;
                 case EventType::CAN_BE_DESTROYED:       { remainingEvents.push(currentEventID); erase = false; } break;
-                default: debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "Connection / " + Tools::toString(connectionType) + " (Enable Data Events) [" + Tools::toString(connectionID) + "] > Unexpected event type encountered."); break;
+                default:
+                {
+                    debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "Connection / "
+                        + Convert::toString(connectionType) + " (Enable Data Events) ["
+                        + Convert::toString(connectionID) + "] > Unexpected event type encountered.");
+                } break;
             }
             
             if(erase)
@@ -236,9 +258,23 @@ void NetworkManagement_Connections::Connection::enableDataEvents()
             
             switch(currentEvent->get<0>())
             {
-                case EventType::DATA_RECEIVED:          onDataReceived(boost::any_cast<ByteVector>(currentEvent->get<1>()), boost::any_cast<PacketSize>(currentEvent->get<2>())); break;
-                case EventType::WRITE_RESULT_RECEIVED:  onWriteResultReceived(boost::any_cast<bool>(currentEvent->get<1>())); break;
-                default: debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "Connection / " + Tools::toString(connectionType) + " (Enable Data Events) [" + Tools::toString(connectionID) + "] > Unexpected event type encountered."); break;
+                case EventType::DATA_RECEIVED:
+                {
+                    onDataReceived(boost::any_cast<ByteVector>(currentEvent->get<1>()),
+                                   boost::any_cast<PacketSize>(currentEvent->get<2>()));
+                } break;
+                
+                case EventType::WRITE_RESULT_RECEIVED:
+                {
+                    onWriteResultReceived(boost::any_cast<bool>(currentEvent->get<1>()));
+                } break;
+                
+                default:
+                {
+                    debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "Connection / "
+                        + Convert::toString(connectionType) + " (Enable Data Events) ["
+                        + Convert::toString(connectionID) + "] > Unexpected event type encountered.");
+                } break;
             }
             
             delete currentEvent;
@@ -253,7 +289,8 @@ void NetworkManagement_Connections::Connection::disableDataEvents()
         dataEventsBlocked = true;
 }
 
-void NetworkManagement_Connections::Connection::initialReadRequestHandler(const boost::system::error_code & readError, std::size_t)
+void NetworkManagement_Connections::Connection::initialReadRequestHandler
+(const boost::system::error_code & readError, std::size_t)
 {
     if(closeConnection)
     {
@@ -267,8 +304,16 @@ void NetworkManagement_Connections::Connection::initialReadRequestHandler(const 
         {
             readBuffer->commit(ConnectionRequest::BYTE_LENGTH); //makes the incoming data available
             boost::asio::streambuf::const_buffers_type rawRequest = readBuffer->data(); //retrieves the incoming data
-            ConnectionRequest request = ConnectionRequest::fromBytes(ByteVector(boost::asio::buffers_begin(rawRequest), boost::asio::buffers_begin(rawRequest) + ConnectionRequest::BYTE_LENGTH));
-            debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "Connection / " + Tools::toString(connectionType) + " (Initial Read Request Handler) [" + Tools::toString(connectionID) + "] > Request data received.");
+            
+            ConnectionRequest request =
+                    ConnectionRequest::fromBytes(ByteVector(boost::asio::buffers_begin(rawRequest),
+                                                            (boost::asio::buffers_begin(rawRequest)
+                                                             + ConnectionRequest::BYTE_LENGTH)));
+            
+            debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "Connection / "
+                + Convert::toString(connectionType) + " (Initial Read Request Handler) ["
+                + Convert::toString(connectionID) + "] > Request data received.");
+            
             readBuffer->consume(ConnectionRequest::BYTE_LENGTH); //removes the incoming data from the buffer
             
             if(request.connectionType == connectionType)
@@ -282,14 +327,21 @@ void NetworkManagement_Connections::Connection::initialReadRequestHandler(const 
             }
             else
             {
-                debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "Connection / " + Tools::toString(connectionType) + " (Initial Read Request Handler) [" + Tools::toString(connectionID) + "] > Invalid connection type requested.");
+                debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "Connection / "
+                    + Convert::toString(connectionType) + " (Initial Read Request Handler) ["
+                    + Convert::toString(connectionID) + "] > Invalid connection type requested.");
+                
                 lastSubstate = ConnectionSubstate::FAILED;
                 disconnect();
             }
         }
         catch(std::invalid_argument & ex)
         {
-            debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "Connection / " + Tools::toString(connectionType) + " (Initial Read Request Handler) [" + Tools::toString(connectionID) + "] > Invalid request data received: <" + ex.what() + ">.");
+            debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "Connection / "
+                + Convert::toString(connectionType) + " (Initial Read Request Handler) ["
+                + Convert::toString(connectionID) + "] > Invalid request data received: <"
+                + ex.what() + ">.");
+            
             lastSubstate = ConnectionSubstate::FAILED;
             disconnect();
         }
@@ -301,7 +353,11 @@ void NetworkManagement_Connections::Connection::initialReadRequestHandler(const 
     }
     else
     {
-        debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "Connection / " + Tools::toString(connectionType) + " (Initial Read Request Handler) [" + Tools::toString(connectionID) + "] > Read error encountered: <" + readError.message() + ">");
+        debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "Connection / "
+            + Convert::toString(connectionType) + " (Initial Read Request Handler) ["
+            + Convert::toString(connectionID) + "] > Read error encountered: <"
+            + readError.message() + ">");
+        
         lastSubstate = ConnectionSubstate::FAILED;
         disconnect();
     }
@@ -309,7 +365,8 @@ void NetworkManagement_Connections::Connection::initialReadRequestHandler(const 
     --pendingHandlers;
 }
 
-void NetworkManagement_Connections::Connection::initialWriteRequestHandler(const boost::system::error_code & writeError, std::size_t)
+void NetworkManagement_Connections::Connection::initialWriteRequestHandler
+(const boost::system::error_code & writeError, std::size_t)
 {
     if(closeConnection)
     {
@@ -327,7 +384,11 @@ void NetworkManagement_Connections::Connection::initialWriteRequestHandler(const
     }
     else
     {
-        debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "Connection / " + Tools::toString(connectionType) + " (Initial Write Request Handler) [" + Tools::toString(connectionID) + "] > Write error encountered: <" + writeError.message() + ">");
+        debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "Connection / "
+            + Convert::toString(connectionType) + " (Initial Write Request Handler) ["
+            + Convert::toString(connectionID) + "] > Write error encountered: <"
+            + writeError.message() + ">");
+        
         lastSubstate = ConnectionSubstate::FAILED;
         disconnect();
     }
@@ -341,7 +402,8 @@ void NetworkManagement_Connections::Connection::queueNextRead(BufferSize readSiz
         return;
     
     ++pendingHandlers;
-    boost::asio::async_read(*socket, readBuffer->prepare(readSize), readStrand.wrap(boost::bind(&NetworkManagement_Connections::Connection::readHandler, this, _1, _2)));
+    boost::asio::async_read(*socket, readBuffer->prepare(readSize), 
+            readStrand.wrap(boost::bind(&NetworkManagement_Connections::Connection::readHandler, this, _1, _2)));
 }
 
 void NetworkManagement_Connections::Connection::queueNextWrite(const ByteVector & data)
@@ -359,10 +421,12 @@ void NetworkManagement_Connections::Connection::queueNextWrite(const ByteVector 
     sendBuffer.push_back(boost::asio::buffer(data, data.size()));
     
     ++pendingHandlers;
-    boost::asio::async_write(*socket, sendBuffer, writeStrand.wrap(boost::bind(&NetworkManagement_Connections::Connection::writeHandler, this, _1, _2)));
+    boost::asio::async_write(*socket, sendBuffer,
+            writeStrand.wrap(boost::bind(&NetworkManagement_Connections::Connection::writeHandler, this, _1, _2)));
 }
 
-void NetworkManagement_Connections::Connection::readHandler(const boost::system::error_code & readError, std::size_t bytesRead)
+void NetworkManagement_Connections::Connection::readHandler
+(const boost::system::error_code & readError, std::size_t bytesRead)
 {
     if(closeConnection)
     {
@@ -392,7 +456,10 @@ void NetworkManagement_Connections::Connection::readHandler(const boost::system:
             }
             else if(header.payloadSize == 0)
             {//empty header was received
-                debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "Connection / " + Tools::toString(connectionType) + " (Read Handler) [" + Tools::toString(connectionID) + "] > Header with payload size '0' encountered.");
+                debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "Connection / "
+                    + Convert::toString(connectionType) + " (Read Handler) ["
+                    + Convert::toString(connectionID) + "] > Header with payload size '0' encountered.");
+                
                 isHeaderExpected = true;
                 queueNextRead(HeaderPacket::BYTE_LENGTH);
             }
@@ -434,15 +501,24 @@ void NetworkManagement_Connections::Connection::readHandler(const boost::system:
         
         lastSubstate = ConnectionSubstate::WAITING;
     }
-    else if(readError == boost::asio::error::eof || readError == boost::asio::error::connection_reset || readError == boost::asio::error::connection_aborted)
+    else if(readError == boost::asio::error::eof
+            || readError == boost::asio::error::connection_reset
+            || readError == boost::asio::error::connection_aborted)
     {
-        debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "Connection / " + Tools::toString(connectionType) + " (Read Handler) [" + Tools::toString(connectionID) + "] > Connection terminated by remote peer.");
+        debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "Connection / "
+            + Convert::toString(connectionType) + " (Read Handler) ["
+            + Convert::toString(connectionID) + "] > Connection terminated by remote peer.");
+        
         lastSubstate = ConnectionSubstate::DROPPED;
         disconnect();
     }
     else
     {
-        debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "Connection / " + Tools::toString(connectionType) + " (Read Handler) [" + Tools::toString(connectionID) + "] > Read error encountered: <" + readError.message() + ">.");
+        debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "Connection / "
+            + Convert::toString(connectionType) + " (Read Handler) ["
+            + Convert::toString(connectionID) + "] > Read error encountered: <"
+            + readError.message() + ">.");
+        
         lastSubstate = ConnectionSubstate::FAILED;
         disconnect();
     }
@@ -450,7 +526,8 @@ void NetworkManagement_Connections::Connection::readHandler(const boost::system:
     --pendingHandlers;
 }
 
-void NetworkManagement_Connections::Connection::writeHandler(const boost::system::error_code & writeError, std::size_t bytesSent)
+void NetworkManagement_Connections::Connection::writeHandler
+(const boost::system::error_code & writeError, std::size_t bytesSent)
 {
     if(closeConnection)
     {
@@ -474,16 +551,25 @@ void NetworkManagement_Connections::Connection::writeHandler(const boost::system
             }
         }
     }
-    else if(writeError == boost::asio::error::eof || writeError == boost::asio::error::connection_reset || writeError == boost::asio::error::connection_aborted)
+    else if(writeError == boost::asio::error::eof
+            || writeError == boost::asio::error::connection_reset
+            || writeError == boost::asio::error::connection_aborted)
     {
-        debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "Connection / " + Tools::toString(connectionType) + " (Write Handler) [" + Tools::toString(connectionID) + "] > Connection terminated by remote peer (?).");
+        debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "Connection / "
+            + Convert::toString(connectionType) + " (Write Handler) ["
+            + Convert::toString(connectionID) + "] > Connection terminated by remote peer (?).");
+        
         lastSubstate = ConnectionSubstate::DROPPED;
         onWriteResultReceivedEvent(false);
         disconnect();
     }
     else
     {
-        debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "Connection / " + Tools::toString(connectionType) + " (Write Handler) [" + Tools::toString(connectionID) + "] > Write error encountered: <" + writeError.message() + ">.");
+        debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "Connection / "
+            + Convert::toString(connectionType) + " (Write Handler) ["
+            + Convert::toString(connectionID) + "] > Write error encountered: <"
+            + writeError.message() + ">.");
+        
         lastSubstate = ConnectionSubstate::FAILED;
         onWriteResultReceivedEvent(false);
         disconnect();

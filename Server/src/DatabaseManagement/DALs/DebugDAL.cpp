@@ -27,7 +27,7 @@ DatabaseManagement_DALs::DebugDAL::DebugDAL(std::string logPath, std::string dat
 
 DatabaseManagement_DALs::DebugDAL::~DebugDAL()
 {
-    logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Tools::toString(dalType) + " (~) > Destruction initiated.");
+    logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Convert::toString(dalType) + " (~) > Destruction initiated.");
     
     {
         boost::lock_guard<boost::mutex> dataLock(mainThreadMutex);
@@ -44,131 +44,131 @@ DatabaseManagement_DALs::DebugDAL::~DebugDAL()
 
 bool DatabaseManagement_DALs::DebugDAL::getObject(DatabaseRequestID requestID, boost::any constraintType, boost::any constraintValue)
 {
-    logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Tools::toString(dalType) + " (Get Object) > <" + Tools::toString(requestID) + ">.");
+    logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Convert::toString(dalType) + " (Get Object) > <" + Convert::toString(requestID) + ">.");
     addRequest(requestID, RequestType::SELECT, constraintType, constraintValue);
     return true;
 }
 
 bool DatabaseManagement_DALs::DebugDAL::putObject(DatabaseRequestID requestID, const DataContainerPtr inputData)
 {
-    logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Tools::toString(dalType) + " (Insert Object) > <" + Tools::toString(requestID) + ">.");
+    logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Convert::toString(dalType) + " (Insert Object) > <" + Convert::toString(requestID) + ">.");
     addRequest(requestID, RequestType::INSERT, inputData, 0);
     return true;
 }
 
 bool DatabaseManagement_DALs::DebugDAL::updateObject(DatabaseRequestID requestID, const DataContainerPtr inputData)
 {
-    logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Tools::toString(dalType) + " (Update Object) > <" + Tools::toString(requestID) + ">.");
+    logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Convert::toString(dalType) + " (Update Object) > <" + Convert::toString(requestID) + ">.");
     addRequest(requestID, RequestType::UPDATE, inputData, 0);
     return true;
 }
 
 bool DatabaseManagement_DALs::DebugDAL::removeObject(DatabaseRequestID requestID, DBObjectID id)
 {
-    logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Tools::toString(dalType) + " (Remove Object) > <" + Tools::toString(requestID) + ">.");
+    logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Convert::toString(dalType) + " (Remove Object) > <" + Convert::toString(requestID) + ">.");
     addRequest(requestID, RequestType::REMOVE, id, 0);
     return true;
 }
 
 bool DatabaseManagement_DALs::DebugDAL::changeDatabaseSettings(const DatabaseSettingsContainer settings)
 {
-    logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Tools::toString(dalType) + " (Change DB Settings) > Database settings update requested.");
+    logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Convert::toString(dalType) + " (Change DB Settings) > Database settings update requested.");
     return true;
 }
 
 bool DatabaseManagement_DALs::DebugDAL::buildDatabase()
 {
-    logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Tools::toString(dalType) + " (Build DB) > Database build requested.");
+    logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Convert::toString(dalType) + " (Build DB) > Database build requested.");
     return true;
 }
 
 bool DatabaseManagement_DALs::DebugDAL::rebuildDatabase()
 {
-    logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Tools::toString(dalType) + " (Rebuild DB) > Database rebuild requested.");
+    logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Convert::toString(dalType) + " (Rebuild DB) > Database rebuild requested.");
     return true;
 }
 
 bool DatabaseManagement_DALs::DebugDAL::clearDatabase()
 {
-    logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Tools::toString(dalType) + " (Clear DB) > Database clearing requested.");
-    logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Tools::toString(dalType) + " (Clear DB) > Entering critical section.");
+    logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Convert::toString(dalType) + " (Clear DB) > Database clearing requested.");
+    logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Convert::toString(dalType) + " (Clear DB) > Entering critical section.");
     boost::lock_guard<boost::mutex> requestsLock(mainThreadMutex);
-    logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Tools::toString(dalType) + " (Clear DB) > Critical section entered.");
+    logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Convert::toString(dalType) + " (Clear DB) > Critical section entered.");
 
     data.clear();
     saveDataFile();
 
-    logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Tools::toString(dalType) + " (Clear DB) > Exiting critical section.");
+    logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Convert::toString(dalType) + " (Clear DB) > Exiting critical section.");
     
     return true;
 }
 
 bool DatabaseManagement_DALs::DebugDAL::connect()
 {
-    logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Tools::toString(dalType) + " (Connect) > Database connect requested.");
+    logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Convert::toString(dalType) + " (Connect) > Database connect requested.");
     
     if(isConnected)
         return false;
     
-    logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Tools::toString(dalType) + " (Connect) > Entering critical section.");
+    logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Convert::toString(dalType) + " (Connect) > Entering critical section.");
     boost::lock_guard<boost::mutex> requestsLock(mainThreadMutex);
-    logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Tools::toString(dalType) + " (Connect) > Critical section entered.");
+    logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Convert::toString(dalType) + " (Connect) > Critical section entered.");
 
     loadDataFile();
     isConnected = true;
 
-    logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Tools::toString(dalType) + " (Connect) > Exiting critical section.");
+    logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Convert::toString(dalType) + " (Connect) > Exiting critical section.");
     
     return true;
 }
 
 bool DatabaseManagement_DALs::DebugDAL::disconnect()
 {
-    logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Tools::toString(dalType) + " (Disconnect) > Database disconnect requested.");
+    logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Convert::toString(dalType) + " (Disconnect) > Database disconnect requested.");
     
     if(!isConnected)
         return false;
     
-    logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Tools::toString(dalType) + " (Disconnect) > Entering critical section.");
+    logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Convert::toString(dalType) + " (Disconnect) > Entering critical section.");
     boost::lock_guard<boost::mutex> requestsLock(mainThreadMutex);
-    logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Tools::toString(dalType) + " (Disconnect) > Critical section entered.");
+    logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Convert::toString(dalType) + " (Disconnect) > Critical section entered.");
 
     saveDataFile();
     data.clear();
     isConnected = false;
 
-    logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Tools::toString(dalType) + " (Disconnect) > Exiting critical section.");
+    logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Convert::toString(dalType) + " (Disconnect) > Exiting critical section.");
     
     return true;
 }
 
 const DatabaseInformationContainer* DatabaseManagement_DALs::DebugDAL::getDatabaseInfo() const
 {
-    logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Tools::toString(dalType) + " (Get DB Info) > Database info requested.");
+    logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Convert::toString(dalType) + " (Get DB Info) > Database info requested.");
     return info;
 }
 
 DatabaseObjectType DatabaseManagement_DALs::DebugDAL::getType() const
 {
-    logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Tools::toString(dalType) + " (Get Type) > Type requested.");
+    logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Convert::toString(dalType) + " (Get Type) > Type requested.");
     return dalType;
 }
 
 void DatabaseManagement_DALs::DebugDAL::setID(DatabaseAbstractionLayerID id)
 {
     dalID = id;
-    logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Tools::toString(dalType) + " (Set ID) > DAL ID set to <" + Tools::toString(id) + ">");
+    logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Convert::toString(dalType) + " (Set ID) > DAL ID set to <" + Convert::toString(id) + ">");
 }
 
 DatabaseAbstractionLayerID DatabaseManagement_DALs::DebugDAL::getID() const
 {
-    logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Tools::toString(dalType) + " (Get ID) > DAL ID returned <" + Tools::toString(dalID) + ">");
+    logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Convert::toString(dalType) + " (Get ID) > DAL ID returned <" + Convert::toString(dalID) + ">");
     return dalID;
 }
 
 void DatabaseManagement_DALs::DebugDAL::loadDataFile()
 {
-    logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Tools::toString(dalType) + " (Load Data) > Data load requested.");
+    logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Convert::toString(dalType) + " (Load Data) > Data load requested.");
     
     std::ifstream dataFile(dataFilePath);
     
@@ -187,7 +187,7 @@ void DatabaseManagement_DALs::DebugDAL::loadDataFile()
             boost::smatch currentMatch;
             if(!boost::regex_search(entry, currentMatch, boost::regex("^.,(.*);(.*)")))
             {
-                logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Tools::toString(dalType) + " (Load Data) > Malformed entry found <" + Tools::toString(i) + ">"); break;
+                logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Convert::toString(dalType) + " (Load Data) > Malformed entry found <" + Convert::toString(i) + ">"); break;
                 i++;
                 continue;
             }
@@ -198,7 +198,7 @@ void DatabaseManagement_DALs::DebugDAL::loadDataFile()
             switch(entry.at(0))
             {
                 case 'U': currentID = boost::lexical_cast<boost::uuids::uuid>(currentStringID); break;
-                default: logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Tools::toString(dalType) + " (Load Data) > Invalid entry found <" + Tools::toString(i) + ">"); break;
+                default: logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Convert::toString(dalType) + " (Load Data) > Invalid entry found <" + Convert::toString(i) + ">"); break;
             }
             
             data.insert(std::pair<DBObjectID,std::string>(currentID, currentMatch[2]));
@@ -207,7 +207,7 @@ void DatabaseManagement_DALs::DebugDAL::loadDataFile()
         }
     }
     else
-        logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Tools::toString(dalType) + " (Load Data) > Data file is not open <" + dataFilePath + ">.");
+        logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Convert::toString(dalType) + " (Load Data) > Data file is not open <" + dataFilePath + ">.");
     
     dataFile.close();
 }
@@ -216,11 +216,11 @@ void DatabaseManagement_DALs::DebugDAL::saveDataFile()
 {
     std::ofstream dataFile(dataFilePath, std::ofstream::trunc);
     
-    dataFile << Tools::toString(nextIntID) << std::endl;
+    dataFile << Convert::toString(nextIntID) << std::endl;
     
     for(std::pair<DBObjectID, std::string> currentEntry : data)
     {
-        std::string entryString = "U," + Tools::toString(currentEntry.first) + ";" + currentEntry.second;
+        std::string entryString = "U," + Convert::toString(currentEntry.first) + ";" + currentEntry.second;
         
         dataFile << entryString << std::endl;
     }
@@ -230,36 +230,36 @@ void DatabaseManagement_DALs::DebugDAL::saveDataFile()
 
 void DatabaseManagement_DALs::DebugDAL::mainThread()
 {
-    logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Tools::toString(dalType) + " (Main Thread) > Started.");
+    logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Convert::toString(dalType) + " (Main Thread) > Started.");
     mainThreadRunnig = true;
 
     while(!stopDebugger)
     {
-        logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Tools::toString(dalType) + " (Main Thread) > Acquiring data lock.");
+        logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Convert::toString(dalType) + " (Main Thread) > Acquiring data lock.");
         boost::unique_lock<boost::mutex> dataLock(mainThreadMutex);
-        logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Tools::toString(dalType) + " (Main Thread) > Data lock acquired.");
+        logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Convert::toString(dalType) + " (Main Thread) > Data lock acquired.");
         
         if(pendingRequests.size() == 0)
         {
-            logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Tools::toString(dalType) + " (Main Thread) > Waiting on data lock.");
+            logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Convert::toString(dalType) + " (Main Thread) > Waiting on data lock.");
             mainThreadLockCondition.wait(dataLock);
-            logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Tools::toString(dalType) + " (Main Thread) > Data lock re-acquired after wait.");
+            logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Convert::toString(dalType) + " (Main Thread) > Data lock re-acquired after wait.");
         }
         else
         {
             unsigned int numberOfNewRequests = pendingRequests.size();
-            logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Tools::toString(dalType) + " (Main Thread) > Starting work on <" + Tools::toString(numberOfNewRequests) + "> new request(s).");
+            logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Convert::toString(dalType) + " (Main Thread) > Starting work on <" + Convert::toString(numberOfNewRequests) + "> new request(s).");
             for(unsigned int i = 0; i < numberOfNewRequests; i++)
             {
                 DatabaseRequestID currentRequest = pendingRequests.front();
                 tuple<RequestType, boost::any, boost::any> * currentRequestData = requestsData[currentRequest];
-                logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Tools::toString(dalType) + " (Main Thread) > Working with request <#" + Tools::toString(i) + "/" + Tools::toString(currentRequest) + ">.");
+                logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Convert::toString(dalType) + " (Main Thread) > Working with request <#" + Convert::toString(i) + "/" + Convert::toString(currentRequest) + ">.");
                 
                 switch(currentRequestData->get<0>())
                 {
                     case RequestType::SELECT:
                     {
-                        DBObjectID objectID = Tools::getIDFromConstraint(dalType, currentRequestData->get<1>(), currentRequestData->get<2>());
+                        DBObjectID objectID = Utilities::Tools::getIDFromConstraint(dalType, currentRequestData->get<1>(), currentRequestData->get<2>());
                         
                         if(dalType == DatabaseObjectType::USER 
                                 && boost::any_cast<DatabaseSelectConstraints::USERS>(currentRequestData->get<1>()) == DatabaseSelectConstraints::USERS::LIMIT_BY_NAME)
@@ -314,7 +314,7 @@ void DatabaseManagement_DALs::DebugDAL::mainThread()
                             data.insert(std::pair<DBObjectID, std::string>(container->getContainerID(), Stringifier::toString(container)));
                         }
                         else
-                            logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Tools::toString(dalType) + " (Main Thread) > INSERT failed for request; object exists <#" + Tools::toString(i) + "/" + Tools::toString(currentRequest) + ">.");
+                            logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Convert::toString(dalType) + " (Main Thread) > INSERT failed for request; object exists <#" + Convert::toString(i) + "/" + Convert::toString(currentRequest) + ">.");
                         
                         if(successful)
                             onSuccess(dalID, currentRequest, container);
@@ -333,7 +333,7 @@ void DatabaseManagement_DALs::DebugDAL::mainThread()
                         }
                         else
                         {
-                            logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Tools::toString(dalType) + " (Main Thread) > UPDATE failed for request <#" + Tools::toString(i) + "/" + Tools::toString(currentRequest) + ">.");
+                            logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Convert::toString(dalType) + " (Main Thread) > UPDATE failed for request <#" + Convert::toString(i) + "/" + Convert::toString(currentRequest) + ">.");
                             onFailure(dalID, currentRequest, container->getContainerID());
                         }
                     } break;
@@ -352,14 +352,14 @@ void DatabaseManagement_DALs::DebugDAL::mainThread()
                         }
                         else
                         {
-                            logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Tools::toString(dalType) + " (Main Thread) > REMOVE failed for request <#" + Tools::toString(i) + "/" + Tools::toString(currentRequest) + "/" + Tools::toString(id) + ">.");
+                            logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Convert::toString(dalType) + " (Main Thread) > REMOVE failed for request <#" + Convert::toString(i) + "/" + Convert::toString(currentRequest) + "/" + Convert::toString(id) + ">.");
                             onFailure(dalID, currentRequest, id);
                         }
                     } break;
                     
                     default:
                     {
-                        logger.logMessage(Utilities::FileLogSeverity::Error, "DebugDAL / " + Tools::toString(dalType) + " (Main Thread) > Unexpected request type encountered for new request <" + Tools::toString(currentRequest) + ">.");
+                        logger.logMessage(Utilities::FileLogSeverity::Error, "DebugDAL / " + Convert::toString(dalType) + " (Main Thread) > Unexpected request type encountered for new request <" + Convert::toString(currentRequest) + ">.");
                         onFailure(dalID, currentRequest, DBObjectID());
                     } break;
                 }
@@ -368,17 +368,17 @@ void DatabaseManagement_DALs::DebugDAL::mainThread()
                 requestsData.erase(currentRequest);
                 delete currentRequestData;
                 
-                logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Tools::toString(dalType) + " (Main Thread) > Done with request <#" + Tools::toString(i) + "/" + Tools::toString(currentRequest) + ">.");
+                logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Convert::toString(dalType) + " (Main Thread) > Done with request <#" + Convert::toString(i) + "/" + Convert::toString(currentRequest) + ">.");
             }
             
-            logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Tools::toString(dalType) + " (Main Thread) > Work on new requests finished.");
+            logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Convert::toString(dalType) + " (Main Thread) > Work on new requests finished.");
         }
         
-        logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Tools::toString(dalType) + " (Main Thread) > Data lock released.");
+        logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Convert::toString(dalType) + " (Main Thread) > Data lock released.");
     }
     
     mainThreadRunnig = false;
-    logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Tools::toString(dalType) + " (Main Thread) > Stopped.");
+    logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Convert::toString(dalType) + " (Main Thread) > Stopped.");
     return;
 }
 

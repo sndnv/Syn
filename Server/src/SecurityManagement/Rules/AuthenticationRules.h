@@ -21,9 +21,9 @@
 #include <string>
 #include <boost/regex.h>
 #include "../Types/Types.h"
-#include "../../Utilities/Tools.h"
+#include "../../Utilities/Strings/Common.h"
 
-using Utilities::Tools;
+namespace Convert = Utilities::Strings;
 
 namespace SecurityManagement_Rules
 {
@@ -98,7 +98,7 @@ namespace SecurityManagement_Rules
             std::string getErrorMessage() const
             {
                 return "The password is below the minimum required length of ["
-                        + Tools::toString(minLength) + "].";
+                        + Convert::toString(minLength) + "].";
             }
             
         private:
@@ -159,7 +159,7 @@ namespace SecurityManagement_Rules
             std::string getErrorMessage() const
             {
                 return "The name is below the minimum required length of ["
-                        + Tools::toString(minLength) + "].";
+                        + Convert::toString(minLength) + "].";
             }
             
         private:
@@ -192,7 +192,7 @@ namespace SecurityManagement_Rules
             std::string getErrorMessage() const
             {
                 return "The name is above the maximum allowed length of ["
-                        + Tools::toString(maxLength) + "].";
+                        + Convert::toString(maxLength) + "].";
             }
             
         private:

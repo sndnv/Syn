@@ -17,553 +17,84 @@
 
 #include "Tools.h"
 
-using Utilities::Tools;
-
-const boost::unordered_map<DatabaseObjectType, std::string> Tools::databaseObjectTypesToString
+unsigned long Utilities::Tools::powerof(unsigned long base, unsigned long exponent)
 {
-    {DatabaseObjectType::DEVICE,            "DEVICE"},
-    {DatabaseObjectType::INVALID,           "INVALID"},
-    {DatabaseObjectType::LOG,               "LOG"},
-    {DatabaseObjectType::SCHEDULE,          "SCHEDULE"},
-    {DatabaseObjectType::SESSION,           "SESSION"},
-    {DatabaseObjectType::STATISTICS,        "STATISTICS"},
-    {DatabaseObjectType::SYNC_FILE,         "SYNC_FILE"},
-    {DatabaseObjectType::SYSTEM_SETTINGS,   "SYSTEM_SETTINGS"},
-    {DatabaseObjectType::USER,              "USER"}
-};
+    if(exponent != 0)
+    {
+        unsigned long intermediateResult = powerof(base, (exponent - 1));
+        unsigned long result = base*intermediateResult;
 
-const boost::unordered_map<std::string, DatabaseObjectType> Tools::stringToDatabaseObjectTypes
+        if(result/intermediateResult != base)
+            throw std::overflow_error("Tools::powerof() > Overflow encountered.");
+        else
+            return result;
+    }
+    else
+        return 1;
+}
+
+Common_Types::DBObjectID Utilities::Tools::getIDFromString(std::string var)
 {
-    {"DEVICE",          DatabaseObjectType::DEVICE},
-    {"INVALID",         DatabaseObjectType::INVALID},
-    {"LOG",             DatabaseObjectType::LOG},
-    {"SCHEDULE",        DatabaseObjectType::SCHEDULE},
-    {"SESSION",         DatabaseObjectType::SESSION},
-    {"STATISTICS",      DatabaseObjectType::STATISTICS},
-    {"SYNC_FILE",       DatabaseObjectType::SYNC_FILE},
-    {"SYSTEM_SETTINGS", DatabaseObjectType::SYSTEM_SETTINGS},
-    {"USER",            DatabaseObjectType::USER}
-};
+    try { return boost::lexical_cast<boost::uuids::uuid>(var); }
+    catch(boost::bad_lexical_cast) { return Common_Types::INVALID_OBJECT_ID;}
+}
 
-const boost::unordered_map<DatabaseManagerOperationMode, std::string> Tools::databaseManagerOperationModeToString
+Common_Types::DBObjectID Utilities::Tools::getIDFromConstraint(DatabaseObjectType objectType, boost::any constraintType, boost::any constraintValue)
 {
-    {DatabaseManagerOperationMode::CRCW,    "CRCW"},
-    {DatabaseManagerOperationMode::INVALID, "INVALID"},
-    {DatabaseManagerOperationMode::PRCW,    "PRCW"},
-    {DatabaseManagerOperationMode::PRPW,    "PRPW"}
-};
+    Common_Types::DBObjectID objectID = Common_Types::INVALID_OBJECT_ID;
 
-const boost::unordered_map<std::string, DatabaseManagerOperationMode> Tools::stringToDatabaseManagerOperationMode
-{
-    {"CRCW",    DatabaseManagerOperationMode::CRCW},
-    {"INVALID", DatabaseManagerOperationMode::INVALID},
-    {"PRCW",    DatabaseManagerOperationMode::PRCW},
-    {"PRPW",    DatabaseManagerOperationMode::PRPW}
-};
+    switch(objectType)
+    {
+        case DatabaseObjectType::DEVICE:
+        {
+            if(boost::any_cast<DatabaseSelectConstraints::DEVICES>(constraintType) == DatabaseSelectConstraints::DEVICES::LIMIT_BY_ID)
+                objectID = boost::any_cast<Common_Types::DeviceID>(constraintValue);
+        } break;
 
-const boost::unordered_map<DatabaseFailureAction, std::string> Tools::databaseFailureActionToString
-{
-    {DatabaseFailureAction::DROP_DAL,           "DROP_DAL"},
-    {DatabaseFailureAction::DROP_IF_NOT_LAST,   "DROP_IF_NOT_LAST"},
-    {DatabaseFailureAction::IGNORE_FAILURE,     "IGNORE_FAILURE"},
-    {DatabaseFailureAction::INITIATE_RECONNECT, "INITIATE_RECONNECT"},
-    {DatabaseFailureAction::PUSH_TO_BACK,       "PUSH_TO_BACK"},
-    {DatabaseFailureAction::INVALID,            "INVALID"}
-};
+        case DatabaseObjectType::LOG:
+        {
+            if(boost::any_cast<DatabaseSelectConstraints::LOGS>(constraintType) == DatabaseSelectConstraints::LOGS::LIMIT_BY_ID)
+                objectID = boost::any_cast<Common_Types::LogID>(constraintValue);
+        } break;
 
-const boost::unordered_map<std::string, DatabaseFailureAction> Tools::stringToDatabaseFailureAction
-{
-    {"DROP_DAL",            DatabaseFailureAction::DROP_DAL},
-    {"DROP_IF_NOT_LAST",    DatabaseFailureAction::DROP_IF_NOT_LAST},
-    {"IGNORE_FAILURE",      DatabaseFailureAction::IGNORE_FAILURE},
-    {"INITIATE_RECONNECT",  DatabaseFailureAction::INITIATE_RECONNECT},
-    {"PUSH_TO_BACK",        DatabaseFailureAction::PUSH_TO_BACK},
-    {"INVALID",             DatabaseFailureAction::INVALID}
-};
+        case DatabaseObjectType::SCHEDULE:
+        {
+            if(boost::any_cast<DatabaseSelectConstraints::SCHEDULES>(constraintType) == DatabaseSelectConstraints::SCHEDULES::LIMIT_BY_ID)
+                objectID = boost::any_cast<Common_Types::ScheduleID>(constraintValue);
+        } break;
 
-const boost::unordered_map<UserAccessLevel, std::string> Tools::userAccessLevelToString
-{
-    {UserAccessLevel::ADMIN,    "ADMIN"},
-    {UserAccessLevel::NONE,     "NONE"},
-    {UserAccessLevel::USER,     "USER"},
-    {UserAccessLevel::INVALID,  "INVALID"}
-};
+        case DatabaseObjectType::SESSION:
+        {
+            if(boost::any_cast<DatabaseSelectConstraints::SESSIONS>(constraintType) == DatabaseSelectConstraints::SESSIONS::LIMIT_BY_ID)
+                objectID = boost::any_cast<Common_Types::SessionID>(constraintValue);
+        } break;
 
-const boost::unordered_map<std::string, UserAccessLevel> Tools::stringToUserAccessLevel
-{
-    {"ADMIN",   UserAccessLevel::ADMIN},
-    {"NONE",    UserAccessLevel::NONE},
-    {"USER",    UserAccessLevel::USER},
-    {"INVALID", UserAccessLevel::INVALID}
-};
+        case DatabaseObjectType::STATISTICS:
+        {
+            if(boost::any_cast<DatabaseSelectConstraints::STATISTCS>(constraintType) == DatabaseSelectConstraints::STATISTCS::LIMIT_BY_TYPE)
+                objectID = boost::any_cast<boost::uuids::uuid>(constraintValue);
+        } break;
 
-const boost::unordered_map<StatisticType, std::string> Tools::statisticTypeToString
-{
-    {StatisticType::INSTALL_TIMESTAMP,          "INSTALL_TIMESTAMP"},
-    {StatisticType::START_TIMESTAMP,            "START_TIMESTAMP"},
-    {StatisticType::TOTAL_FAILED_TRANSFERS,     "TOTAL_FAILED_TRANSFERS"},
-    {StatisticType::TOTAL_RETRIED_TRANSFERS,    "TOTAL_RETRIED_TRANSFERS"},
-    {StatisticType::TOTAL_TRANSFERRED_DATA,     "TOTAL_TRANSFERRED_DATA"},
-    {StatisticType::TOTAL_TRANSFERRED_FILES,    "TOTAL_TRANSFERRED_FILES"}
-};
+        case DatabaseObjectType::SYNC_FILE:
+        {
+            if(boost::any_cast<DatabaseSelectConstraints::SYNC>(constraintType) == DatabaseSelectConstraints::SYNC::LIMIT_BY_ID)
+                objectID = boost::any_cast<Common_Types::SyncID>(constraintValue);
+        } break;
 
-const boost::unordered_map<std::string, StatisticType> Tools::stringToStatisticType
-{
-    {"INSTALL_TIMESTAMP",       StatisticType::INSTALL_TIMESTAMP},
-    {"START_TIMESTAMP",         StatisticType::START_TIMESTAMP},
-    {"TOTAL_FAILED_TRANSFERS",  StatisticType::TOTAL_FAILED_TRANSFERS},
-    {"TOTAL_RETRIED_TRANSFERS", StatisticType::TOTAL_RETRIED_TRANSFERS},
-    {"TOTAL_TRANSFERRED_DATA",  StatisticType::TOTAL_TRANSFERRED_DATA},
-    {"TOTAL_TRANSFERRED_FILES", StatisticType::TOTAL_TRANSFERRED_FILES}
-};
+        case DatabaseObjectType::SYSTEM_SETTINGS:
+        {
+            if(boost::any_cast<DatabaseSelectConstraints::SYSTEM>(constraintType) == DatabaseSelectConstraints::SYSTEM::LIMIT_BY_TYPE)
+                objectID = boost::any_cast<boost::uuids::uuid>(constraintValue);
+        } break;
 
-const boost::unordered_map<SystemParameterType, std::string> Tools::systemParameterTypeToString
-{
-    {SystemParameterType::COMMAND_IP_ADDRESS,       "COMMAND_IP_ADDRESS"},
-    {SystemParameterType::COMMAND_IP_PORT,          "COMMAND_IP_PORT"},
-    {SystemParameterType::COMMAND_RETRIES_MAX,      "COMMAND_RETRIES_MAX"},
-    {SystemParameterType::DATA_IP_ADDRESS,          "DATA_IP_ADDRESS"},
-    {SystemParameterType::DATA_IP_PORT,             "DATA_IP_PORT"},
-    {SystemParameterType::DATA_RETRIES_MAX,         "DATA_RETRIES_MAX"},
-    {SystemParameterType::DB_CACHE_FLUSH_INTERVAL,  "DB_CACHE_FLUSH_INTERVAL"},
-    {SystemParameterType::DB_IMMEDIATE_FLUSH,       "DB_IMMEDIATE_FLUSH"},
-    {SystemParameterType::DB_MAX_READ_RETRIES,      "DB_MAX_READ_RETRIES"},
-    {SystemParameterType::DB_MAX_WRITE_RETRIES,     "DB_MAX_WRITE_RETRIES"},
-    {SystemParameterType::DB_OPERATION_MODE,        "DB_OPERATION_MODE"},
-    {SystemParameterType::FORCE_COMMAND_ENCRYPTION, "FORCE_COMMAND_ENCRYPTION"},
-    {SystemParameterType::FORCE_DATA_COMPRESSION,   "FORCE_DATA_COMPRESSION"},
-    {SystemParameterType::FORCE_DATA_ENCRYPTION,    "FORCE_DATA_ENCRYPTION"},
-    {SystemParameterType::IN_MEMORY_POOL_RETENTION, "IN_MEMORY_POOL_RETENTION"},
-    {SystemParameterType::IN_MEMORY_POOL_SIZE,      "IN_MEMORY_POOL_SIZE"},
-    {SystemParameterType::MINIMIZE_MEMORY_USAGE,    "MINIMIZE_MEMORY_USAGE"},
-    {SystemParameterType::PENDING_DATA_POOL_PATH,   "PENDING_DATA_POOL_PATH"},
-    {SystemParameterType::PENDING_DATA_POOL_SIZE,   "PENDING_DATA_POOL_SIZE"},
-    {SystemParameterType::PENDING_DATA_RETENTION,   "PENDING_DATA_RETENTION"},
-    {SystemParameterType::SESSION_KEEP_ALIVE,       "SESSION_KEEP_ALIVE"},
-    {SystemParameterType::SESSION_TIMEOUT,          "SESSION_TIMEOUT"},
-    {SystemParameterType::SUPPORTED_PROTOCOLS,      "SUPPORTED_PROTOCOLS"}
-};
+        case DatabaseObjectType::USER:
+        {
+            if(boost::any_cast<DatabaseSelectConstraints::USERS>(constraintType) == DatabaseSelectConstraints::USERS::LIMIT_BY_ID)
+                objectID = boost::any_cast<Common_Types::UserID>(constraintValue);
+        } break;
 
-const boost::unordered_map<std::string, SystemParameterType> Tools::stringToSystemParameterType
-{
-    {"COMMAND_IP_ADDRESS",      SystemParameterType::COMMAND_IP_ADDRESS},
-    {"COMMAND_IP_PORT",         SystemParameterType::COMMAND_IP_PORT},
-    {"COMMAND_RETRIES_MAX",     SystemParameterType::COMMAND_RETRIES_MAX},
-    {"DATA_IP_ADDRESS",         SystemParameterType::DATA_IP_ADDRESS},
-    {"DATA_IP_PORT",            SystemParameterType::DATA_IP_PORT},
-    {"DATA_RETRIES_MAX",        SystemParameterType::DATA_RETRIES_MAX},
-    {"DB_CACHE_FLUSH_INTERVAL", SystemParameterType::DB_CACHE_FLUSH_INTERVAL},
-    {"DB_IMMEDIATE_FLUSH",      SystemParameterType::DB_IMMEDIATE_FLUSH},
-    {"DB_MAX_READ_RETRIES",     SystemParameterType::DB_MAX_READ_RETRIES},
-    {"DB_MAX_WRITE_RETRIES",    SystemParameterType::DB_MAX_WRITE_RETRIES},
-    {"DB_OPERATION_MODE",       SystemParameterType::DB_OPERATION_MODE},
-    {"FORCE_COMMAND_ENCRYPTION",SystemParameterType::FORCE_COMMAND_ENCRYPTION},
-    {"FORCE_DATA_COMPRESSION",  SystemParameterType::FORCE_DATA_COMPRESSION},
-    {"FORCE_DATA_ENCRYPTION",   SystemParameterType::FORCE_DATA_ENCRYPTION},
-    {"IN_MEMORY_POOL_RETENTION",SystemParameterType::IN_MEMORY_POOL_RETENTION},
-    {"IN_MEMORY_POOL_SIZE",     SystemParameterType::IN_MEMORY_POOL_SIZE},
-    {"MINIMIZE_MEMORY_USAGE",   SystemParameterType::MINIMIZE_MEMORY_USAGE},
-    {"PENDING_DATA_POOL_PATH",  SystemParameterType::PENDING_DATA_POOL_PATH},
-    {"PENDING_DATA_POOL_SIZE",  SystemParameterType::PENDING_DATA_POOL_SIZE},
-    {"PENDING_DATA_RETENTION",  SystemParameterType::PENDING_DATA_RETENTION},
-    {"SESSION_KEEP_ALIVE",      SystemParameterType::SESSION_KEEP_ALIVE},
-    {"SESSION_TIMEOUT",         SystemParameterType::SESSION_TIMEOUT},
-    {"SUPPORTED_PROTOCOLS",     SystemParameterType::SUPPORTED_PROTOCOLS}
-};
+        default: ; break; //ignore
+    }
 
-const boost::unordered_map<LogSeverity, std::string> Tools::logSeverityToString
-{
-    {LogSeverity::Debug,    "DEBUG"},
-    {LogSeverity::Error,    "ERROR"},
-    {LogSeverity::Info,     "INFO"},
-    {LogSeverity::Warning,     "WARN"}
-};
-
-const boost::unordered_map<std::string, LogSeverity> Tools::stringToLogSeverity
-{
-    {"DEBUG",   LogSeverity::Debug},
-    {"ERROR",   LogSeverity::Error},
-    {"INFO",    LogSeverity::Info},
-    {"WARN",    LogSeverity::Warning}
-};
-
-const boost::unordered_map<DataTransferType, std::string> Tools::dataTransferTypeToString
-{
-    {DataTransferType::PULL, "PULL"},
-    {DataTransferType::PUSH, "PUSH"}
-};
-
-const boost::unordered_map<std::string, DataTransferType> Tools::stringToDataTransferType
-{
-    {"PULL", DataTransferType::PULL},
-    {"PUSH", DataTransferType::PUSH}
-};
-
-const boost::unordered_map<SessionType, std::string> Tools::sessionTypeToString
-{
-    {SessionType::ADMIN, "ADMIN"},
-    {SessionType::COMMAND, "COMMAND"},
-    {SessionType::DATA, "DATA"}
-};
-
-const boost::unordered_map<std::string, SessionType> Tools::stringToSessionType
-{
-    {"ADMIN", SessionType::ADMIN},
-    {"COMMAND", SessionType::COMMAND},
-    {"DATA", SessionType::DATA}
-};
-
-const boost::unordered_map<ScheduleIntervalType, std::string> Tools::scheduleIntervalTypeToString
-{
-    {ScheduleIntervalType::DAYS,    "DAYS"},
-    {ScheduleIntervalType::HOURS,   "HOURS"},
-    {ScheduleIntervalType::MINUTES, "MINUTES"},
-    {ScheduleIntervalType::MONTHS,  "MONTHS"},
-    {ScheduleIntervalType::SECONDS, "SECONDS"}
-};
-
-const boost::unordered_map<std::string, ScheduleIntervalType> Tools::stringToScheduleIntervalType
-{
-    {"DAYS",    ScheduleIntervalType::DAYS},
-    {"HOURS",   ScheduleIntervalType::HOURS},
-    {"MINUTES", ScheduleIntervalType::MINUTES},
-    {"MONTHS",  ScheduleIntervalType::MONTHS},
-    {"SECONDS", ScheduleIntervalType::SECONDS}
-};
-
-const boost::unordered_map<ConflictResolutionRule_Directory, std::string> Tools::dirResolutionRuleToString
-{
-    {ConflictResolutionRule_Directory::ASK,                     "ASK"},
-    {ConflictResolutionRule_Directory::COPY_AND_RENAME,         "COPY_AND_RENAME"},
-    {ConflictResolutionRule_Directory::MERGE,                   "MERGE"},
-    {ConflictResolutionRule_Directory::OVERWRITE_DESTINATION,   "OVERWRITE_DESTINATION"},
-    {ConflictResolutionRule_Directory::OVERWRITE_SOURCE,        "OVERWRITE_SOURCE"},
-    {ConflictResolutionRule_Directory::RENAME_AND_COPY,         "RENAME_AND_COPY"},
-    {ConflictResolutionRule_Directory::STOP,                    "STOP"}
-};
-
-const boost::unordered_map<std::string, ConflictResolutionRule_Directory> Tools::stringToDirResolutionRule
-{
-    {"ASK",                     ConflictResolutionRule_Directory::ASK},
-    {"COPY_AND_RENAME",         ConflictResolutionRule_Directory::COPY_AND_RENAME},
-    {"MERGE",                   ConflictResolutionRule_Directory::MERGE},
-    {"OVERWRITE_DESTINATION",   ConflictResolutionRule_Directory::OVERWRITE_DESTINATION},
-    {"OVERWRITE_SOURCE",        ConflictResolutionRule_Directory::OVERWRITE_SOURCE},
-    {"RENAME_AND_COPY",         ConflictResolutionRule_Directory::RENAME_AND_COPY},
-    {"STOP",                    ConflictResolutionRule_Directory::STOP}
-};
-
-const boost::unordered_map<ConflictResolutionRule_File, std::string> Tools::fileResolutionRuleToString
-{
-    {ConflictResolutionRule_File::ASK,                  "ASK"},
-    {ConflictResolutionRule_File::COPY_AND_RENAME,      "COPY_AND_RENAME"},
-    {ConflictResolutionRule_File::OVERWRITE_DESTINATION,"OVERWRITE_DESTINATION"},
-    {ConflictResolutionRule_File::OVERWRITE_SOURCE,     "OVERWRITE_SOURCE"},
-    {ConflictResolutionRule_File::RENAME_AND_COPY,      "RENAME_AND_COPY"},
-    {ConflictResolutionRule_File::STOP,                 "STOP"}
-};
-
-const boost::unordered_map<std::string, ConflictResolutionRule_File> Tools::stringToFileResolutionRule
-{
-    {"ASK",                     ConflictResolutionRule_File::ASK},
-    {"COPY_AND_RENAME",         ConflictResolutionRule_File::COPY_AND_RENAME},
-    {"OVERWRITE_DESTINATION",   ConflictResolutionRule_File::OVERWRITE_DESTINATION},
-    {"OVERWRITE_SOURCE",        ConflictResolutionRule_File::OVERWRITE_SOURCE},
-    {"RENAME_AND_COPY",         ConflictResolutionRule_File::RENAME_AND_COPY},
-    {"STOP",                    ConflictResolutionRule_File::STOP}
-};
-
-const boost::unordered_map<SyncFailureAction, std::string> Tools::syncFailureActionToString
-{
-    {SyncFailureAction::RETRY_LATER,"RETRY_LATER"},
-    {SyncFailureAction::RETRY_NOW,  "RETRY_NOW"},
-    {SyncFailureAction::SKIP,       "SKIP"},
-    {SyncFailureAction::STOP,       "STOP"}
-};
-
-const boost::unordered_map<std::string, SyncFailureAction> Tools::stringToSyncFailureAction
-{
-    {"RETRY_LATER", SyncFailureAction::RETRY_LATER},
-    {"RETRY_NOW",   SyncFailureAction::RETRY_NOW},
-    {"SKIP",        SyncFailureAction::SKIP},
-    {"STOP",        SyncFailureAction::STOP}
-};
-
-const boost::unordered_map<SyncResult, std::string> Tools::syncResultToString
-{
-    {SyncResult::NONE,      "NONE"},
-    {SyncResult::FAILED,    "FAILED"},
-    {SyncResult::PARTIAL,   "PARTIAL"},
-    {SyncResult::SUCCESSFUL,"SUCCESSFUL"}
-};
-
-const boost::unordered_map<std::string, SyncResult> Tools::stringToSyncResult
-{
-    {"NONE",        SyncResult::NONE},
-    {"FAILED",      SyncResult::FAILED},
-    {"PARTIAL",     SyncResult::PARTIAL},
-    {"SUCCESSFUL",  SyncResult::SUCCESSFUL}
-};
-
-const boost::unordered_map<PeerType, std::string> Tools::peerTypeToString
-{
-    {PeerType::CLIENT,  "CLIENT"},
-    {PeerType::SERVER,  "SERVER"},
-    {PeerType::INVALID, "INVALID"}
-};
-
-const boost::unordered_map<std::string, PeerType> Tools::stringToPeerType
-{
-    {"CLIENT",  PeerType::CLIENT},
-    {"SERVER",  PeerType::SERVER},
-    {"INVALID", PeerType::INVALID}
-};
-
-const boost::unordered_map<ConnectionType, std::string> Tools::connectionTypeToString
-{
-    {ConnectionType::COMMAND,           "COMMAND"},
-    {ConnectionType::DATA,              "DATA"},
-    {ConnectionType::INVALID,           "INVALID"}
-};
-
-const boost::unordered_map<std::string, ConnectionType> Tools::stringToConnectionType
-{
-    {"COMMAND",             ConnectionType::COMMAND},
-    {"DATA",                ConnectionType::DATA},
-    {"INVALID",             ConnectionType::INVALID}
-};
-
-const boost::unordered_map<ConnectionState, std::string> Tools::connectionStateToString
-{
-    {ConnectionState::CLOSED,       "CLOSED"},
-    {ConnectionState::ESTABLISHED,  "ESTABLISHED"},
-    {ConnectionState::INVALID,      "INVALID"}
-};
-
-const boost::unordered_map<std::string, ConnectionState> Tools::stringToConnectionState
-{
-    {"CLOSED",      ConnectionState::CLOSED},
-    {"ESTABLISHED", ConnectionState::ESTABLISHED},
-    {"INVALID",     ConnectionState::INVALID}
-};
-
-const boost::unordered_map<ConnectionSubstate, std::string> Tools::connectionSubstateToString
-{
-    {ConnectionSubstate::DROPPED,   "DROPPED"},
-    {ConnectionSubstate::NONE,      "NONE"},
-    {ConnectionSubstate::READING,   "READING"},
-    {ConnectionSubstate::FAILED,    "FAILED"},
-    {ConnectionSubstate::WAITING,   "WAITING"},
-    {ConnectionSubstate::WRITING,   "WRITING"}
-};
-
-const boost::unordered_map<std::string, ConnectionSubstate> Tools::stringToConnectionSubstate
-{
-    {"DROPPED", ConnectionSubstate::DROPPED},
-    {"NONE",    ConnectionSubstate::NONE},
-    {"READING", ConnectionSubstate::READING},
-    {"FAILED",  ConnectionSubstate::FAILED},
-    {"WAITING", ConnectionSubstate::WAITING},
-    {"WRITING", ConnectionSubstate::WRITING}
-};
-
-
-const boost::unordered_map<ConnectionInitiation, std::string> Tools::connectionInitiationToString
-{
-    {ConnectionInitiation::LOCAL,   "LOCAL"},
-    {ConnectionInitiation::REMOTE,  "REMOTE"},
-    {ConnectionInitiation::INVALID, "INVALID"}
-};
-
-const boost::unordered_map<std::string, ConnectionInitiation> Tools::stringToConnectionInitiation
-{
-    {"LOCAL",   ConnectionInitiation::LOCAL},
-    {"REMOTE",  ConnectionInitiation::REMOTE},
-    {"INVALID", ConnectionInitiation::INVALID}
-};
-
-const boost::unordered_map<InstructionSetType, std::string> Tools::instructionSetTypeToString
-{
-    {InstructionSetType::DATABASE_MANAGER, "DATABASE_MANAGER"},
-    {InstructionSetType::INVALID, "INVALID"}
-};
-
-const boost::unordered_map<std::string, InstructionSetType> Tools::stringToInstructionSetType
-{
-    {"DATABASE_MANAGER", InstructionSetType::DATABASE_MANAGER},
-    {"INVALID", InstructionSetType::INVALID}
-};
-
-const boost::unordered_map<DataPoolType, std::string> dataPoolTypeToString
-{
-    {DataPoolType::AGGREGATE,       "AGGREGATE"},
-    {DataPoolType::LOCAL_DISK,      "LOCAL_DISK"},
-    {DataPoolType::LOCAL_MEMORY,    "LOCAL_MEMORY"},
-    {DataPoolType::REMOTE_DISK,     "REMOTE_DISK"},
-    {DataPoolType::REMOTE_MEMORY,   "REMOTE_MEMORY"},
-    {DataPoolType::INVALID,         "INVALID"},
-};
-
-const boost::unordered_map<std::string, DataPoolType> stringToDataPoolType
-{
-    {"AGGREGATE",       DataPoolType::AGGREGATE},
-    {"LOCAL_DISK",      DataPoolType::LOCAL_DISK},
-    {"LOCAL_MEMORY",    DataPoolType::LOCAL_MEMORY},
-    {"REMOTE_DISK",     DataPoolType::REMOTE_DISK},
-    {"REMOTE_MEMORY",   DataPoolType::REMOTE_MEMORY},
-    {"INVALID",         DataPoolType::INVALID},
-};
-
-const boost::unordered_map<PoolMode, std::string> Tools::poolModeToString
-{
-    {PoolMode::READ_WRITE,  "READ_WRITE"},
-    {PoolMode::READ_ONLY,   "READ_ONLY"},
-    {PoolMode::INVALID,     "INVALID"}
-};
-
-const boost::unordered_map<std::string, PoolMode> Tools::stringToPoolMode
-{
-    {"READ_WRITE",  PoolMode::READ_WRITE},
-    {"READ_ONLY",   PoolMode::READ_ONLY},
-    {"INVALID",     PoolMode::INVALID}
-};
-
-const boost::unordered_map<PoolState, std::string> Tools::poolStateToString
-{
-    {PoolState::OPEN,       "OPEN"},
-    {PoolState::CLOSED,     "CLOSED"},
-    {PoolState::FAILED,     "FAILED"},
-    {PoolState::INVALID,    "INVALID"},
-};
-
-const boost::unordered_map<std::string, PoolState> Tools::stringToPoolState
-{
-    {"OPEN",    PoolState::OPEN},
-    {"CLOSED",  PoolState::CLOSED},
-    {"FAILED",  PoolState::FAILED},
-    {"INVALID", PoolState::INVALID}
-};
-
-const boost::unordered_map<LinkActionType, std::string> Tools::linkActionTypeToString
-{
-    {LinkActionType::DISTRIBUTE, "DISTRIBUTE"},
-    {LinkActionType::COPY,       "COPY"},
-    {LinkActionType::MOVE,       "MOVE"},
-    {LinkActionType::DISCARD,    "DISCARD"},
-    {LinkActionType::SKIP,       "SKIP"},
-    {LinkActionType::INVALID,    "INVALID"},
-};
-
-const boost::unordered_map<std::string, LinkActionType> Tools::stringToLinkActionType
-{
-    {"DISTRIBUTE",  LinkActionType::DISTRIBUTE},
-    {"COPY",        LinkActionType::COPY},
-    {"MOVE",        LinkActionType::MOVE},
-    {"DISCARD",     LinkActionType::DISCARD},
-    {"SKIP",        LinkActionType::SKIP},
-    {"INVALID",     LinkActionType::INVALID},
-};
-
-const boost::unordered_map<LinkActionConditionType, std::string> Tools::linkActionConditionTypeToString
-{
-    {LinkActionConditionType::NONE,                 "NONE"},
-    {LinkActionConditionType::TIMED,                "TIMED"},
-    {LinkActionConditionType::SOURCE_MIN_FULL,      "SOURCE_MIN_FULL"},
-    {LinkActionConditionType::TARGET_MIN_FULL,      "TARGET_MIN_FULL"},
-    {LinkActionConditionType::SOURCE_MAX_FULL,      "SOURCE_MAX_FULL"},
-    {LinkActionConditionType::TARGET_MAX_FULL,      "TARGET_MAX_FULL"},
-    {LinkActionConditionType::SOURCE_MIN_ENTITIES,  "SOURCE_MIN_ENTITIES"},
-    {LinkActionConditionType::SOURCE_MAX_ENTITIES,  "SOURCE_MAX_ENTITIES"},
-    {LinkActionConditionType::TARGET_MIN_ENTITIES,  "TARGET_MIN_ENTITIES"},
-    {LinkActionConditionType::TARGET_MAX_ENTITIES,  "TARGET_MAX_ENTITIES"},
-    {LinkActionConditionType::DATA_MIN_SIZE,        "DATA_MIN_SIZE"},
-    {LinkActionConditionType::DATA_MAX_SIZE,        "DATA_MAX_SIZE"},
-    {LinkActionConditionType::INVALID,              "INVALID"},
-};
-
-const boost::unordered_map<std::string, LinkActionConditionType> Tools::stringToLinkActionConditionType
-{
-    {"NONE",                LinkActionConditionType::NONE},
-    {"TIMED",               LinkActionConditionType::TIMED},
-    {"SOURCE_MIN_FULL",     LinkActionConditionType::SOURCE_MIN_FULL},
-    {"TARGET_MIN_FULL",     LinkActionConditionType::TARGET_MIN_FULL},
-    {"SOURCE_MAX_FULL",     LinkActionConditionType::SOURCE_MAX_FULL},
-    {"TARGET_MAX_FULL",     LinkActionConditionType::TARGET_MAX_FULL},
-    {"SOURCE_MIN_ENTITIES", LinkActionConditionType::SOURCE_MIN_ENTITIES},
-    {"SOURCE_MAX_ENTITIES", LinkActionConditionType::SOURCE_MAX_ENTITIES},
-    {"TARGET_MIN_ENTITIES", LinkActionConditionType::TARGET_MIN_ENTITIES},
-    {"TARGET_MAX_ENTITIES", LinkActionConditionType::TARGET_MAX_ENTITIES},
-    {"DATA_MIN_SIZE",       LinkActionConditionType::DATA_MIN_SIZE},
-    {"DATA_MAX_SIZE",       LinkActionConditionType::DATA_MAX_SIZE},
-    {"INVALID",             LinkActionConditionType::INVALID}
-};
-
-const boost::unordered_map<SecurableComponentType, std::string> Tools::securableComponentTypeToString
-{
-    {SecurableComponentType::DATABASE_MANAGER,  "DATABASE_MANAGER"},
-    {SecurableComponentType::NETWORK_MANAGER,   "NETWORK_MANAGER"},
-    {SecurableComponentType::SECURITY_MANAGER,  "SECURITY_MANAGER"},
-    {SecurableComponentType::STORAGE_MANAGER,   "STORAGE_MANAGER"},
-    {SecurableComponentType::SESSION_MANAGER,   "SESSION_MANAGER"},
-    {SecurableComponentType::INVALID,           "INVALID"},
-};
-
-const boost::unordered_map<std::string, SecurableComponentType> Tools::stringToSecurableComponentType
-{
-    {"DATABASE_MANAGER",    SecurableComponentType::DATABASE_MANAGER},
-    {"NETWORK_MANAGER",     SecurableComponentType::NETWORK_MANAGER},
-    {"SECURITY_MANAGER",    SecurableComponentType::SECURITY_MANAGER},
-    {"STORAGE_MANAGER",     SecurableComponentType::STORAGE_MANAGER},
-    {"SESSION_MANAGER",     SecurableComponentType::SESSION_MANAGER},
-    {"INVALID",             SecurableComponentType::INVALID},
-};
-
-const boost::unordered_map<CacheEvictionType, std::string> Tools::cacheEvictionTypeToString
-{
-    {CacheEvictionType::LRU,     "LRU"},
-    {CacheEvictionType::MRU,     "MRU"},
-    {CacheEvictionType::INVALID, "INVALID"},
-};
-
-const boost::unordered_map<std::string, CacheEvictionType> Tools::stringToCacheEvictionType
-{
-    {"LRU",     CacheEvictionType::LRU},
-    {"MRU",     CacheEvictionType::MRU},
-    {"INVALID", CacheEvictionType::INVALID},
-};
-
-const boost::unordered_map<HashAlgorithmType, std::string> Tools::hashAlgorithmTypeToString
-{
-    {HashAlgorithmType::RIPEMD_160, "RIPEMD_160"},
-    {HashAlgorithmType::RIPEMD_256, "RIPEMD_256"},
-    {HashAlgorithmType::RIPEMD_320, "RIPEMD_320"},
-    {HashAlgorithmType::SHA3_224,   "SHA3_224"},
-    {HashAlgorithmType::SHA3_256,   "SHA3_256"},
-    {HashAlgorithmType::SHA3_384,   "SHA3_384"},
-    {HashAlgorithmType::SHA3_512,   "SHA3_512"},
-    {HashAlgorithmType::SHA_224,    "SHA_224"},
-    {HashAlgorithmType::SHA_256,    "SHA_256"},
-    {HashAlgorithmType::SHA_384,    "SHA_384"},
-    {HashAlgorithmType::SHA_512,    "SHA_512"},
-    {HashAlgorithmType::WHIRLPOOL,  "WHIRLPOOL"},
-    {HashAlgorithmType::INVALID,    "INVALID"}  
-};
-
-const boost::unordered_map<std::string, HashAlgorithmType> Tools::stringToHashAlgorithmType
-{
-    {"RIPEMD_160",  HashAlgorithmType::RIPEMD_160},
-    {"RIPEMD_256",  HashAlgorithmType::RIPEMD_256},
-    {"RIPEMD_320",  HashAlgorithmType::RIPEMD_320},
-    {"SHA3_224",    HashAlgorithmType::SHA3_224},
-    {"SHA3_256",    HashAlgorithmType::SHA3_256},
-    {"SHA3_384",    HashAlgorithmType::SHA3_384},
-    {"SHA3_512",    HashAlgorithmType::SHA3_512},
-    {"SHA_224",     HashAlgorithmType::SHA_224},
-    {"SHA_256",     HashAlgorithmType::SHA_256},
-    {"SHA_384",     HashAlgorithmType::SHA_384},
-    {"SHA_512",     HashAlgorithmType::SHA_512},
-    {"WHIRLPOOL",   HashAlgorithmType::WHIRLPOOL},
-    {"INVALID",     HashAlgorithmType::INVALID}   
-};
-
-
+    return objectID;
+}

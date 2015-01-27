@@ -26,12 +26,15 @@
 #include <boost/unordered_map.hpp>
 #include "Types/Types.h"
 #include "../Utilities/Tools.h"
+#include "../Utilities/Strings/Common.h"
+#include "../Utilities/Strings/Database.h"
 #include "../Utilities/FileLogger.h"
 #include "Containers/DataContainer.h"
 #include "Containers/VectorDataContainer.h"
 #include "Interfaces/DatabaseAbstractionLayer.h"
 
-using Utilities::Tools;
+namespace Tools = Utilities::Tools;
+namespace Convert = Utilities::Strings;
 
 using boost::tuples::tuple;
 using boost::unordered::unordered_map;

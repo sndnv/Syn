@@ -95,7 +95,7 @@ bool SyncServer_Core::DatabaseManager::addDAL(DALPtr dal, bool enableCache)
         case DatabaseObjectType::SESSION: return sessionsTableDALs->addDAL(newDAL); break;
         default:
         {
-            logger->logMessage(Utilities::FileLogSeverity::Error, "DatabaseManager (Add DAL) > Failed to add DAL; unexpected type found <" + Tools::toString(newDAL->getType()) + ">.");
+            logger->logMessage(Utilities::FileLogSeverity::Error, "DatabaseManager (Add DAL) > Failed to add DAL; unexpected type found <" + Convert::toString(newDAL->getType()) + ">.");
             return false;
         } break;
     }
@@ -117,7 +117,7 @@ bool SyncServer_Core::DatabaseManager::addDAL(DALPtr dal, DALCache::DALCachePara
         case DatabaseObjectType::SESSION: return sessionsTableDALs->addDAL(newDAL);
         default:
         {
-            logger->logMessage(Utilities::FileLogSeverity::Error, "DatabaseManager (Add DAL) > Failed to add DAL; unexpected type found <" + Tools::toString(newDAL->getType()) + ">.");
+            logger->logMessage(Utilities::FileLogSeverity::Error, "DatabaseManager (Add DAL) > Failed to add DAL; unexpected type found <" + Convert::toString(newDAL->getType()) + ">.");
             return false;
         }
     }
@@ -137,7 +137,7 @@ bool SyncServer_Core::DatabaseManager::removeDAL(const DALPtr dal)
         case DatabaseObjectType::SESSION: return sessionsTableDALs->removeDAL(dal);
         default:
         {
-            logger->logMessage(Utilities::FileLogSeverity::Error, "DatabaseManager (Remove DAL) > Failed to remove DAL; unexpected type found <" + Tools::toString(dal->getType()) + ">.");
+            logger->logMessage(Utilities::FileLogSeverity::Error, "DatabaseManager (Remove DAL) > Failed to remove DAL; unexpected type found <" + Convert::toString(dal->getType()) + ">.");
             return false;
         }
     }
@@ -159,7 +159,7 @@ bool SyncServer_Core::DatabaseManager::setQueueParameters(DatabaseObjectType que
         case DatabaseObjectType::SESSION: result = sessionsTableDALs->setParameters(parameters); break;
         default:
         {
-            logger->logMessage(Utilities::FileLogSeverity::Error, "DatabaseManager (Set Queue Parameters) > Failed to set DALQueue parameters; unexpected type found <" + Tools::toString(queueType) + ">.");
+            logger->logMessage(Utilities::FileLogSeverity::Error, "DatabaseManager (Set Queue Parameters) > Failed to set DALQueue parameters; unexpected type found <" + Convert::toString(queueType) + ">.");
         } break;
     }
     
@@ -181,7 +181,7 @@ SyncServer_Core::DatabaseManagement::DALQueue::DALQueueParameters SyncServer_Cor
         
         default:
         {
-            logger->logMessage(Utilities::FileLogSeverity::Error, "DatabaseManager (Get Queue Parameters) > Failed to get DALQueue information; unexpected type found <" + Tools::toString(queueType) + ">.");
+            logger->logMessage(Utilities::FileLogSeverity::Error, "DatabaseManager (Get Queue Parameters) > Failed to get DALQueue information; unexpected type found <" + Convert::toString(queueType) + ">.");
             return DALQueue::DALQueueParameters();
         }
     }
@@ -203,7 +203,7 @@ bool SyncServer_Core::DatabaseManager::setCacheParameters(DatabaseObjectType cac
         case DatabaseObjectType::SESSION: result = sessionsTableDALs->setCacheParameters(cacheID, parameters); break;
         default:
         {
-            logger->logMessage(Utilities::FileLogSeverity::Error, "DatabaseManager (Set Cache Parameters) > Failed to set DALCache parameters; unexpected type found <" + Tools::toString(cacheType) + ">.");
+            logger->logMessage(Utilities::FileLogSeverity::Error, "DatabaseManager (Set Cache Parameters) > Failed to set DALCache parameters; unexpected type found <" + Convert::toString(cacheType) + ">.");
         } break;
     }
     
@@ -225,7 +225,7 @@ DALCache::DALCacheParameters SyncServer_Core::DatabaseManager::getCacheParameter
         
         default:
         {
-            logger->logMessage(Utilities::FileLogSeverity::Error, "DatabaseManager (Get Cache Parameters) > Failed to get caches information; unexpected type found <" + Tools::toString(queueType) + ">.");
+            logger->logMessage(Utilities::FileLogSeverity::Error, "DatabaseManager (Get Cache Parameters) > Failed to get caches information; unexpected type found <" + Convert::toString(queueType) + ">.");
             return DALCache::DALCacheParameters();
         }
     }
@@ -258,7 +258,7 @@ DALQueue::DALQueueInformation SyncServer_Core::DatabaseManager::getQueueInformat
         
         default:
         {
-            logger->logMessage(Utilities::FileLogSeverity::Error, "DatabaseManager (Get Queue Information) > Failed to get queue information; unexpected type found <" + Tools::toString(queueType) + ">.");
+            logger->logMessage(Utilities::FileLogSeverity::Error, "DatabaseManager (Get Queue Information) > Failed to get queue information; unexpected type found <" + Convert::toString(queueType) + ">.");
             return DALQueue::DALQueueInformation();
         }
     }
@@ -279,7 +279,7 @@ std::vector<DALCache::DALCacheInformation> SyncServer_Core::DatabaseManager::get
         
         default:
         {
-            logger->logMessage(Utilities::FileLogSeverity::Error, "DatabaseManager (Get Caches Information) > Failed to get caches information; unexpected type found <" + Tools::toString(queueType) + ">.");
+            logger->logMessage(Utilities::FileLogSeverity::Error, "DatabaseManager (Get Caches Information) > Failed to get caches information; unexpected type found <" + Convert::toString(queueType) + ">.");
             return std::vector<DALCache::DALCacheInformation>();
         }
     }
@@ -300,7 +300,7 @@ std::vector<DALQueue::DALInformation> SyncServer_Core::DatabaseManager::getDALsI
         
         default:
         {
-            logger->logMessage(Utilities::FileLogSeverity::Error, "DatabaseManager (Get DALs Information) > Failed to get DALs information; unexpected type found <" + Tools::toString(queueType) + ">.");
+            logger->logMessage(Utilities::FileLogSeverity::Error, "DatabaseManager (Get DALs Information) > Failed to get DALs information; unexpected type found <" + Convert::toString(queueType) + ">.");
             return std::vector<DALQueue::DALInformation>();
         }
     }
@@ -329,41 +329,41 @@ bool SyncServer_Core::DatabaseManager::Functions_Statistics::updateStatistic(Sta
     std::function<void(DatabaseRequestID, DataContainerPtr)> onSuccessHandler = [&](DatabaseRequestID id, DataContainerPtr)
     {
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <updateStatistic/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <updateStatistic/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <updateStatistic/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <updateStatistic/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <updateStatistic/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <updateStatistic/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <updateStatistic/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <updateStatistic/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             
             resultReceived = true;
             successful = true;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <updateStatistic/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <updateStatistic/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     std::function<void(DatabaseRequestID, DBObjectID)> onFailureHandler = [&](DatabaseRequestID id, DBObjectID)
     {
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <updateStatistic/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <updateStatistic/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <updateStatistic/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <updateStatistic/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <updateStatistic/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <updateStatistic/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <updateStatistic/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <updateStatistic/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             
             resultReceived = true;
             successful = false;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <updateStatistic/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <updateStatistic/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     onSuccessConnection = parentManager->statisticsTableDALs->onSuccessEventAttach(onSuccessHandler);
@@ -376,13 +376,13 @@ bool SyncServer_Core::DatabaseManager::Functions_Statistics::updateStatistic(Sta
         boost::unique_lock<boost::mutex> resultLock(resultMutex);
         boost::system_time nextWakeup = boost::get_system_time() + boost::posix_time::seconds(parentManager->functionCallTimeout);
         while(!resultReceived && !releaseLocks && resultCondition.timed_wait(resultLock, nextWakeup))
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <updateStatistic/TLOCK> ["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <updateStatistic/TLOCK> ["+Convert::toString(requestID)+"]");
     }
     
     onSuccessConnection.disconnect();
     onFailreConnection.disconnect();
     
-    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <updateStatistic/END> ["+Tools::toString(requestID)+"]");
+    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <updateStatistic/END> ["+Convert::toString(requestID)+"]");
     return successful;
 }
 
@@ -428,40 +428,40 @@ StatisticDataContainerPtr SyncServer_Core::DatabaseManager::Functions_Statistics
     std::function<void(DatabaseRequestID, DataContainerPtr)> onSuccessHandler = [&](DatabaseRequestID id, DataContainerPtr data)
     {
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getStatistic/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getStatistic/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getStatistic/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getStatistic/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getStatistic/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getStatistic/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getStatistic/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getStatistic/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             
             result = boost::dynamic_pointer_cast<DatabaseManagement_Containers::StatisticDataContainer>(data);
             resultReceived = true;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getStatistic/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getStatistic/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     std::function<void(DatabaseRequestID, DBObjectID)> onFailureHandler = [&](DatabaseRequestID id, DBObjectID)
     {
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getStatistic/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getStatistic/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getStatistic/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getStatistic/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getStatistic/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getStatistic/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getStatistic/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getStatistic/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             
             resultReceived = true;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getStatistic/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getStatistic/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     onSuccessConnection = parentManager->statisticsTableDALs->onSuccessEventAttach(onSuccessHandler);
@@ -473,13 +473,13 @@ StatisticDataContainerPtr SyncServer_Core::DatabaseManager::Functions_Statistics
         boost::unique_lock<boost::mutex> resultLock(resultMutex);
         boost::system_time nextWakeup = boost::get_system_time() + boost::posix_time::seconds(parentManager->functionCallTimeout);
         while(!resultReceived && !releaseLocks && resultCondition.timed_wait(resultLock, nextWakeup))
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getStatistic/TLOCK> ["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getStatistic/TLOCK> ["+Convert::toString(requestID)+"]");
     }
     
     onSuccessConnection.disconnect();
     onFailreConnection.disconnect();
     
-    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getStatistic/END> ["+Tools::toString(requestID)+"]");
+    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getStatistic/END> ["+Convert::toString(requestID)+"]");
     return result;
 }
 
@@ -495,40 +495,40 @@ vector<StatisticDataContainerPtr> SyncServer_Core::DatabaseManager::Functions_St
     std::function<void(DatabaseRequestID, DataContainerPtr)> onSuccessHandler = [&](DatabaseRequestID id, DataContainerPtr data)
     {
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getAllStatistics/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getAllStatistics/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getAllStatistics/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getAllStatistics/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getAllStatistics/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getAllStatistics/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getAllStatistics/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getAllStatistics/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             
             containersWrapper = boost::dynamic_pointer_cast<DatabaseManagement_Containers::VectorDataContainer>(data);
             resultReceived = true;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getAllStatistics/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getAllStatistics/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     std::function<void(DatabaseRequestID, DBObjectID)> onFailureHandler = [&](DatabaseRequestID id, DBObjectID)
     {
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getAllStatistics/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getAllStatistics/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getAllStatistics/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getAllStatistics/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getAllStatistics/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getAllStatistics/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getAllStatistics/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getAllStatistics/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             
             resultReceived = true;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getAllStatistics/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getAllStatistics/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     onSuccessConnection = parentManager->statisticsTableDALs->onSuccessEventAttach(onSuccessHandler);
@@ -540,7 +540,7 @@ vector<StatisticDataContainerPtr> SyncServer_Core::DatabaseManager::Functions_St
         boost::unique_lock<boost::mutex> resultLock(resultMutex);
         boost::system_time nextWakeup = boost::get_system_time() + boost::posix_time::seconds(parentManager->functionCallTimeout);
         while(!resultReceived && !releaseLocks && resultCondition.timed_wait(resultLock, nextWakeup))
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getAllStatistics/TLOCK> ["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getAllStatistics/TLOCK> ["+Convert::toString(requestID)+"]");
     }
     
     onSuccessConnection.disconnect();
@@ -554,7 +554,7 @@ vector<StatisticDataContainerPtr> SyncServer_Core::DatabaseManager::Functions_St
             result.push_back(boost::dynamic_pointer_cast<DatabaseManagement_Containers::StatisticDataContainer>(currentContainer));
     }
     
-    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getAllStatistics/END> ["+Tools::toString(requestID)+"]");
+    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getAllStatistics/END> ["+Convert::toString(requestID)+"]");
     return result;
 }
 
@@ -642,41 +642,41 @@ bool SyncServer_Core::DatabaseManager::Functions_System::setSystemParameter(Syst
     std::function<void(DatabaseRequestID, DataContainerPtr)> onSuccessHandler = [&](DatabaseRequestID id, DataContainerPtr)
     { 
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <setSystemParameter/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <setSystemParameter/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <setSystemParameter/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <setSystemParameter/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <setSystemParameter/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <setSystemParameter/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <setSystemParameter/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <setSystemParameter/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             
             resultReceived = true;
             successful = true;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <setSystemParameter/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <setSystemParameter/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     std::function<void(DatabaseRequestID, DBObjectID)> onFailureHandler = [&](DatabaseRequestID id, DBObjectID)
     {
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <setSystemParameter/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <setSystemParameter/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <setSystemParameter/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <setSystemParameter/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <setSystemParameter/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <setSystemParameter/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <setSystemParameter/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <setSystemParameter/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             
             resultReceived = true;
             successful = false;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <setSystemParameter/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <setSystemParameter/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     onSuccessConnection = parentManager->systemTableDALs->onSuccessEventAttach(onSuccessHandler);
@@ -689,13 +689,13 @@ bool SyncServer_Core::DatabaseManager::Functions_System::setSystemParameter(Syst
         boost::unique_lock<boost::mutex> resultLock(resultMutex);
         boost::system_time nextWakeup = boost::get_system_time() + boost::posix_time::seconds(parentManager->functionCallTimeout);
         while(!resultReceived && !releaseLocks && resultCondition.timed_wait(resultLock, nextWakeup))
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <setSystemParameter/TLOCK> ["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <setSystemParameter/TLOCK> ["+Convert::toString(requestID)+"]");
     }
     
     onSuccessConnection.disconnect();
     onFailreConnection.disconnect();
     
-    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <setSystemParameter/END> ["+Tools::toString(requestID)+"]");
+    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <setSystemParameter/END> ["+Convert::toString(requestID)+"]");
     return successful;
 }
 
@@ -821,40 +821,40 @@ SystemDataContainerPtr SyncServer_Core::DatabaseManager::Functions_System::getSy
     std::function<void(DatabaseRequestID, DataContainerPtr)> onSuccessHandler = [&](DatabaseRequestID id, DataContainerPtr data)
     {
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSystemParameter/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSystemParameter/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSystemParameter/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSystemParameter/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSystemParameter/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSystemParameter/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSystemParameter/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSystemParameter/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             
             result = boost::dynamic_pointer_cast<DatabaseManagement_Containers::SystemDataContainer>(data);
             resultReceived = true;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSystemParameter/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSystemParameter/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     std::function<void(DatabaseRequestID, DBObjectID)> onFailureHandler = [&](DatabaseRequestID id, DBObjectID)
     {
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSystemParameter/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSystemParameter/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSystemParameter/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSystemParameter/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSystemParameter/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSystemParameter/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSystemParameter/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSystemParameter/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             
             resultReceived = true;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSystemParameter/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSystemParameter/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     onSuccessConnection = parentManager->systemTableDALs->onSuccessEventAttach(onSuccessHandler);
@@ -866,13 +866,13 @@ SystemDataContainerPtr SyncServer_Core::DatabaseManager::Functions_System::getSy
         boost::unique_lock<boost::mutex> resultLock(resultMutex);
         boost::system_time nextWakeup = boost::get_system_time() + boost::posix_time::seconds(parentManager->functionCallTimeout);
         while(!resultReceived && !releaseLocks && resultCondition.timed_wait(resultLock, nextWakeup))
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getSystemParameter/TLOCK> ["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getSystemParameter/TLOCK> ["+Convert::toString(requestID)+"]");
     }
     
     onSuccessConnection.disconnect();
     onFailreConnection.disconnect();
     
-    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getSystemParameter/END> ["+Tools::toString(requestID)+"]");
+    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getSystemParameter/END> ["+Convert::toString(requestID)+"]");
     return result;
 }
 
@@ -888,40 +888,40 @@ vector<SystemDataContainerPtr> SyncServer_Core::DatabaseManager::Functions_Syste
     std::function<void(DatabaseRequestID, DataContainerPtr)> onSuccessHandler = [&](DatabaseRequestID id, DataContainerPtr data)
     {
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getAllSystemparameters/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getAllSystemparameters/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getAllSystemparameters/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getAllSystemparameters/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getAllSystemparameters/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getAllSystemparameters/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getAllSystemparameters/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getAllSystemparameters/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             
             containersWrapper = boost::dynamic_pointer_cast<DatabaseManagement_Containers::VectorDataContainer>(data);
             resultReceived = true;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getAllSystemparameters/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getAllSystemparameters/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     std::function<void(DatabaseRequestID, DBObjectID)> onFailureHandler = [&](DatabaseRequestID id, DBObjectID)
     {
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getAllSystemparameters/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getAllSystemparameters/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getAllSystemparameters/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getAllSystemparameters/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getAllSystemparameters/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getAllSystemparameters/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getAllSystemparameters/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getAllSystemparameters/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             
             resultReceived = true;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getAllSystemparameters/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getAllSystemparameters/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     onSuccessConnection = parentManager->systemTableDALs->onSuccessEventAttach(onSuccessHandler);
@@ -933,7 +933,7 @@ vector<SystemDataContainerPtr> SyncServer_Core::DatabaseManager::Functions_Syste
         boost::unique_lock<boost::mutex> resultLock(resultMutex);
         boost::system_time nextWakeup = boost::get_system_time() + boost::posix_time::seconds(parentManager->functionCallTimeout);
         while(!resultReceived && !releaseLocks && resultCondition.timed_wait(resultLock, nextWakeup))
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getAllSystemparameters/TLOCK> ["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getAllSystemparameters/TLOCK> ["+Convert::toString(requestID)+"]");
     }
     
     onSuccessConnection.disconnect();
@@ -947,7 +947,7 @@ vector<SystemDataContainerPtr> SyncServer_Core::DatabaseManager::Functions_Syste
             result.push_back(boost::dynamic_pointer_cast<DatabaseManagement_Containers::SystemDataContainer>(currentContainer));
     }
     
-    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getAllSystemparameters/END> ["+Tools::toString(requestID)+"]");
+    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getAllSystemparameters/END> ["+Convert::toString(requestID)+"]");
     return result;
 }
 
@@ -1186,41 +1186,41 @@ bool SyncServer_Core::DatabaseManager::Functions_SyncFiles::addSync(const SyncDa
     std::function<void(DatabaseRequestID, DataContainerPtr)> onSuccessHandler = [&](DatabaseRequestID id, DataContainerPtr)
     {
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <addSync/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <addSync/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <addSync/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <addSync/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <addSync/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <addSync/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <addSync/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <addSync/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             
             resultReceived = true;
             successful = true;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <addSync/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <addSync/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     std::function<void(DatabaseRequestID, DBObjectID)> onFailureHandler = [&](DatabaseRequestID id, DBObjectID)
     {
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <addSync/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <addSync/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <addSync/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <addSync/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <addSync/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <addSync/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <addSync/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <addSync/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             
             resultReceived = true;
             successful = false;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <addSync/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <addSync/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     onSuccessConnection = parentManager->syncFilesTableDALs->onSuccessEventAttach(onSuccessHandler);
@@ -1232,13 +1232,13 @@ bool SyncServer_Core::DatabaseManager::Functions_SyncFiles::addSync(const SyncDa
         boost::unique_lock<boost::mutex> resultLock(resultMutex);
         boost::system_time nextWakeup = boost::get_system_time() + boost::posix_time::seconds(parentManager->functionCallTimeout);
         while(!resultReceived && !releaseLocks && resultCondition.timed_wait(resultLock, nextWakeup))
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <addSync/TLOCK> ["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <addSync/TLOCK> ["+Convert::toString(requestID)+"]");
     }
     
     onSuccessConnection.disconnect();
     onFailreConnection.disconnect();
     
-    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <addSync/END> ["+Tools::toString(requestID)+"]");
+    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <addSync/END> ["+Convert::toString(requestID)+"]");
     return successful;
 }
 
@@ -1254,41 +1254,41 @@ bool SyncServer_Core::DatabaseManager::Functions_SyncFiles::updateSync(const Syn
     std::function<void(DatabaseRequestID, DataContainerPtr)> onSuccessHandler = [&](DatabaseRequestID id, DataContainerPtr)
     { 
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <updateSync/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <updateSync/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <updateSync/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <updateSync/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <updateSync/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <updateSync/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <updateSync/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <updateSync/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             
             resultReceived = true;
             successful = true;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <updateSync/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <updateSync/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     std::function<void(DatabaseRequestID, DBObjectID)> onFailureHandler = [&](DatabaseRequestID id, DBObjectID)
     {
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <updateSync/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <updateSync/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <updateSync/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <updateSync/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <updateSync/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <updateSync/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <updateSync/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <updateSync/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             
             resultReceived = true;
             successful = false;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <updateSync/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <updateSync/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     onSuccessConnection = parentManager->syncFilesTableDALs->onSuccessEventAttach(onSuccessHandler);
@@ -1300,13 +1300,13 @@ bool SyncServer_Core::DatabaseManager::Functions_SyncFiles::updateSync(const Syn
         boost::unique_lock<boost::mutex> resultLock(resultMutex);
         boost::system_time nextWakeup = boost::get_system_time() + boost::posix_time::seconds(parentManager->functionCallTimeout);
         while(!resultReceived && !releaseLocks && resultCondition.timed_wait(resultLock, nextWakeup))
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <updateSync/TLOCK> ["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <updateSync/TLOCK> ["+Convert::toString(requestID)+"]");
     }
     
     onSuccessConnection.disconnect();
     onFailreConnection.disconnect();
     
-    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <updateSync/END> ["+Tools::toString(requestID)+"]");
+    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <updateSync/END> ["+Convert::toString(requestID)+"]");
     return successful;
 }
 
@@ -1322,41 +1322,41 @@ bool SyncServer_Core::DatabaseManager::Functions_SyncFiles::removeSync(SyncID sy
     std::function<void(DatabaseRequestID, DataContainerPtr)> onSuccessHandler = [&](DatabaseRequestID id, DataContainerPtr)
     { 
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <removeSync/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <removeSync/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <removeSync/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <removeSync/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <removeSync/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <removeSync/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <removeSync/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <removeSync/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             
             resultReceived = true;
             successful = true;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <removeSync/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <removeSync/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     std::function<void(DatabaseRequestID, DBObjectID)> onFailureHandler = [&](DatabaseRequestID id, DBObjectID)
     {
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <removeSync/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <removeSync/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <removeSync/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <removeSync/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <removeSync/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <removeSync/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <removeSync/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <removeSync/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             
             resultReceived = true;
             successful = false;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <removeSync/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <removeSync/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     onSuccessConnection = parentManager->syncFilesTableDALs->onSuccessEventAttach(onSuccessHandler);
@@ -1368,13 +1368,13 @@ bool SyncServer_Core::DatabaseManager::Functions_SyncFiles::removeSync(SyncID sy
         boost::unique_lock<boost::mutex> resultLock(resultMutex);
         boost::system_time nextWakeup = boost::get_system_time() + boost::posix_time::seconds(parentManager->functionCallTimeout);
         while(!resultReceived && !releaseLocks && resultCondition.timed_wait(resultLock, nextWakeup))
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <removeSync/TLOCK> ["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <removeSync/TLOCK> ["+Convert::toString(requestID)+"]");
     }
     
     onSuccessConnection.disconnect();
     onFailreConnection.disconnect();
     
-    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <removeSync/END> ["+Tools::toString(requestID)+"]");
+    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <removeSync/END> ["+Convert::toString(requestID)+"]");
     return successful;
 }
 
@@ -1390,40 +1390,40 @@ SyncDataContainerPtr SyncServer_Core::DatabaseManager::Functions_SyncFiles::getS
     std::function<void(DatabaseRequestID, DataContainerPtr)> onSuccessHandler = [&](DatabaseRequestID id, DataContainerPtr data)
     {
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSync/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSync/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSync/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSync/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSync/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSync/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSync/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSync/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             
             result = boost::dynamic_pointer_cast<DatabaseManagement_Containers::SyncDataContainer>(data);
             resultReceived = true;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSync/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSync/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     std::function<void(DatabaseRequestID, DBObjectID)> onFailureHandler = [&](DatabaseRequestID id, DBObjectID)
     {
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSync/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSync/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSync/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSync/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSync/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSync/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSync/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSync/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             
             resultReceived = true;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSync/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSync/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     onSuccessConnection = parentManager->syncFilesTableDALs->onSuccessEventAttach(onSuccessHandler);
@@ -1435,13 +1435,13 @@ SyncDataContainerPtr SyncServer_Core::DatabaseManager::Functions_SyncFiles::getS
         boost::unique_lock<boost::mutex> resultLock(resultMutex);
         boost::system_time nextWakeup = boost::get_system_time() + boost::posix_time::seconds(parentManager->functionCallTimeout);
         while(!resultReceived && !releaseLocks && resultCondition.timed_wait(resultLock, nextWakeup))
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getSync/TLOCK> ["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getSync/TLOCK> ["+Convert::toString(requestID)+"]");
     }
     
     onSuccessConnection.disconnect();
     onFailreConnection.disconnect();
     
-    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getSync/END> ["+Tools::toString(requestID)+"]");
+    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getSync/END> ["+Convert::toString(requestID)+"]");
     return result;
 }
 
@@ -1457,40 +1457,40 @@ vector<SyncDataContainerPtr> SyncServer_Core::DatabaseManager::Functions_SyncFil
     std::function<void(DatabaseRequestID, DataContainerPtr)> onSuccessHandler = [&](DatabaseRequestID id, DataContainerPtr data)
     {
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSyncsByConstraint/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSyncsByConstraint/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSyncsByConstraint/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSyncsByConstraint/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSyncsByConstraint/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSyncsByConstraint/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSyncsByConstraint/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSyncsByConstraint/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             
             containersWrapper = boost::dynamic_pointer_cast<DatabaseManagement_Containers::VectorDataContainer>(data);
             resultReceived = true;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSyncsByConstraint/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSyncsByConstraint/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     std::function<void(DatabaseRequestID, DBObjectID)> onFailureHandler = [&](DatabaseRequestID id, DBObjectID)
     {
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSyncsByConstraint/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSyncsByConstraint/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSyncsByConstraint/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSyncsByConstraint/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSyncsByConstraint/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSyncsByConstraint/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSyncsByConstraint/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSyncsByConstraint/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             
             resultReceived = true;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSyncsByConstraint/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSyncsByConstraint/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     onSuccessConnection = parentManager->syncFilesTableDALs->onSuccessEventAttach(onSuccessHandler);
@@ -1502,7 +1502,7 @@ vector<SyncDataContainerPtr> SyncServer_Core::DatabaseManager::Functions_SyncFil
         boost::unique_lock<boost::mutex> resultLock(resultMutex);
         boost::system_time nextWakeup = boost::get_system_time() + boost::posix_time::seconds(parentManager->functionCallTimeout);
         while(!resultReceived && !releaseLocks && resultCondition.timed_wait(resultLock, nextWakeup))
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getSyncsByConstraint/TLOCK> ["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getSyncsByConstraint/TLOCK> ["+Convert::toString(requestID)+"]");
     }
     
     onSuccessConnection.disconnect();
@@ -1518,7 +1518,7 @@ vector<SyncDataContainerPtr> SyncServer_Core::DatabaseManager::Functions_SyncFil
         }
     }
     
-    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getSyncsByConstraint/END> ["+Tools::toString(requestID)+"]");
+    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getSyncsByConstraint/END> ["+Convert::toString(requestID)+"]");
     return result;
 }
 
@@ -1586,40 +1586,40 @@ bool SyncServer_Core::DatabaseManager::Functions_Devices::addDevice(const Device
     std::function<void(DatabaseRequestID, DataContainerPtr)> onSuccessHandler = [&](DatabaseRequestID id, DataContainerPtr)
     { 
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <addDevice/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <addDevice/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <addDevice/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <addDevice/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <addDevice/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <addDevice/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <addDevice/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <addDevice/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             resultReceived = true;
             successful = true;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <addDevice/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <addDevice/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     std::function<void(DatabaseRequestID, DBObjectID)> onFailureHandler = [&](DatabaseRequestID id, DBObjectID)
     {
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <addDevice/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <addDevice/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <addDevice/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <addDevice/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <addDevice/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <addDevice/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <addDevice/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <addDevice/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             
             resultReceived = true;
             successful = false;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <addDevice/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <addDevice/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     onSuccessConnection = parentManager->devicesTableDALs->onSuccessEventAttach(onSuccessHandler);
@@ -1631,13 +1631,13 @@ bool SyncServer_Core::DatabaseManager::Functions_Devices::addDevice(const Device
         boost::unique_lock<boost::mutex> resultLock(resultMutex);
         boost::system_time nextWakeup = boost::get_system_time() + boost::posix_time::seconds(parentManager->functionCallTimeout);
         while(!resultReceived && !releaseLocks && resultCondition.timed_wait(resultLock, nextWakeup))
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <addDevice/TLOCK> ["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <addDevice/TLOCK> ["+Convert::toString(requestID)+"]");
     }
     
     onSuccessConnection.disconnect();
     onFailreConnection.disconnect();
     
-    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <addDevice/END> ["+Tools::toString(requestID)+"]");
+    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <addDevice/END> ["+Convert::toString(requestID)+"]");
     return successful;
 }
 
@@ -1653,40 +1653,40 @@ bool SyncServer_Core::DatabaseManager::Functions_Devices::updateDevice(const Dev
     std::function<void(DatabaseRequestID, DataContainerPtr)> onSuccessHandler = [&](DatabaseRequestID id, DataContainerPtr)
     { 
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <updateDevice/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <updateDevice/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <updateDevice/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <updateDevice/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <updateDevice/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <updateDevice/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <updateDevice/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <updateDevice/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             resultReceived = true;
             successful = true;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <updateDevice/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <updateDevice/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     std::function<void(DatabaseRequestID, DBObjectID)> onFailureHandler = [&](DatabaseRequestID id, DBObjectID)
     {
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <updateDevice/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <updateDevice/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <updateDevice/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <updateDevice/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <updateDevice/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <updateDevice/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <updateDevice/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <updateDevice/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             
             resultReceived = true;
             successful = false;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <updateDevice/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <updateDevice/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     onSuccessConnection = parentManager->devicesTableDALs->onSuccessEventAttach(onSuccessHandler);
@@ -1698,13 +1698,13 @@ bool SyncServer_Core::DatabaseManager::Functions_Devices::updateDevice(const Dev
         boost::unique_lock<boost::mutex> resultLock(resultMutex);
         boost::system_time nextWakeup = boost::get_system_time() + boost::posix_time::seconds(parentManager->functionCallTimeout);
         while(!resultReceived && !releaseLocks && resultCondition.timed_wait(resultLock, nextWakeup))
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <updateDevice/TLOCK> ["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <updateDevice/TLOCK> ["+Convert::toString(requestID)+"]");
     }
     
     onSuccessConnection.disconnect();
     onFailreConnection.disconnect();
     
-    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <updateDevice/END> ["+Tools::toString(requestID)+"]");
+    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <updateDevice/END> ["+Convert::toString(requestID)+"]");
     return successful;
 }
 
@@ -1720,40 +1720,40 @@ bool SyncServer_Core::DatabaseManager::Functions_Devices::removeDevice(DeviceID 
     std::function<void(DatabaseRequestID, DataContainerPtr)> onSuccessHandler = [&](DatabaseRequestID id, DataContainerPtr)
     { 
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <removeDevice/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <removeDevice/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <removeDevice/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <removeDevice/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <removeDevice/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <removeDevice/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <removeDevice/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <removeDevice/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             resultReceived = true;
             successful = true;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <removeDevice/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <removeDevice/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     std::function<void(DatabaseRequestID, DBObjectID)> onFailureHandler = [&](DatabaseRequestID id, DBObjectID)
     {
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <removeDevice/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <removeDevice/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <removeDevice/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <removeDevice/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <removeDevice/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <removeDevice/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <removeDevice/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <removeDevice/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             
             resultReceived = true;
             successful = false;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <removeDevice/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <removeDevice/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     onSuccessConnection = parentManager->devicesTableDALs->onSuccessEventAttach(onSuccessHandler);
@@ -1765,13 +1765,13 @@ bool SyncServer_Core::DatabaseManager::Functions_Devices::removeDevice(DeviceID 
         boost::unique_lock<boost::mutex> resultLock(resultMutex);
         boost::system_time nextWakeup = boost::get_system_time() + boost::posix_time::seconds(parentManager->functionCallTimeout);
         while(!resultReceived && !releaseLocks && resultCondition.timed_wait(resultLock, nextWakeup))
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <removeDevice/TLOCK> ["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <removeDevice/TLOCK> ["+Convert::toString(requestID)+"]");
     }
     
     onSuccessConnection.disconnect();
     onFailreConnection.disconnect();
     
-    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <removeDevice/END> ["+Tools::toString(requestID)+"]");
+    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <removeDevice/END> ["+Convert::toString(requestID)+"]");
     return successful;
 }
 
@@ -1787,40 +1787,40 @@ DeviceDataContainerPtr SyncServer_Core::DatabaseManager::Functions_Devices::getD
     std::function<void(DatabaseRequestID, DataContainerPtr)> onSuccessHandler = [&](DatabaseRequestID id, DataContainerPtr data)
     {
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getDevice/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getDevice/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getDevice/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getDevice/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getDevice/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getDevice/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getDevice/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getDevice/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             
             result = boost::dynamic_pointer_cast<DatabaseManagement_Containers::DeviceDataContainer>(data);
             resultReceived = true;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getDevice/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getDevice/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     std::function<void(DatabaseRequestID, DBObjectID)> onFailureHandler = [&](DatabaseRequestID id, DBObjectID)
     {
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getDevice/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getDevice/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getDevice/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getDevice/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getDevice/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getDevice/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getDevice/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getDevice/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             
             resultReceived = true;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getDevice/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getDevice/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     onSuccessConnection = parentManager->devicesTableDALs->onSuccessEventAttach(onSuccessHandler);
@@ -1832,13 +1832,13 @@ DeviceDataContainerPtr SyncServer_Core::DatabaseManager::Functions_Devices::getD
         boost::unique_lock<boost::mutex> resultLock(resultMutex);
         boost::system_time nextWakeup = boost::get_system_time() + boost::posix_time::seconds(parentManager->functionCallTimeout);
         while(!resultReceived && !releaseLocks && resultCondition.timed_wait(resultLock, nextWakeup))
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getDevice/TLOCK> ["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getDevice/TLOCK> ["+Convert::toString(requestID)+"]");
     }
     
     onSuccessConnection.disconnect();
     onFailreConnection.disconnect();
     
-    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getDevice/END> ["+Tools::toString(requestID)+"]");
+    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getDevice/END> ["+Convert::toString(requestID)+"]");
     return result;
 }
 
@@ -1854,40 +1854,40 @@ vector<DeviceDataContainerPtr> SyncServer_Core::DatabaseManager::Functions_Devic
     std::function<void(DatabaseRequestID, DataContainerPtr)> onSuccessHandler = [&](DatabaseRequestID id, DataContainerPtr data)
     {
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getDevicesByConstraint/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getDevicesByConstraint/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getDevicesByConstraint/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getDevicesByConstraint/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getDevicesByConstraint/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getDevicesByConstraint/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getDevicesByConstraint/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getDevicesByConstraint/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             
             containersWrapper = boost::dynamic_pointer_cast<DatabaseManagement_Containers::VectorDataContainer>(data);
             resultReceived = true;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getDevicesByConstraint/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getDevicesByConstraint/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     std::function<void(DatabaseRequestID, DBObjectID)> onFailureHandler = [&](DatabaseRequestID id, DBObjectID)
     {
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getDevicesByConstraint/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getDevicesByConstraint/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getDevicesByConstraint/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getDevicesByConstraint/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getDevicesByConstraint/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getDevicesByConstraint/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getDevicesByConstraint/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getDevicesByConstraint/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             
             resultReceived = true;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getDevicesByConstraint/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getDevicesByConstraint/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     onSuccessConnection = parentManager->devicesTableDALs->onSuccessEventAttach(onSuccessHandler);
@@ -1899,7 +1899,7 @@ vector<DeviceDataContainerPtr> SyncServer_Core::DatabaseManager::Functions_Devic
         boost::unique_lock<boost::mutex> resultLock(resultMutex);
         boost::system_time nextWakeup = boost::get_system_time() + boost::posix_time::seconds(parentManager->functionCallTimeout);
         while(!resultReceived && !releaseLocks && resultCondition.timed_wait(resultLock, nextWakeup))
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getDevicesByConstraint/TLOCK> ["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getDevicesByConstraint/TLOCK> ["+Convert::toString(requestID)+"]");
     }
     
     onSuccessConnection.disconnect();
@@ -1913,7 +1913,7 @@ vector<DeviceDataContainerPtr> SyncServer_Core::DatabaseManager::Functions_Devic
             result.push_back(boost::dynamic_pointer_cast<DatabaseManagement_Containers::DeviceDataContainer>(currentContainer));
     }
     
-    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getDevicesByConstraint/END> ["+Tools::toString(requestID)+"]");
+    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getDevicesByConstraint/END> ["+Convert::toString(requestID)+"]");
     return result;
 }
 
@@ -1961,41 +1961,41 @@ bool SyncServer_Core::DatabaseManager::Functions_Schedules::addSchedule(const Sc
     std::function<void(DatabaseRequestID, DataContainerPtr)> onSuccessHandler = [&](DatabaseRequestID id, DataContainerPtr)
     { 
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <addSchedule/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <addSchedule/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <addSchedule/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <addSchedule/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <addSchedule/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <addSchedule/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <addSchedule/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <addSchedule/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             
             resultReceived = true;
             successful = true;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <addSchedule/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <addSchedule/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     std::function<void(DatabaseRequestID, DBObjectID)> onFailureHandler = [&](DatabaseRequestID id, DBObjectID)
     {
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <addSchedule/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <addSchedule/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <addSchedule/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <addSchedule/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <addSchedule/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <addSchedule/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <addSchedule/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <addSchedule/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             
             resultReceived = true;
             successful = false;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <addSchedule/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <addSchedule/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     onSuccessConnection = parentManager->schedulesTableDALs->onSuccessEventAttach(onSuccessHandler);
@@ -2007,13 +2007,13 @@ bool SyncServer_Core::DatabaseManager::Functions_Schedules::addSchedule(const Sc
         boost::unique_lock<boost::mutex> resultLock(resultMutex);
         boost::system_time nextWakeup = boost::get_system_time() + boost::posix_time::seconds(parentManager->functionCallTimeout);
         while(!resultReceived && !releaseLocks && resultCondition.timed_wait(resultLock, nextWakeup))
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <addSchedule/TLOCK> ["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <addSchedule/TLOCK> ["+Convert::toString(requestID)+"]");
     }
     
     onSuccessConnection.disconnect();
     onFailreConnection.disconnect();
     
-    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <addSchedule/END> ["+Tools::toString(requestID)+"]");
+    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <addSchedule/END> ["+Convert::toString(requestID)+"]");
     return successful;
 }
 
@@ -2029,41 +2029,41 @@ bool SyncServer_Core::DatabaseManager::Functions_Schedules::updateSchedule(const
     std::function<void(DatabaseRequestID, DataContainerPtr)> onSuccessHandler = [&](DatabaseRequestID id, DataContainerPtr)
     {
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <updateSchedule/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <updateSchedule/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <updateSchedule/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <updateSchedule/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <updateSchedule/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <updateSchedule/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <updateSchedule/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <updateSchedule/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             
             resultReceived = true;
             successful = true;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <updateSchedule/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <updateSchedule/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     std::function<void(DatabaseRequestID, DBObjectID)> onFailureHandler = [&](DatabaseRequestID id, DBObjectID)
     {
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <updateSchedule/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <updateSchedule/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <updateSchedule/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <updateSchedule/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <updateSchedule/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <updateSchedule/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <updateSchedule/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <updateSchedule/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             
             resultReceived = true;
             successful = false;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <updateSchedule/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <updateSchedule/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     onSuccessConnection = parentManager->schedulesTableDALs->onSuccessEventAttach(onSuccessHandler);
@@ -2075,13 +2075,13 @@ bool SyncServer_Core::DatabaseManager::Functions_Schedules::updateSchedule(const
         boost::unique_lock<boost::mutex> resultLock(resultMutex);
         boost::system_time nextWakeup = boost::get_system_time() + boost::posix_time::seconds(parentManager->functionCallTimeout);
         while(!resultReceived && !releaseLocks && resultCondition.timed_wait(resultLock, nextWakeup))
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <updateSchedule/TLOCK> ["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <updateSchedule/TLOCK> ["+Convert::toString(requestID)+"]");
     }
     
     onSuccessConnection.disconnect();
     onFailreConnection.disconnect();
     
-    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <updateSchedule/END> ["+Tools::toString(requestID)+"]");
+    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <updateSchedule/END> ["+Convert::toString(requestID)+"]");
     return successful;
 }
 
@@ -2097,41 +2097,41 @@ bool SyncServer_Core::DatabaseManager::Functions_Schedules::removeSchedule(Sched
     std::function<void(DatabaseRequestID, DataContainerPtr)> onSuccessHandler = [&](DatabaseRequestID id, DataContainerPtr)
     {
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <removeSchedule/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <removeSchedule/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <removeSchedule/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <removeSchedule/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <removeSchedule/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <removeSchedule/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <removeSchedule/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <removeSchedule/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             
             resultReceived = true;
             successful = true;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <removeSchedule/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <removeSchedule/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     std::function<void(DatabaseRequestID, DBObjectID)> onFailureHandler = [&](DatabaseRequestID id, DBObjectID)
     {
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <removeSchedule/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <removeSchedule/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <removeSchedule/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <removeSchedule/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <removeSchedule/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <removeSchedule/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <removeSchedule/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <removeSchedule/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             
             resultReceived = true;
             successful = false;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <removeSchedule/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <removeSchedule/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     onSuccessConnection = parentManager->schedulesTableDALs->onSuccessEventAttach(onSuccessHandler);
@@ -2143,13 +2143,13 @@ bool SyncServer_Core::DatabaseManager::Functions_Schedules::removeSchedule(Sched
         boost::unique_lock<boost::mutex> resultLock(resultMutex);
         boost::system_time nextWakeup = boost::get_system_time() + boost::posix_time::seconds(parentManager->functionCallTimeout);
         while(!resultReceived && !releaseLocks && resultCondition.timed_wait(resultLock, nextWakeup))
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <removeSchedule/TLOCK> ["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <removeSchedule/TLOCK> ["+Convert::toString(requestID)+"]");
     }
     
     onSuccessConnection.disconnect();
     onFailreConnection.disconnect();
     
-    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <removeSchedule/END> ["+Tools::toString(requestID)+"]");
+    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <removeSchedule/END> ["+Convert::toString(requestID)+"]");
     return successful;
 }
 
@@ -2165,40 +2165,40 @@ ScheduleDataContainerPtr SyncServer_Core::DatabaseManager::Functions_Schedules::
     std::function<void(DatabaseRequestID, DataContainerPtr)> onSuccessHandler = [&](DatabaseRequestID id, DataContainerPtr data)
     {
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSchedule/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSchedule/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSchedule/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSchedule/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSchedule/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSchedule/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSchedule/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSchedule/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             
             result = boost::dynamic_pointer_cast<DatabaseManagement_Containers::ScheduleDataContainer>(data);
             resultReceived = true;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSchedule/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSchedule/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     std::function<void(DatabaseRequestID, DBObjectID)> onFailureHandler = [&](DatabaseRequestID id, DBObjectID)
     {
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSchedule/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSchedule/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSchedule/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSchedule/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSchedule/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSchedule/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSchedule/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSchedule/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             
             resultReceived = true;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSchedule/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSchedule/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     onSuccessConnection = parentManager->schedulesTableDALs->onSuccessEventAttach(onSuccessHandler);
@@ -2210,13 +2210,13 @@ ScheduleDataContainerPtr SyncServer_Core::DatabaseManager::Functions_Schedules::
         boost::unique_lock<boost::mutex> resultLock(resultMutex);
         boost::system_time nextWakeup = boost::get_system_time() + boost::posix_time::seconds(parentManager->functionCallTimeout);
         while(!resultReceived && !releaseLocks && resultCondition.timed_wait(resultLock, nextWakeup))
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getSchedule/TLOCK> ["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getSchedule/TLOCK> ["+Convert::toString(requestID)+"]");
     }
     
     onSuccessConnection.disconnect();
     onFailreConnection.disconnect();
     
-    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getSchedule/END> ["+Tools::toString(requestID)+"]");
+    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getSchedule/END> ["+Convert::toString(requestID)+"]");
     return result;
 }
 
@@ -2232,40 +2232,40 @@ vector<ScheduleDataContainerPtr> SyncServer_Core::DatabaseManager::Functions_Sch
     std::function<void(DatabaseRequestID, DataContainerPtr)> onSuccessHandler = [&](DatabaseRequestID id, DataContainerPtr data)
     {
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSchedulesByConstraint/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSchedulesByConstraint/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSchedulesByConstraint/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSchedulesByConstraint/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSchedulesByConstraint/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSchedulesByConstraint/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSchedulesByConstraint/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSchedulesByConstraint/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             
             containersWrapper = boost::dynamic_pointer_cast<DatabaseManagement_Containers::VectorDataContainer>(data);
             resultReceived = true;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSchedulesByConstraint/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSchedulesByConstraint/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     std::function<void(DatabaseRequestID, DBObjectID)> onFailureHandler = [&](DatabaseRequestID id, DBObjectID)
     {
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSchedulesByConstraint/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSchedulesByConstraint/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSchedulesByConstraint/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSchedulesByConstraint/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSchedulesByConstraint/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSchedulesByConstraint/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSchedulesByConstraint/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSchedulesByConstraint/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             
             resultReceived = true;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSchedulesByConstraint/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSchedulesByConstraint/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     onSuccessConnection = parentManager->schedulesTableDALs->onSuccessEventAttach(onSuccessHandler);
@@ -2277,7 +2277,7 @@ vector<ScheduleDataContainerPtr> SyncServer_Core::DatabaseManager::Functions_Sch
         boost::unique_lock<boost::mutex> resultLock(resultMutex);
         boost::system_time nextWakeup = boost::get_system_time() + boost::posix_time::seconds(parentManager->functionCallTimeout);
         while(!resultReceived && !releaseLocks && resultCondition.timed_wait(resultLock, nextWakeup))
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getSchedulesByConstraint/TLOCK> ["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getSchedulesByConstraint/TLOCK> ["+Convert::toString(requestID)+"]");
     }
     
     onSuccessConnection.disconnect();
@@ -2291,7 +2291,7 @@ vector<ScheduleDataContainerPtr> SyncServer_Core::DatabaseManager::Functions_Sch
             result.push_back(boost::dynamic_pointer_cast<DatabaseManagement_Containers::ScheduleDataContainer>(currentContainer));
     }
     
-    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getSchedulesByConstraint/END> ["+Tools::toString(requestID)+"]");
+    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getSchedulesByConstraint/END> ["+Convert::toString(requestID)+"]");
     return result;
 }
 
@@ -2334,41 +2334,41 @@ bool SyncServer_Core::DatabaseManager::Functions_Users::addUser(const UserDataCo
     std::function<void(DatabaseRequestID, DataContainerPtr)> onSuccessHandler = [&](DatabaseRequestID id, DataContainerPtr)
     { 
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <addUser/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <addUser/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <addUser/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <addUser/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <addUser/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <addUser/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <addUser/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <addUser/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             
             resultReceived = true;
             successful = true;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <addUser/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <addUser/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     std::function<void(DatabaseRequestID, DBObjectID)> onFailureHandler = [&](DatabaseRequestID id, DBObjectID)
     {
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <addUser/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <addUser/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <addUser/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <addUser/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <addUser/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <addUser/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <addUser/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <addUser/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             
             resultReceived = true;
             successful = false;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <addUser/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <addUser/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     onSuccessConnection = parentManager->usersTableDALs->onSuccessEventAttach(onSuccessHandler);
@@ -2380,13 +2380,13 @@ bool SyncServer_Core::DatabaseManager::Functions_Users::addUser(const UserDataCo
         boost::unique_lock<boost::mutex> resultLock(resultMutex);
         boost::system_time nextWakeup = boost::get_system_time() + boost::posix_time::seconds(parentManager->functionCallTimeout);
         while(!resultReceived && !releaseLocks && resultCondition.timed_wait(resultLock, nextWakeup))
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <addUser/TLOCK> ["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <addUser/TLOCK> ["+Convert::toString(requestID)+"]");
     }
     
     onSuccessConnection.disconnect();
     onFailreConnection.disconnect();
     
-    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <addUser/END> ["+Tools::toString(requestID)+"]");
+    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <addUser/END> ["+Convert::toString(requestID)+"]");
     return successful;
 }
 
@@ -2402,41 +2402,41 @@ bool SyncServer_Core::DatabaseManager::Functions_Users::updateUser(const UserDat
     std::function<void(DatabaseRequestID, DataContainerPtr)> onSuccessHandler = [&](DatabaseRequestID id, DataContainerPtr)
     {
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <updateUser/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <updateUser/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <updateUser/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <updateUser/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <updateUser/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <updateUser/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <updateUser/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <updateUser/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             
             resultReceived = true;
             successful = true;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <updateUser/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <updateUser/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     std::function<void(DatabaseRequestID, DBObjectID)> onFailureHandler = [&](DatabaseRequestID id, DBObjectID)
     {
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <updateUser/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <updateUser/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <updateUser/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <updateUser/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <updateUser/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <updateUser/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <updateUser/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <updateUser/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             
             resultReceived = true;
             successful = false;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <updateUser/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <updateUser/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     onSuccessConnection = parentManager->usersTableDALs->onSuccessEventAttach(onSuccessHandler);
@@ -2448,13 +2448,13 @@ bool SyncServer_Core::DatabaseManager::Functions_Users::updateUser(const UserDat
         boost::unique_lock<boost::mutex> resultLock(resultMutex);
         boost::system_time nextWakeup = boost::get_system_time() + boost::posix_time::seconds(parentManager->functionCallTimeout);
         while(!resultReceived && !releaseLocks && resultCondition.timed_wait(resultLock, nextWakeup))
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <updateUser/TLOCK> ["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <updateUser/TLOCK> ["+Convert::toString(requestID)+"]");
     }
     
     onSuccessConnection.disconnect();
     onFailreConnection.disconnect();
     
-    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <updateUser/END> ["+Tools::toString(requestID)+"]");
+    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <updateUser/END> ["+Convert::toString(requestID)+"]");
     return successful;
 }
 
@@ -2470,41 +2470,41 @@ bool SyncServer_Core::DatabaseManager::Functions_Users::removeUser(UserID user)
     std::function<void(DatabaseRequestID, DataContainerPtr)> onSuccessHandler = [&](DatabaseRequestID id, DataContainerPtr)
     { 
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <removeUser_I/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <removeUser_I/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <removeUser_I/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <removeUser_I/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <removeUser_I/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <removeUser_I/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <removeUser_I/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <removeUser_I/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             
             resultReceived = true;
             successful = true;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <removeUser_I/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <removeUser_I/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     std::function<void(DatabaseRequestID, DBObjectID)> onFailureHandler = [&](DatabaseRequestID id, DBObjectID)
     {
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <removeUser_I/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <removeUser_I/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <removeUser_I/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <removeUser_I/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <removeUser_I/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <removeUser_I/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <removeUser_I/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <removeUser_I/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             
             resultReceived = true;
             successful = false;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <removeUser_I/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <removeUser_I/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     onSuccessConnection = parentManager->usersTableDALs->onSuccessEventAttach(onSuccessHandler);
@@ -2516,13 +2516,13 @@ bool SyncServer_Core::DatabaseManager::Functions_Users::removeUser(UserID user)
         boost::unique_lock<boost::mutex> resultLock(resultMutex);
         boost::system_time nextWakeup = boost::get_system_time() + boost::posix_time::seconds(parentManager->functionCallTimeout);
         while(!resultReceived && !releaseLocks && resultCondition.timed_wait(resultLock, nextWakeup))
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <removeUser_I/TLOCK> ["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <removeUser_I/TLOCK> ["+Convert::toString(requestID)+"]");
     }
     
     onSuccessConnection.disconnect();
     onFailreConnection.disconnect();
     
-    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <removeUser_I/END> ["+Tools::toString(requestID)+"]");
+    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <removeUser_I/END> ["+Convert::toString(requestID)+"]");
     return successful;
 }
 
@@ -2538,40 +2538,40 @@ UserDataContainerPtr SyncServer_Core::DatabaseManager::Functions_Users::getUser(
     std::function<void(DatabaseRequestID, DataContainerPtr)> onSuccessHandler = [&](DatabaseRequestID id, DataContainerPtr data)
     {
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getUser_U/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getUser_U/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getUser_U/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getUser_U/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getUser_U/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getUser_U/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getUser_U/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getUser_U/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             
             result = boost::dynamic_pointer_cast<DatabaseManagement_Containers::UserDataContainer>(data);
             resultReceived = true;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getUser_U/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getUser_U/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     std::function<void(DatabaseRequestID, DBObjectID)> onFailureHandler = [&](DatabaseRequestID id, DBObjectID)
     {
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getUser_U/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getUser_U/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getUser_U/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getUser_U/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getUser_U/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getUser_U/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getUser_U/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getUser_U/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             
             resultReceived = true;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getUser_U/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getUser_U/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     onSuccessConnection = parentManager->usersTableDALs->onSuccessEventAttach(onSuccessHandler);
@@ -2583,13 +2583,13 @@ UserDataContainerPtr SyncServer_Core::DatabaseManager::Functions_Users::getUser(
         boost::unique_lock<boost::mutex> resultLock(resultMutex);
         boost::system_time nextWakeup = boost::get_system_time() + boost::posix_time::seconds(parentManager->functionCallTimeout);
         while(!resultReceived && !releaseLocks && resultCondition.timed_wait(resultLock, nextWakeup))
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getUser_U/TLOCK> ["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getUser_U/TLOCK> ["+Convert::toString(requestID)+"]");
     }
     
     onSuccessConnection.disconnect();
     onFailreConnection.disconnect();
     
-    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getUser_U/END> ["+Tools::toString(requestID)+"]");
+    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getUser_U/END> ["+Convert::toString(requestID)+"]");
     return result;
 }
 
@@ -2605,40 +2605,40 @@ UserDataContainerPtr SyncServer_Core::DatabaseManager::Functions_Users::getUser(
     std::function<void(DatabaseRequestID, DataContainerPtr)> onSuccessHandler = [&](DatabaseRequestID id, DataContainerPtr data)
     {
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getUser_I/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getUser_I/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getUser_I/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getUser_I/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getUser_I/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getUser_I/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getUser_I/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getUser_I/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             
             result = boost::dynamic_pointer_cast<DatabaseManagement_Containers::UserDataContainer>(data);
             resultReceived = true;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getUser_I/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getUser_I/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     std::function<void(DatabaseRequestID, DBObjectID)> onFailureHandler = [&](DatabaseRequestID id, DBObjectID)
     {
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getUser_I/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getUser_I/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getUser_I/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getUser_I/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getUser_I/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getUser_I/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getUser_I/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getUser_I/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             
             resultReceived = true;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getUser_I/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getUser_I/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     onSuccessConnection = parentManager->usersTableDALs->onSuccessEventAttach(onSuccessHandler);
@@ -2650,13 +2650,13 @@ UserDataContainerPtr SyncServer_Core::DatabaseManager::Functions_Users::getUser(
         boost::unique_lock<boost::mutex> resultLock(resultMutex);
         boost::system_time nextWakeup = boost::get_system_time() + boost::posix_time::seconds(parentManager->functionCallTimeout);
         while(!resultReceived && !releaseLocks && resultCondition.timed_wait(resultLock, nextWakeup))
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getUser_I/TLOCK> ["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getUser_I/TLOCK> ["+Convert::toString(requestID)+"]");
     }
     
     onSuccessConnection.disconnect();
     onFailreConnection.disconnect();
     
-    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getUser_I/END> ["+Tools::toString(requestID)+"]");
+    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getUser_I/END> ["+Convert::toString(requestID)+"]");
     return result;
 }
 
@@ -2672,40 +2672,40 @@ vector<UserDataContainerPtr> SyncServer_Core::DatabaseManager::Functions_Users::
     std::function<void(DatabaseRequestID, DataContainerPtr)> onSuccessHandler = [&](DatabaseRequestID id, DataContainerPtr data)
     {
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getUsersByConstraint/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getUsersByConstraint/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getUsersByConstraint/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getUsersByConstraint/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getUsersByConstraint/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getUsersByConstraint/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getUsersByConstraint/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getUsersByConstraint/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             
             containersWrapper = boost::dynamic_pointer_cast<DatabaseManagement_Containers::VectorDataContainer>(data);
             resultReceived = true;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getUsersByConstraint/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getUsersByConstraint/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     std::function<void(DatabaseRequestID, DBObjectID)> onFailureHandler = [&](DatabaseRequestID id, DBObjectID)
     {
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getUsersByConstraint/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getUsersByConstraint/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getUsersByConstraint/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getUsersByConstraint/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getUsersByConstraint/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getUsersByConstraint/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getUsersByConstraint/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getUsersByConstraint/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             
             resultReceived = true;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getUsersByConstraint/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getUsersByConstraint/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     onSuccessConnection = parentManager->usersTableDALs->onSuccessEventAttach(onSuccessHandler);
@@ -2717,7 +2717,7 @@ vector<UserDataContainerPtr> SyncServer_Core::DatabaseManager::Functions_Users::
         boost::unique_lock<boost::mutex> resultLock(resultMutex);
         boost::system_time nextWakeup = boost::get_system_time() + boost::posix_time::seconds(parentManager->functionCallTimeout);
         while(!resultReceived && !releaseLocks && resultCondition.timed_wait(resultLock, nextWakeup))
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getUsersByConstraint/TLOCK> ["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getUsersByConstraint/TLOCK> ["+Convert::toString(requestID)+"]");
     }
     
     onSuccessConnection.disconnect();
@@ -2731,7 +2731,7 @@ vector<UserDataContainerPtr> SyncServer_Core::DatabaseManager::Functions_Users::
             result.push_back(boost::dynamic_pointer_cast<DatabaseManagement_Containers::UserDataContainer>(currentContainer));
     }
     
-    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getUsersByConstraint/END> ["+Tools::toString(requestID)+"]");
+    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getUsersByConstraint/END> ["+Convert::toString(requestID)+"]");
     return result;
 }
 
@@ -2774,39 +2774,39 @@ bool SyncServer_Core::DatabaseManager::Functions_Logs::addLog(const LogDataConta
     std::function<void(DatabaseRequestID, DataContainerPtr)> onSuccessHandler = [&](DatabaseRequestID id, DataContainerPtr)
     {
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <addLog/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <addLog/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <addLog/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <addLog/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <addLog/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <addLog/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <addLog/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <addLog/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             resultReceived = true;
             successful = true;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <addLog/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <addLog/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     std::function<void(DatabaseRequestID, DBObjectID)> onFailureHandler = [&](DatabaseRequestID id, DBObjectID)
     {
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <addLog/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <addLog/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <addLog/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <addLog/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <addLog/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <addLog/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <addLog/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <addLog/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             resultReceived = true;
             successful = true;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <addLog/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <addLog/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     onSuccessConnection = parentManager->logsTableDALs->onSuccessEventAttach(onSuccessHandler);
@@ -2818,13 +2818,13 @@ bool SyncServer_Core::DatabaseManager::Functions_Logs::addLog(const LogDataConta
         boost::unique_lock<boost::mutex> resultLock(resultMutex);
         boost::system_time nextWakeup = boost::get_system_time() + boost::posix_time::seconds(parentManager->functionCallTimeout);
         while(!resultReceived && !releaseLocks && resultCondition.timed_wait(resultLock, nextWakeup))
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <addLog/TLOCK> ["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <addLog/TLOCK> ["+Convert::toString(requestID)+"]");
     }
     
     onSuccessConnection.disconnect();
     onFailreConnection.disconnect();
     
-    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <addLog/END> ["+Tools::toString(requestID)+"]");
+    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <addLog/END> ["+Convert::toString(requestID)+"]");
     return successful;
 }
 
@@ -2845,38 +2845,38 @@ LogDataContainerPtr SyncServer_Core::DatabaseManager::Functions_Logs::getLog(Log
     std::function<void(DatabaseRequestID, DataContainerPtr)> onSuccessHandler = [&](DatabaseRequestID id, DataContainerPtr data)
     {
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getLog/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getLog/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getLog/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getLog/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getLog/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getLog/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getLog/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getLog/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             result = boost::dynamic_pointer_cast<DatabaseManagement_Containers::LogDataContainer>(data);
             resultReceived = true;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getLog/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getLog/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     std::function<void(DatabaseRequestID, DBObjectID)> onFailureHandler = [&](DatabaseRequestID id, DBObjectID)
     {
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getLog/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getLog/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getLog/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getLog/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getLog/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getLog/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getLog/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getLog/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             resultReceived = true;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getLog/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getLog/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     onSuccessConnection = parentManager->logsTableDALs->onSuccessEventAttach(onSuccessHandler);
@@ -2888,13 +2888,13 @@ LogDataContainerPtr SyncServer_Core::DatabaseManager::Functions_Logs::getLog(Log
         boost::unique_lock<boost::mutex> resultLock(resultMutex);
         boost::system_time nextWakeup = boost::get_system_time() + boost::posix_time::seconds(parentManager->functionCallTimeout);
         while(!resultReceived && !releaseLocks && resultCondition.timed_wait(resultLock, nextWakeup))
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getLog/TLOCK> ["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getLog/TLOCK> ["+Convert::toString(requestID)+"]");
     }
     
     onSuccessConnection.disconnect();
     onFailreConnection.disconnect();
     
-    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getLog/END> ["+Tools::toString(requestID)+"]");
+    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getLog/END> ["+Convert::toString(requestID)+"]");
     return result;
 }
 
@@ -2910,38 +2910,38 @@ vector<LogDataContainerPtr> SyncServer_Core::DatabaseManager::Functions_Logs::ge
     std::function<void(DatabaseRequestID, DataContainerPtr)> onSuccessHandler = [&](DatabaseRequestID id, DataContainerPtr data)
     {
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getLogsByConstraint/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getLogsByConstraint/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getLogsByConstraint/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getLogsByConstraint/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getLogsByConstraint/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getLogsByConstraint/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getLogsByConstraint/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getLogsByConstraint/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             containersWrapper = boost::dynamic_pointer_cast<DatabaseManagement_Containers::VectorDataContainer>(data);
             resultReceived = true;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getLogsByConstraint/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getLogsByConstraint/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     std::function<void(DatabaseRequestID, DBObjectID)> onFailureHandler = [&](DatabaseRequestID id, DBObjectID)
     {
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getLogsByConstraint/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getLogsByConstraint/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getLogsByConstraint/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getLogsByConstraint/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getLogsByConstraint/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getLogsByConstraint/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getLogsByConstraint/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getLogsByConstraint/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             resultReceived = true;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getLogsByConstraint/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getLogsByConstraint/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     
@@ -2954,7 +2954,7 @@ vector<LogDataContainerPtr> SyncServer_Core::DatabaseManager::Functions_Logs::ge
         boost::unique_lock<boost::mutex> resultLock(resultMutex);
         boost::system_time nextWakeup = boost::get_system_time() + boost::posix_time::seconds(parentManager->functionCallTimeout);
         while(!resultReceived && !releaseLocks && resultCondition.timed_wait(resultLock, nextWakeup))
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getLogsByConstraint/TLOCK> ["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getLogsByConstraint/TLOCK> ["+Convert::toString(requestID)+"]");
     }
     
     onSuccessConnection.disconnect();
@@ -3010,39 +3010,39 @@ bool SyncServer_Core::DatabaseManager::Functions_Sessions::addSession(const Sess
     std::function<void(DatabaseRequestID, DataContainerPtr)> onSuccessHandler = [&](DatabaseRequestID id, DataContainerPtr)
     {
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <addSession/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <addSession/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <addSession/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <addSession/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <addSession/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <addSession/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <addSession/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <addSession/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             resultReceived = true;
             successful = true;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <addSession/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <addSession/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     std::function<void(DatabaseRequestID, DBObjectID)> onFailureHandler = [&](DatabaseRequestID id, DBObjectID)
     {
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <addSession/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <addSession/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <addSession/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <addSession/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <addSession/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <addSession/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <addSession/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <addSession/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             resultReceived = true;
             successful = false;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <addSession/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <addSession/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     onSuccessConnection = parentManager->sessionsTableDALs->onSuccessEventAttach(onSuccessHandler);
@@ -3054,13 +3054,13 @@ bool SyncServer_Core::DatabaseManager::Functions_Sessions::addSession(const Sess
         boost::unique_lock<boost::mutex> resultLock(resultMutex);
         boost::system_time nextWakeup = boost::get_system_time() + boost::posix_time::seconds(parentManager->functionCallTimeout);
         while(!resultReceived && !releaseLocks && resultCondition.timed_wait(resultLock, nextWakeup))
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <addSession/TLOCK> ["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <addSession/TLOCK> ["+Convert::toString(requestID)+"]");
     }
     
     onSuccessConnection.disconnect();
     onFailreConnection.disconnect();
     
-    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <addSession/END> ["+Tools::toString(requestID)+"]");
+    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <addSession/END> ["+Convert::toString(requestID)+"]");
     return successful;
 }
 
@@ -3076,41 +3076,41 @@ bool SyncServer_Core::DatabaseManager::Functions_Sessions::updateSession(const S
     std::function<void(DatabaseRequestID, DataContainerPtr)> onSuccessHandler = [&](DatabaseRequestID id, DataContainerPtr)
     {
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <updateSession/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <updateSession/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <updateSession/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <updateSession/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <updateSession/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <updateSession/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <updateSession/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <updateSession/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             
             resultReceived = true;
             successful = true;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <updateSession/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <updateSession/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     std::function<void(DatabaseRequestID, DBObjectID)> onFailureHandler = [&](DatabaseRequestID id, DBObjectID)
     {
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <updateSession/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <updateSession/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <updateSession/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <updateSession/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <updateSession/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <updateSession/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <updateSession/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <updateSession/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             
             resultReceived = true;
             successful = false;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <updateSession/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <updateSession/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     onSuccessConnection = parentManager->sessionsTableDALs->onSuccessEventAttach(onSuccessHandler);
@@ -3122,13 +3122,13 @@ bool SyncServer_Core::DatabaseManager::Functions_Sessions::updateSession(const S
         boost::unique_lock<boost::mutex> resultLock(resultMutex);
         boost::system_time nextWakeup = boost::get_system_time() + boost::posix_time::seconds(parentManager->functionCallTimeout);
         while(!resultReceived && !releaseLocks && resultCondition.timed_wait(resultLock, nextWakeup))
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <updateSession/TLOCK> ["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <updateSession/TLOCK> ["+Convert::toString(requestID)+"]");
     }
     
     onSuccessConnection.disconnect();
     onFailreConnection.disconnect();
     
-    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <updateSession/END> ["+Tools::toString(requestID)+"]");
+    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <updateSession/END> ["+Convert::toString(requestID)+"]");
     return successful;
 }
 
@@ -3144,40 +3144,40 @@ SessionDataContainerPtr SyncServer_Core::DatabaseManager::Functions_Sessions::ge
     std::function<void(DatabaseRequestID, DataContainerPtr)> onSuccessHandler = [&](DatabaseRequestID id, DataContainerPtr data)
     {
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSession/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSession/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSession/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSession/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSession/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSession/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSession/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSession/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             
             result = boost::dynamic_pointer_cast<DatabaseManagement_Containers::SessionDataContainer>(data);
             resultReceived = true;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSession/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSession/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     std::function<void(DatabaseRequestID, DBObjectID)> onFailureHandler = [&](DatabaseRequestID id, DBObjectID)
     {
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSession/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSession/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSession/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSession/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSession/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSession/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSession/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSession/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             
             resultReceived = true;
             resultCondition.notify_all();
         }
         
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSession/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSession/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     onSuccessConnection = parentManager->sessionsTableDALs->onSuccessEventAttach(onSuccessHandler);
@@ -3189,13 +3189,13 @@ SessionDataContainerPtr SyncServer_Core::DatabaseManager::Functions_Sessions::ge
         boost::unique_lock<boost::mutex> resultLock(resultMutex);
         boost::system_time nextWakeup = boost::get_system_time() + boost::posix_time::seconds(parentManager->functionCallTimeout);
         while(!resultReceived && !releaseLocks && resultCondition.timed_wait(resultLock, nextWakeup))
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getSession/TLOCK> ["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getSession/TLOCK> ["+Convert::toString(requestID)+"]");
     }
     
     onSuccessConnection.disconnect();
     onFailreConnection.disconnect();
     
-    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getSession/END> ["+Tools::toString(requestID)+"]");
+    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getSession/END> ["+Convert::toString(requestID)+"]");
     return result;
 }
 
@@ -3211,40 +3211,40 @@ vector<SessionDataContainerPtr> SyncServer_Core::DatabaseManager::Functions_Sess
     std::function<void(DatabaseRequestID, DataContainerPtr)> onSuccessHandler = [&](DatabaseRequestID id, DataContainerPtr data)
     {
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSessionsByConstraint/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSessionsByConstraint/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSessionsByConstraint/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSessionsByConstraint/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSessionsByConstraint/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSessionsByConstraint/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSessionsByConstraint/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSessionsByConstraint/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             
             containersWrapper = boost::dynamic_pointer_cast<DatabaseManagement_Containers::VectorDataContainer>(data);
             resultReceived = true;
             resultCondition.notify_all();
         }
             
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSessionsByConstraint/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onSuccess <getSessionsByConstraint/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     std::function<void(DatabaseRequestID, DBObjectID)> onFailureHandler = [&](DatabaseRequestID id, DBObjectID)
     {
         boost::lock_guard<boost::mutex> resultLock(resultMutex);
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSessionsByConstraint/OUT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSessionsByConstraint/OUT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         while(requestID == DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID)
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSessionsByConstraint/SPINLOCK> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");;
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSessionsByConstraint/MID> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSessionsByConstraint/SPINLOCK> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");;
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSessionsByConstraint/MID> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
         
         if(id == requestID)
         {
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSessionsByConstraint/IN> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSessionsByConstraint/IN> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
             
             resultReceived = true;
             resultCondition.notify_all();
         }
             
-        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSessionsByConstraint/EXT> ["+Tools::toString(id)+"]|["+Tools::toString(requestID)+"]");
+        parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> onFailure <getSessionsByConstraint/EXT> ["+Convert::toString(id)+"]|["+Convert::toString(requestID)+"]");
     };
     
     onSuccessConnection = parentManager->sessionsTableDALs->onSuccessEventAttach(onSuccessHandler);
@@ -3256,7 +3256,7 @@ vector<SessionDataContainerPtr> SyncServer_Core::DatabaseManager::Functions_Sess
         boost::unique_lock<boost::mutex> resultLock(resultMutex);
         boost::system_time nextWakeup = boost::get_system_time() + boost::posix_time::seconds(parentManager->functionCallTimeout);
         while(!resultReceived && !releaseLocks && resultCondition.timed_wait(resultLock, nextWakeup))
-            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getSessionsByConstraint/TLOCK> ["+Tools::toString(requestID)+"]");
+            parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getSessionsByConstraint/TLOCK> ["+Convert::toString(requestID)+"]");
     }
     
     onSuccessConnection.disconnect();
@@ -3270,7 +3270,7 @@ vector<SessionDataContainerPtr> SyncServer_Core::DatabaseManager::Functions_Sess
             result.push_back(boost::dynamic_pointer_cast<DatabaseManagement_Containers::SessionDataContainer>(currentContainer));
     }
     
-    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getSessionsByConstraint/END> ["+Tools::toString(requestID)+"]");
+    parentManager->logger->logMessage(FileLogSeverity::Warning, ">>> <getSessionsByConstraint/END> ["+Convert::toString(requestID)+"]");
     return result;
 }
 

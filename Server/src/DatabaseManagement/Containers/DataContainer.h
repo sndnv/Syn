@@ -19,7 +19,8 @@
 #define	DATACONTAINER_H
 
 #include "../Types/Types.h"
-#include "../../Utilities/Tools.h"
+#include "../../Utilities/Strings/Common.h"
+#include "../../Utilities/Strings/Database.h"
 #include <string>
 #include <boost/shared_ptr.hpp>
 #include <boost/uuid/uuid.hpp>
@@ -68,7 +69,11 @@ namespace DatabaseManagement_Containers
              * 
              * @return the container, as a string
              */
-            std::string toString() const { return Utilities::Tools::toString(containerID) + "," + Utilities::Tools::toString(dataType); }
+            std::string toString() const
+            {
+                return Utilities::Strings::toString(containerID) + ","
+                        + Utilities::Strings::toString(dataType);
+            }
             
         protected:
             DataContainer(DBObjectID id, DatabaseObjectType type) : containerID(id), dataType(type) {}

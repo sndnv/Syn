@@ -30,7 +30,9 @@
 #include <boost/unordered_map.hpp>
 #include "../Types/Types.h"
 #include "../Types/Packets.h"
-#include "../../Utilities/Tools.h"
+
+#include "../../Utilities/Strings/Common.h"
+#include "../../Utilities/Strings/Network.h"
 #include "../../Utilities/FileLogger.h"
 #include "../../Common/Types.h"
 
@@ -52,7 +54,7 @@ using NetworkManagement_Types::ConnectionInitiation;
 using NetworkManagement_Types::OperationTimeoutLength;
 using Common_Types::TransferredDataAmount;
 
-using Utilities::Tools;
+namespace Convert = Utilities::Strings;
 
 namespace NetworkManagement_Connections
 {
@@ -96,7 +98,9 @@ namespace NetworkManagement_Connections
              * @param externalReadBuffer externally supplied read buffer, if any
              * @param debugLogger logger for debugging, if any
              */
-            Connection(ConnectionParamters connectionParams, boost::asio::streambuf * externalReadBuffer = nullptr, Utilities::FileLogger * debugLogger = nullptr);
+            Connection(ConnectionParamters connectionParams,
+                       boost::asio::streambuf * externalReadBuffer = nullptr,
+                       Utilities::FileLogger * debugLogger = nullptr);
             
             /**
              * Creates a new outgoing connection object with the specified configuration.
@@ -108,7 +112,10 @@ namespace NetworkManagement_Connections
              * @param externalReadBuffer externally supplied read buffer, if any
              * @param debugLogger logger for debugging, if any
              */
-            Connection(ConnectionParamters connectionParams, ConnectionRequest requestParams, boost::asio::streambuf * externalReadBuffer = nullptr, Utilities::FileLogger * debugLogger = nullptr);
+            Connection(ConnectionParamters connectionParams,
+                       ConnectionRequest requestParams,
+                       boost::asio::streambuf * externalReadBuffer = nullptr,
+                       Utilities::FileLogger * debugLogger = nullptr);
             
             /**
              * Terminates the connection (if still active), removes all signal handlers and performs general cleanup.
@@ -222,7 +229,11 @@ namespace NetworkManagement_Connections
              * @param function the event handler to be attached
              * @return the resulting signal connection object
              */
-            boost::signals2::connection onConnectEventAttach(std::function<void(RawNetworkSessionID)> function) { return onConnect.connect(function); }
+            boost::signals2::connection onConnectEventAttach
+            (std::function<void(RawNetworkSessionID)> function)
+            {
+                return onConnect.connect(function);
+            }
             
             /**
              * Attaches the supplied handler to the <code>onDisconnect</code> event.
@@ -232,7 +243,11 @@ namespace NetworkManagement_Connections
              * @param function the event handler to be attached
              * @return the resulting signal connection object
              */
-            boost::signals2::connection onDisconnectEventAttach(std::function<void(RawNetworkSessionID)> function) { return onDisconnect.connect(function); }
+            boost::signals2::connection onDisconnectEventAttach
+            (std::function<void(RawNetworkSessionID)> function)
+            {
+                return onDisconnect.connect(function);
+            }
             
             /**
              * Attaches the supplied handler to the <code>onDataReceived</code> event.
@@ -242,7 +257,11 @@ namespace NetworkManagement_Connections
              * @param function the event handler to be attached
              * @return the resulting signal connection object
              */
-            boost::signals2::connection onDataReceivedEventAttach(std::function<void(ByteVector, PacketSize)> function) { return onDataReceived.connect(function); }
+            boost::signals2::connection onDataReceivedEventAttach
+            (std::function<void(ByteVector, PacketSize)> function)
+            {
+                return onDataReceived.connect(function);
+            }
             
             /**
              * Attaches the supplied handler to the <code>onWriteResultReceived</code> event.
@@ -252,7 +271,11 @@ namespace NetworkManagement_Connections
              * @param function the event handler to be attached
              * @return the resulting signal connection object
              */
-            boost::signals2::connection onWriteResultReceivedEventAttach(std::function<void(bool)> function) { return onWriteResultReceived.connect(function); }
+            boost::signals2::connection onWriteResultReceivedEventAttach
+            (std::function<void(bool)> function)
+            {
+                return onWriteResultReceived.connect(function);
+            }
             
             /**
              * Attaches the supplied handler to the <code>canBeDestroyed</code> event.
@@ -266,7 +289,11 @@ namespace NetworkManagement_Connections
              * @param function the event handler to be attached
              * @return the resulting signal connection object
              */
-            boost::signals2::connection canBeDestroyedEventAttach(std::function<void(RawNetworkSessionID, ConnectionInitiation)> function) { return canBeDestroyed.connect(function); }
+            boost::signals2::connection canBeDestroyedEventAttach
+            (std::function<void(RawNetworkSessionID, ConnectionInitiation)> function)
+            {
+                return canBeDestroyed.connect(function);
+            }
             
         private:
             //Data - Reading

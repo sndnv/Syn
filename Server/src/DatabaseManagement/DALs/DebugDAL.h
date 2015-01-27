@@ -33,6 +33,8 @@
 #include <boost/tokenizer.hpp>
 #include <queue>
 #include "../../Utilities/Tools.h"
+#include "../../Utilities/Strings/Common.h"
+#include "../../Utilities/Strings/Database.h"
 #include "../../Utilities/FileLogger.h"
 #include "../Interfaces/DatabaseAbstractionLayer.h"
 #include "../Types/Types.h"
@@ -53,6 +55,7 @@
 #include "../../InstructionManagement/Types/Types.h"
 #include "boost/uuid/random_generator.hpp"
 
+namespace Convert = Utilities::Strings;
 
 using DatabaseManagement_Interfaces::DatabaseInformationContainer;
 using DatabaseManagement_Interfaces::DatabaseSettingsContainer;
@@ -107,7 +110,6 @@ using boost::unordered_map;
 
 using std::getline;
 
-using Utilities::Tools;
 using Utilities::FileLogger;
 using Utilities::FileLogSeverity;
 
@@ -236,21 +238,21 @@ namespace DatabaseManagement_DALs
                 currentToken++;
                 IPPort port = boost::lexical_cast<IPPort>(*currentToken);
                 currentToken++;
-                DataTransferType xferType = Tools::toDataTransferType(*currentToken);
+                DataTransferType xferType = Convert::toDataTransferType(*currentToken);
                 currentToken++;
                 std::string providedID = *currentToken;
                 currentToken++;
                 std::string deviceName = *currentToken;
                 currentToken++;
-                PasswordData password = Tools::toSecByteBlock(*currentToken);
+                PasswordData password = Convert::toSecByteBlock(*currentToken);
                 currentToken++;
                 std::string deviceInfo = *currentToken;
                 currentToken++;
                 bool locked = ((*currentToken).compare("TRUE") == 0);
                 currentToken++;
-                boost::posix_time::ptime timestampLastSuccessfulAuth = Tools::toTimestamp(*currentToken);
+                boost::posix_time::ptime timestampLastSuccessfulAuth = Convert::toTimestamp(*currentToken);
                 currentToken++;
-                boost::posix_time::ptime timestampLastFailedAuth = Tools::toTimestamp(*currentToken);
+                boost::posix_time::ptime timestampLastFailedAuth = Convert::toTimestamp(*currentToken);
                 currentToken++;
                 unsigned int failedAttempts = boost::lexical_cast<unsigned int>(*currentToken);
 
@@ -270,11 +272,11 @@ namespace DatabaseManagement_DALs
                 currentToken++; //skips object ID
                 currentToken++; //skips object type
 
-                LogSeverity sev = Tools::toLogSeverity(*currentToken);
+                LogSeverity sev = Convert::toLogSeverity(*currentToken);
                 currentToken++;
                 std::string source = *currentToken;
                 currentToken++;
-                boost::posix_time::ptime timestamp = Tools::toTimestamp(*currentToken);
+                boost::posix_time::ptime timestamp = Convert::toTimestamp(*currentToken);
                 currentToken++;
                 std::string message = *currentToken;
 
@@ -292,11 +294,11 @@ namespace DatabaseManagement_DALs
 
                 bool isActive = ((*currentToken).compare("TRUE") == 0);
                 currentToken++;
-                boost::posix_time::ptime nextRun = Tools::toTimestamp(*currentToken);
+                boost::posix_time::ptime nextRun = Convert::toTimestamp(*currentToken);
                 currentToken++;
                 int repetitions = boost::lexical_cast<int>(*currentToken);
                 currentToken++;
-                ScheduleIntervalType type = Tools::toScheduleIntervalType(*currentToken);
+                ScheduleIntervalType type = Convert::toScheduleIntervalType(*currentToken);
                 currentToken++;
                 unsigned long length = boost::lexical_cast<unsigned long>(*currentToken);
                 currentToken++;
@@ -315,13 +317,13 @@ namespace DatabaseManagement_DALs
                 currentToken++; //skips object ID
                 currentToken++; //skips object type
 
-                boost::posix_time::ptime openT = Tools::toTimestamp(*currentToken);
+                boost::posix_time::ptime openT = Convert::toTimestamp(*currentToken);
                 currentToken++;
-                boost::posix_time::ptime closeT = Tools::toTimestamp(*currentToken);
+                boost::posix_time::ptime closeT = Convert::toTimestamp(*currentToken);
                 currentToken++;
-                boost::posix_time::ptime lastActT = Tools::toTimestamp(*currentToken);
+                boost::posix_time::ptime lastActT = Convert::toTimestamp(*currentToken);
                 currentToken++;
-                SessionType type = Tools::toSessionType(*currentToken);
+                SessionType type = Convert::toSessionType(*currentToken);
                 currentToken++;
                 DeviceID device = boost::lexical_cast<DeviceID>(*currentToken);
                 currentToken++;
@@ -350,7 +352,7 @@ namespace DatabaseManagement_DALs
                 currentToken++; //skips object ID
                 currentToken++; //skips object type
 
-                StatisticType type = Tools::toStatisticType(*currentToken);
+                StatisticType type = Convert::toStatisticType(*currentToken);
                 currentToken++;
                 std::string stringValue = *currentToken;
 
@@ -358,8 +360,8 @@ namespace DatabaseManagement_DALs
 
                 switch(type)
                 {
-                    case StatisticType::INSTALL_TIMESTAMP:          actualValue = Tools::toTimestamp(stringValue); break;
-                    case StatisticType::START_TIMESTAMP:            actualValue = Tools::toTimestamp(stringValue); break;
+                    case StatisticType::INSTALL_TIMESTAMP:          actualValue = Convert::toTimestamp(stringValue); break;
+                    case StatisticType::START_TIMESTAMP:            actualValue = Convert::toTimestamp(stringValue); break;
                     case StatisticType::TOTAL_FAILED_TRANSFERS:     actualValue = boost::lexical_cast<unsigned long>(stringValue); break;
                     case StatisticType::TOTAL_RETRIED_TRANSFERS:    actualValue = boost::lexical_cast<unsigned long>(stringValue); break;
                     case StatisticType::TOTAL_TRANSFERRED_DATA:     actualValue = boost::lexical_cast<unsigned long>(stringValue); break;
@@ -395,9 +397,9 @@ namespace DatabaseManagement_DALs
                 currentToken++;
                 bool oneTime = ((*currentToken).compare("TRUE") == 0);
                 currentToken++;
-                ConflictResolutionRule_Directory conflDir = Tools::toDirConflictResolutionRule(*currentToken);
+                ConflictResolutionRule_Directory conflDir = Convert::toDirConflictResolutionRule(*currentToken);
                 currentToken++;
-                ConflictResolutionRule_File conflFile = Tools::toFileConflictResolutionRule(*currentToken);
+                ConflictResolutionRule_File conflFile = Convert::toFileConflictResolutionRule(*currentToken);
                 currentToken++;
                 bool encrypt = ((*currentToken).compare("TRUE") == 0);
                 currentToken++;
@@ -413,11 +415,11 @@ namespace DatabaseManagement_DALs
                 currentToken++;
                 unsigned int retries = boost::lexical_cast<unsigned int>(*currentToken);
                 currentToken++;
-                SyncFailureAction failAct = Tools::toSyncFailureAction(*currentToken);
+                SyncFailureAction failAct = Convert::toSyncFailureAction(*currentToken);
                 currentToken++;
-                boost::posix_time::ptime lastAttempt = Tools::toTimestamp(*currentToken);
+                boost::posix_time::ptime lastAttempt = Convert::toTimestamp(*currentToken);
                 currentToken++;
-                SyncResult result = Tools::toSyncResult(*currentToken);
+                SyncResult result = Convert::toSyncResult(*currentToken);
                 currentToken++;
                 SessionID sessID = boost::lexical_cast<SessionID>(*currentToken);
 
@@ -435,7 +437,7 @@ namespace DatabaseManagement_DALs
                 currentToken++; //skips object type
 
                 //SystemDataContainer(SystemParameterType type, boost::any value)
-                SystemParameterType type = Tools::toSystemParameterType(*currentToken);
+                SystemParameterType type = Convert::toSystemParameterType(*currentToken);
                 currentToken++;
                 std::string stringValue = *currentToken;
 
@@ -454,7 +456,7 @@ namespace DatabaseManagement_DALs
                     case SystemParameterType::DB_IMMEDIATE_FLUSH:       actualValue = ((stringValue).compare("TRUE") == 0); break;
                     case SystemParameterType::DB_MAX_READ_RETRIES:      actualValue = boost::lexical_cast<unsigned int>(stringValue); break;
                     case SystemParameterType::DB_MAX_WRITE_RETRIES:     actualValue = boost::lexical_cast<unsigned int>(stringValue); break;
-                    case SystemParameterType::DB_OPERATION_MODE:        actualValue = Tools::toDatabaseManagerOperationMode(stringValue); break;
+                    case SystemParameterType::DB_OPERATION_MODE:        actualValue = Convert::toDatabaseManagerOperationMode(stringValue); break;
                     case SystemParameterType::FORCE_COMMAND_ENCRYPTION: actualValue = ((stringValue).compare("TRUE") == 0); break;
                     case SystemParameterType::FORCE_DATA_COMPRESSION:   actualValue = ((stringValue).compare("TRUE") == 0); break;
                     case SystemParameterType::FORCE_DATA_ENCRYPTION:    actualValue = ((stringValue).compare("TRUE") == 0); break;
@@ -484,23 +486,23 @@ namespace DatabaseManagement_DALs
 
                 std::string username = *currentToken;
                 currentToken++;
-                PasswordData password = Tools::toSecByteBlock(*currentToken);
+                PasswordData password = Convert::toSecByteBlock(*currentToken);
                 currentToken++;
                 unsigned long maxSize = boost::lexical_cast<unsigned long>(*currentToken);
                 currentToken++;
                 unsigned long maxNum = boost::lexical_cast<unsigned long>(*currentToken);
                 currentToken++;
-                UserAccessLevel level = Tools::toUserAccessLevel(*currentToken);
+                UserAccessLevel level = Convert::toUserAccessLevel(*currentToken);
                 currentToken++;
                 bool pwReset = ((*currentToken).compare("TRUE") == 0);
                 currentToken++;
                 bool locked = ((*currentToken).compare("TRUE") == 0);
                 currentToken++;
-                boost::posix_time::ptime create = Tools::toTimestamp(*currentToken);
+                boost::posix_time::ptime create = Convert::toTimestamp(*currentToken);
                 currentToken++;
-                boost::posix_time::ptime login = Tools::toTimestamp(*currentToken);
+                boost::posix_time::ptime login = Convert::toTimestamp(*currentToken);
                 currentToken++;
-                boost::posix_time::ptime timestampLastFailedAuth = Tools::toTimestamp(*currentToken);
+                boost::posix_time::ptime timestampLastFailedAuth = Convert::toTimestamp(*currentToken);
                 currentToken++;
                 unsigned int failedAttempts = boost::lexical_cast<unsigned int>(*currentToken);
                 
@@ -554,38 +556,38 @@ namespace DatabaseManagement_DALs
 
             static std::string toString(DeviceDataContainerPtr container)
             {
-                return container->toString() + "," + Tools::toString(container->getDeviceOwner()) + "," + container->getDeviceAddress() + "," + Tools::toString(container->getDevicePort())
-                       + "," + Tools::toString(container->getTransferType()) + "," + container->getDeviceProvidedID() + "," + container->getDeviceName()
-                       + "," + Tools::toString(container->getPasswordData()) + "," + container->getDeviceInfo() + "," + Tools::toString(container->isDeviceLocked()) 
-                       + "," + Tools::toString(container->getLastSuccessfulAuthenticationTimestamp())
-                       + "," + Tools::toString(container->getLastFailedAuthenticationTimestamp())
-                       + "," + Tools::toString(container->getFailedAuthenticationAttempts());
+                return container->toString() + "," + Convert::toString(container->getDeviceOwner()) + "," + container->getDeviceAddress() + "," + Convert::toString(container->getDevicePort())
+                       + "," + Convert::toString(container->getTransferType()) + "," + container->getDeviceProvidedID() + "," + container->getDeviceName()
+                       + "," + Convert::toString(container->getPasswordData()) + "," + container->getDeviceInfo() + "," + Convert::toString(container->isDeviceLocked()) 
+                       + "," + Convert::toString(container->getLastSuccessfulAuthenticationTimestamp())
+                       + "," + Convert::toString(container->getLastFailedAuthenticationTimestamp())
+                       + "," + Convert::toString(container->getFailedAuthenticationAttempts());
             }
 
             static std::string toString(LogDataContainerPtr container)
             {
-                return container->toString() + "," + Tools::toString(container->getLogSeverity()) + "," + container->getLogSourceName() + ","
-                       + Tools::toString(container->getLogTimestamp()) + "," + container->getLogMessage();
+                return container->toString() + "," + Convert::toString(container->getLogSeverity()) + "," + container->getLogSourceName() + ","
+                       + Convert::toString(container->getLogTimestamp()) + "," + container->getLogMessage();
             }
 
             static std::string toString(ScheduleDataContainerPtr container)
             {
-                return container->toString() + "," + Tools::toString(container->isScheduleActive()) + "," + Tools::toString(container->getNextRun()) + ","
-                       + Tools::toString(container->getNumberOfRepetitions()) + "," + Tools::toString(container->getIntervalType()) + ","
-                       + Tools::toString(container->getIntervalLength()) + "," + Tools::toString(container->runScheduleIfMissed()) + ","
-                       + Tools::toString(container->deleteScheduleAfterCompletion());
+                return container->toString() + "," + Convert::toString(container->isScheduleActive()) + "," + Convert::toString(container->getNextRun()) + ","
+                       + Convert::toString(container->getNumberOfRepetitions()) + "," + Convert::toString(container->getIntervalType()) + ","
+                       + Convert::toString(container->getIntervalLength()) + "," + Convert::toString(container->runScheduleIfMissed()) + ","
+                       + Convert::toString(container->deleteScheduleAfterCompletion());
             }
 
             static std::string toString(SessionDataContainerPtr container)
             {
-                return container->toString() + "," + Tools::toString(container->getOpenTimestamp()) + "," + Tools::toString(container->getCloseTimestamp()) + ","
-                       + Tools::toString(container->getLastActivityTimestamp()) + "," + Tools::toString(container->getSessionType()) + ","
-                       + Tools::toString(container->getDevice()) + "," + Tools::toString(container->getUser()) + ","+ Tools::toString(container->isSessionPersistent()) + ","
-                       + Tools::toString(container->isSessionActive()) + "," + Tools::toString(container->getDataTransferred()) + ","
-                       + Tools::toString(container->getPendingTransfers().size()) + "," + Tools::toString(container->getFailedTransfers().size()) + ","
-                       + Tools::toString(container->getCompletedTransfers().size()) + ","+ Tools::toString(container->getNumberOfCommandsSent()) + ","
-                       + Tools::toString(container->getPendingCommands().size()) + "," + Tools::toString(container->getFailedCommands().size()) + ","
-                       + Tools::toString(container->getCompletedCommands().size());
+                return container->toString() + "," + Convert::toString(container->getOpenTimestamp()) + "," + Convert::toString(container->getCloseTimestamp()) + ","
+                       + Convert::toString(container->getLastActivityTimestamp()) + "," + Convert::toString(container->getSessionType()) + ","
+                       + Convert::toString(container->getDevice()) + "," + Convert::toString(container->getUser()) + ","+ Convert::toString(container->isSessionPersistent()) + ","
+                       + Convert::toString(container->isSessionActive()) + "," + Convert::toString(container->getDataTransferred()) + ","
+                       + Convert::toString(container->getPendingTransfers().size()) + "," + Convert::toString(container->getFailedTransfers().size()) + ","
+                       + Convert::toString(container->getCompletedTransfers().size()) + ","+ Convert::toString(container->getNumberOfCommandsSent()) + ","
+                       + Convert::toString(container->getPendingCommands().size()) + "," + Convert::toString(container->getFailedCommands().size()) + ","
+                       + Convert::toString(container->getCompletedCommands().size());
             }
 
             static std::string toString(StatisticDataContainerPtr container)
@@ -594,28 +596,28 @@ namespace DatabaseManagement_DALs
 
                 switch(container->getStatisticType())
                 {
-                    case StatisticType::INSTALL_TIMESTAMP: value = Tools::toString(boost::any_cast<boost::posix_time::ptime>(container->getStatisticValue())); break;
-                    case StatisticType::START_TIMESTAMP: value = Tools::toString(boost::any_cast<boost::posix_time::ptime>(container->getStatisticValue())); break;
-                    case StatisticType::TOTAL_FAILED_TRANSFERS: value = Tools::toString(boost::any_cast<unsigned long>(container->getStatisticValue())); break;
-                    case StatisticType::TOTAL_RETRIED_TRANSFERS: value = Tools::toString(boost::any_cast<unsigned long>(container->getStatisticValue())); break;
-                    case StatisticType::TOTAL_TRANSFERRED_DATA: value = Tools::toString(boost::any_cast<unsigned long>(container->getStatisticValue())); break;
-                    case StatisticType::TOTAL_TRANSFERRED_FILES: value = Tools::toString(boost::any_cast<unsigned long>(container->getStatisticValue())); break;
+                    case StatisticType::INSTALL_TIMESTAMP: value = Convert::toString(boost::any_cast<boost::posix_time::ptime>(container->getStatisticValue())); break;
+                    case StatisticType::START_TIMESTAMP: value = Convert::toString(boost::any_cast<boost::posix_time::ptime>(container->getStatisticValue())); break;
+                    case StatisticType::TOTAL_FAILED_TRANSFERS: value = Convert::toString(boost::any_cast<unsigned long>(container->getStatisticValue())); break;
+                    case StatisticType::TOTAL_RETRIED_TRANSFERS: value = Convert::toString(boost::any_cast<unsigned long>(container->getStatisticValue())); break;
+                    case StatisticType::TOTAL_TRANSFERRED_DATA: value = Convert::toString(boost::any_cast<unsigned long>(container->getStatisticValue())); break;
+                    case StatisticType::TOTAL_TRANSFERRED_FILES: value = Convert::toString(boost::any_cast<unsigned long>(container->getStatisticValue())); break;
                     default: value = "UNDEFINED"; break;
                 }
 
-                return container->toString() + "," + Tools::toString(container->getStatisticType()) + "," + value;
+                return container->toString() + "," + Convert::toString(container->getStatisticType()) + "," + value;
             }
 
             static std::string toString(SyncDataContainerPtr container)
             {
                 return container->toString() + "," + container->getSyncName() + "," + container->getSyncDescription() + "," + container->getSourcePath() + "," 
-                       + container->getDestinationPath() + "," + Tools::toString(container->getSourceDevice()) + "," + Tools::toString(container->getDestinationDevice()) + ","
-                       + Tools::toString(container->isSyncOneWay()) + "," + Tools::toString(container->isSyncOneTime()) + ","
-                       + Tools::toString(container->getDirectoryConflictResolutionRule()) + "," + Tools::toString(container->getFileConflictResolutionRule()) + ","
-                       + Tools::toString(container->isEncryptionEnabled()) + "," + Tools::toString(container->isCompressionEnabled()) + "," + Tools::toString(container->getOwnerID()) + ","
-                       + container->getDestinationPermissions() + "," + Tools::toString(container->isOfflineSyncEnabled()) + "," + Tools::toString(container->isDifferentialSyncEnabled()) + ","
-                       + Tools::toString(container->getNumberOfSyncRetries()) + "," + Tools::toString(container->getFailureAction()) + ","
-                       + Tools::toString(container->getLastAttemptTimestamp()) + "," + Tools::toString(container->getLastResult()) + "," + Tools::toString(container->getLastSessionID());
+                       + container->getDestinationPath() + "," + Convert::toString(container->getSourceDevice()) + "," + Convert::toString(container->getDestinationDevice()) + ","
+                       + Convert::toString(container->isSyncOneWay()) + "," + Convert::toString(container->isSyncOneTime()) + ","
+                       + Convert::toString(container->getDirectoryConflictResolutionRule()) + "," + Convert::toString(container->getFileConflictResolutionRule()) + ","
+                       + Convert::toString(container->isEncryptionEnabled()) + "," + Convert::toString(container->isCompressionEnabled()) + "," + Convert::toString(container->getOwnerID()) + ","
+                       + container->getDestinationPermissions() + "," + Convert::toString(container->isOfflineSyncEnabled()) + "," + Convert::toString(container->isDifferentialSyncEnabled()) + ","
+                       + Convert::toString(container->getNumberOfSyncRetries()) + "," + Convert::toString(container->getFailureAction()) + ","
+                       + Convert::toString(container->getLastAttemptTimestamp()) + "," + Convert::toString(container->getLastResult()) + "," + Convert::toString(container->getLastSessionID());
             }
 
             static std::string toString(SystemDataContainerPtr container)
@@ -626,48 +628,48 @@ namespace DatabaseManagement_DALs
                 {
                     //TODO - any_cast to proper types (DataPoolRetention instead of unsigned long)
                     case SystemParameterType::COMMAND_IP_ADDRESS: value = boost::any_cast<std::string>(container->getSystemParameterValue()); break;
-                    case SystemParameterType::COMMAND_IP_PORT: value = Tools::toString(boost::any_cast<unsigned int>(container->getSystemParameterValue())); break;
-                    case SystemParameterType::COMMAND_RETRIES_MAX: value = Tools::toString(boost::any_cast<unsigned int>(container->getSystemParameterValue())); break;
+                    case SystemParameterType::COMMAND_IP_PORT: value = Convert::toString(boost::any_cast<unsigned int>(container->getSystemParameterValue())); break;
+                    case SystemParameterType::COMMAND_RETRIES_MAX: value = Convert::toString(boost::any_cast<unsigned int>(container->getSystemParameterValue())); break;
                     case SystemParameterType::DATA_IP_ADDRESS: value = boost::any_cast<std::string>(container->getSystemParameterValue()); break;
-                    case SystemParameterType::DATA_IP_PORT: value = Tools::toString(boost::any_cast<unsigned int>(container->getSystemParameterValue())); break;
-                    case SystemParameterType::DATA_RETRIES_MAX: value = Tools::toString(boost::any_cast<unsigned int>(container->getSystemParameterValue())); break;
-                    case SystemParameterType::DB_CACHE_FLUSH_INTERVAL: value = Tools::toString(boost::any_cast<unsigned long>(container->getSystemParameterValue())); break;
-                    case SystemParameterType::DB_IMMEDIATE_FLUSH: value = Tools::toString(boost::any_cast<bool>(container->getSystemParameterValue())); break;
-                    case SystemParameterType::DB_MAX_READ_RETRIES: value = Tools::toString(boost::any_cast<unsigned int>(container->getSystemParameterValue())); break;
-                    case SystemParameterType::DB_MAX_WRITE_RETRIES: value = Tools::toString(boost::any_cast<unsigned int>(container->getSystemParameterValue())); break;
-                    case SystemParameterType::DB_OPERATION_MODE: value = Tools::toString(boost::any_cast<DatabaseManagerOperationMode>(container->getSystemParameterValue())); break;
-                    case SystemParameterType::FORCE_COMMAND_ENCRYPTION: value = Tools::toString(boost::any_cast<bool>(container->getSystemParameterValue())); break;
-                    case SystemParameterType::FORCE_DATA_COMPRESSION: value = Tools::toString(boost::any_cast<bool>(container->getSystemParameterValue())); break;
-                    case SystemParameterType::FORCE_DATA_ENCRYPTION: value = Tools::toString(boost::any_cast<bool>(container->getSystemParameterValue())); break;
-                    case SystemParameterType::IN_MEMORY_POOL_RETENTION: value = Tools::toString(boost::any_cast<unsigned long>(container->getSystemParameterValue())); break;
-                    case SystemParameterType::IN_MEMORY_POOL_SIZE: value = Tools::toString(boost::any_cast<unsigned long>(container->getSystemParameterValue())); break;
-                    case SystemParameterType::MINIMIZE_MEMORY_USAGE: value = Tools::toString(boost::any_cast<bool>(container->getSystemParameterValue())); break;
+                    case SystemParameterType::DATA_IP_PORT: value = Convert::toString(boost::any_cast<unsigned int>(container->getSystemParameterValue())); break;
+                    case SystemParameterType::DATA_RETRIES_MAX: value = Convert::toString(boost::any_cast<unsigned int>(container->getSystemParameterValue())); break;
+                    case SystemParameterType::DB_CACHE_FLUSH_INTERVAL: value = Convert::toString(boost::any_cast<unsigned long>(container->getSystemParameterValue())); break;
+                    case SystemParameterType::DB_IMMEDIATE_FLUSH: value = Convert::toString(boost::any_cast<bool>(container->getSystemParameterValue())); break;
+                    case SystemParameterType::DB_MAX_READ_RETRIES: value = Convert::toString(boost::any_cast<unsigned int>(container->getSystemParameterValue())); break;
+                    case SystemParameterType::DB_MAX_WRITE_RETRIES: value = Convert::toString(boost::any_cast<unsigned int>(container->getSystemParameterValue())); break;
+                    case SystemParameterType::DB_OPERATION_MODE: value = Convert::toString(boost::any_cast<DatabaseManagerOperationMode>(container->getSystemParameterValue())); break;
+                    case SystemParameterType::FORCE_COMMAND_ENCRYPTION: value = Convert::toString(boost::any_cast<bool>(container->getSystemParameterValue())); break;
+                    case SystemParameterType::FORCE_DATA_COMPRESSION: value = Convert::toString(boost::any_cast<bool>(container->getSystemParameterValue())); break;
+                    case SystemParameterType::FORCE_DATA_ENCRYPTION: value = Convert::toString(boost::any_cast<bool>(container->getSystemParameterValue())); break;
+                    case SystemParameterType::IN_MEMORY_POOL_RETENTION: value = Convert::toString(boost::any_cast<unsigned long>(container->getSystemParameterValue())); break;
+                    case SystemParameterType::IN_MEMORY_POOL_SIZE: value = Convert::toString(boost::any_cast<unsigned long>(container->getSystemParameterValue())); break;
+                    case SystemParameterType::MINIMIZE_MEMORY_USAGE: value = Convert::toString(boost::any_cast<bool>(container->getSystemParameterValue())); break;
                     case SystemParameterType::PENDING_DATA_POOL_PATH: value = boost::any_cast<std::string>(container->getSystemParameterValue()); break;
-                    case SystemParameterType::PENDING_DATA_POOL_SIZE: value = Tools::toString(boost::any_cast<unsigned long>(container->getSystemParameterValue())); break;
-                    case SystemParameterType::PENDING_DATA_RETENTION: value = Tools::toString(boost::any_cast<unsigned long>(container->getSystemParameterValue())); break;
-                    case SystemParameterType::SESSION_KEEP_ALIVE: value = Tools::toString(boost::any_cast<bool>(container->getSystemParameterValue())); break;
-                    case SystemParameterType::SESSION_TIMEOUT: value = Tools::toString(boost::any_cast<unsigned long>(container->getSystemParameterValue())); break;
+                    case SystemParameterType::PENDING_DATA_POOL_SIZE: value = Convert::toString(boost::any_cast<unsigned long>(container->getSystemParameterValue())); break;
+                    case SystemParameterType::PENDING_DATA_RETENTION: value = Convert::toString(boost::any_cast<unsigned long>(container->getSystemParameterValue())); break;
+                    case SystemParameterType::SESSION_KEEP_ALIVE: value = Convert::toString(boost::any_cast<bool>(container->getSystemParameterValue())); break;
+                    case SystemParameterType::SESSION_TIMEOUT: value = Convert::toString(boost::any_cast<unsigned long>(container->getSystemParameterValue())); break;
                     case SystemParameterType::SUPPORTED_PROTOCOLS: value = boost::any_cast<std::string>(container->getSystemParameterValue()); break;
                     default: value = "UNDEFINED"; break;
                 }
 
-                return container->toString() + "," + Tools::toString(container->getSystemParameterType()) + "," + value;
+                return container->toString() + "," + Convert::toString(container->getSystemParameterType()) + "," + value;
             }
 
             static std::string toString(UserDataContainerPtr container)
             {
-                return container->toString() + "," + container->getUsername() + "," + Tools::toString(container->getPasswordData()) + "," 
-                        + Tools::toString(container->getMaxFileSize()) + "," + Tools::toString(container->getMaxNumberOfFiles())
-                        + "," + Tools::toString(container->getUserAccessLevel()) + "," + Tools::toString(container->getForcePasswordReset()) 
-                        + "," + Tools::toString(container->isUserLocked()) + "," + Tools::toString(container->getCreationTimestamp()) 
-                        + "," + Tools::toString(container->getLastSuccessfulAuthenticationTimestamp())
-                        + "," + Tools::toString(container->getLastFailedAuthenticationTimestamp())
-                        + "," + Tools::toString(container->getFailedAuthenticationAttempts());
+                return container->toString() + "," + container->getUsername() + "," + Convert::toString(container->getPasswordData()) + "," 
+                        + Convert::toString(container->getMaxFileSize()) + "," + Convert::toString(container->getMaxNumberOfFiles())
+                        + "," + Convert::toString(container->getUserAccessLevel()) + "," + Convert::toString(container->getForcePasswordReset()) 
+                        + "," + Convert::toString(container->isUserLocked()) + "," + Convert::toString(container->getCreationTimestamp()) 
+                        + "," + Convert::toString(container->getLastSuccessfulAuthenticationTimestamp())
+                        + "," + Convert::toString(container->getLastFailedAuthenticationTimestamp())
+                        + "," + Convert::toString(container->getFailedAuthenticationAttempts());
             }
 
             static std::string toString(VectorDataContainerPtr container)
             {
-                return container->toString() + "," + Tools::toString(container->getContainers().size());
+                return container->toString() + "," + Convert::toString(container->getContainers().size());
             }
             //</editor-fold>
 

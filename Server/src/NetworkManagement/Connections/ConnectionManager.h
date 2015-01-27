@@ -26,13 +26,14 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/unordered_map.hpp>
-#include "../../Utilities/Tools.h"
+
+#include "../../Utilities/Strings/Common.h"
+#include "../../Utilities/Strings/Network.h"
 #include "../../Utilities/FileLogger.h"
 #include "../Types/Types.h"
 #include "../Types/Packets.h"
 #include "Connection.h"
 
-using Utilities::Tools;
 using NetworkManagement_Types::PeerType;
 using NetworkManagement_Types::SocketPtr;
 using NetworkManagement_Types::BufferSize;
@@ -45,6 +46,8 @@ using NetworkManagement_Connections::Connection;
 using NetworkManagement_Connections::ConnectionPtr;
 using Common_Types::IPPort;
 using Common_Types::IPAddress;
+
+namespace Convert = Utilities::Strings;
 
 namespace NetworkManagement_Connections
 {
@@ -114,7 +117,11 @@ namespace NetworkManagement_Connections
              * @param function the event handler to be attached
              * @return the resulting signal connection object
              */
-            boost::signals2::connection onConnectionCreatedEventAttach(std::function<void(ConnectionPtr, ConnectionInitiation)> function) { return onConnectionCreated.connect(function); }
+            boost::signals2::connection onConnectionCreatedEventAttach
+            (std::function<void(ConnectionPtr, ConnectionInitiation)> function)
+            {
+                return onConnectionCreated.connect(function);
+            }
             
             /**
              * Attaches the supplied handler to the <code>onConnectionInitiationFailed</code> event.
@@ -122,7 +129,11 @@ namespace NetworkManagement_Connections
              * @param function the event handler to be attached
              * @return the resulting signal connection object
              */
-            boost::signals2::connection onConnectionInitiationFailedEventAttach(std::function<void(const boost::system::error_code &)> function) { return onConnectionInitiationFailed.connect(function); }
+            boost::signals2::connection onConnectionInitiationFailedEventAttach
+            (std::function<void(const boost::system::error_code &)> function)
+            {
+                return onConnectionInitiationFailed.connect(function);
+            }
             
             /** Retrieves the type of the manager.\n\n@return the manager's type */
             ConnectionType getManagerType()                         const { return managerType; }

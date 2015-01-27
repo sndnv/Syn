@@ -61,19 +61,19 @@ SyncServer_Core::SecurityManager::SecurityManager
     if(authorizationTokenSignatureSize <= 0)
     {
         logDebugMessage("() > The authorization token signature size is set to [" 
-                + Utilities::Tools::toString(authorizationTokenSignatureSize) + "].");
+                + Convert::toString(authorizationTokenSignatureSize) + "].");
     }
 
     if(authenticationTokenSignatureSize <= 0)
     {
         logDebugMessage("() > The authentication token signature size is set to [" 
-                + Utilities::Tools::toString(authenticationTokenSignatureSize) + "].");
+                + Convert::toString(authenticationTokenSignatureSize) + "].");
     }
 
     if(authenticationTokenValidityDuration <= 0)
     {
         logDebugMessage("() > The authentication token validity duration is set to [" 
-                + Utilities::Tools::toString(authenticationTokenValidityDuration) + "].");
+                + Convert::toString(authenticationTokenValidityDuration) + "].");
     }
 
     for(const NameRule * currentRule : params.userNameRules)
@@ -111,14 +111,14 @@ SyncServer_Core::SecurityManager::SecurityManager
     if(currentHashingConfig.userPasswordSaltSize <= 0)
     {
         logDebugMessage("() > The user password salt size is set to [" 
-                + Utilities::Tools::toString(currentHashingConfig.userPasswordSaltSize)
+                + Convert::toString(currentHashingConfig.userPasswordSaltSize)
                 + "] (current configuration).");
     }
 
     if(currentHashingConfig.devicePasswordSaltSize <= 0)
     {
         logDebugMessage("() > The device password salt size is set to [" 
-                + Utilities::Tools::toString(currentHashingConfig.devicePasswordSaltSize)
+                + Convert::toString(currentHashingConfig.devicePasswordSaltSize)
                 + "] (current configuration).");
     }
 
@@ -139,14 +139,14 @@ SyncServer_Core::SecurityManager::SecurityManager
         if(previousHashingConfig.userPasswordSaltSize <= 0)
         {
             logDebugMessage("() > The user password salt size is set to [" 
-                    + Utilities::Tools::toString(previousHashingConfig.userPasswordSaltSize)
+                    + Convert::toString(previousHashingConfig.userPasswordSaltSize)
                     + "] (previous configuration).");
         }
 
         if(previousHashingConfig.devicePasswordSaltSize <= 0)
         {
             logDebugMessage("() > The device password salt size is set to [" 
-                    + Utilities::Tools::toString(previousHashingConfig.devicePasswordSaltSize)
+                    + Convert::toString(previousHashingConfig.devicePasswordSaltSize)
                     + "] (previous configuration).");
         }
 
@@ -166,7 +166,7 @@ SyncServer_Core::SecurityManager::SecurityManager
     if(userDelayConfig.delayBase <= 0)
     {
         logDebugMessage("() > The user authentication delay base is set to [" 
-                    + Utilities::Tools::toString(userDelayConfig.delayBase) + "] seconds.");
+                    + Convert::toString(userDelayConfig.delayBase) + "] seconds.");
     }
     
     if(userDelayConfig.escalationType == DelayEscalationType::INVALID)
@@ -177,7 +177,7 @@ SyncServer_Core::SecurityManager::SecurityManager
     if(deviceDelayConfig.delayBase <= 0)
     {
         logDebugMessage("() > The device authentication delay base is set to [" 
-                    + Utilities::Tools::toString(userDelayConfig.delayBase) + "] seconds.");
+                    + Convert::toString(userDelayConfig.delayBase) + "] seconds.");
     }
     
     if(deviceDelayConfig.escalationType == DelayEscalationType::INVALID)
@@ -228,7 +228,7 @@ void SyncServer_Core::SecurityManager::registerSecurableComponent(Securable & co
     else
     {
         throw std::invalid_argument("SecurityManager::registerSecurableComponent() > A component of type ["
-                + Utilities::Tools::toString(component.getComponentType()) + "] is already present.");
+                + Convert::toString(component.getComponentType()) + "] is already present.");
     }
 }
 
@@ -244,7 +244,7 @@ void SyncServer_Core::SecurityManager::deregisterSecurableComponent(SecurableCom
     else
     {
         throw std::invalid_argument("SecurityManager::registerSecurableComponent() > A component of type ["
-                + Utilities::Tools::toString(type) + "] is not present.");
+                + Convert::toString(type) + "] is not present.");
     }
 }
 
@@ -274,7 +274,7 @@ void SyncServer_Core::SecurityManager::removeUserNameRule(unsigned int ruleID)
     else
     {
         throw std::runtime_error("SecurityManager::removeUserNameRule() > The specified rule ["
-                + Utilities::Tools::toString(ruleID) + "] was not found.");
+                + Convert::toString(ruleID) + "] was not found.");
     }
 }
 
@@ -304,7 +304,7 @@ void SyncServer_Core::SecurityManager::removeDeviceNameRule(unsigned int ruleID)
     else
     {
         throw std::runtime_error("SecurityManager::removeDeviceNameRule() > The specified rule ["
-                + Utilities::Tools::toString(ruleID) + "] was not found.");
+                + Convert::toString(ruleID) + "] was not found.");
     }
 }
 
@@ -334,7 +334,7 @@ void SyncServer_Core::SecurityManager::removeUserPasswordRule(unsigned int ruleI
     else
     {
         throw std::runtime_error("SecurityManager::removeUserPasswordRule() > The specified rule ["
-                + Utilities::Tools::toString(ruleID) + "] was not found.");
+                + Convert::toString(ruleID) + "] was not found.");
     }
 }
 
@@ -364,7 +364,7 @@ void SyncServer_Core::SecurityManager::removeDevicePasswordRule(unsigned int rul
     else
     {
         throw std::runtime_error("SecurityManager::removeDevicePasswordRule() > The specified rule ["
-                + Utilities::Tools::toString(ruleID) + "] was not found.");
+                + Convert::toString(ruleID) + "] was not found.");
     }
 }
 
@@ -479,13 +479,13 @@ void SyncServer_Core::SecurityManager::updatePasswordHashingParameters
     if(newConfiguration.userPasswordSaltSize <= 0)
     {
         logDebugMessage("(updatePasswordHashingParameters) > The user password salt size will be set to [" 
-                + Utilities::Tools::toString(newConfiguration.userPasswordSaltSize) + "].");
+                + Convert::toString(newConfiguration.userPasswordSaltSize) + "].");
     }
 
     if(newConfiguration.devicePasswordSaltSize <= 0)
     {
         logDebugMessage("(updatePasswordHashingParameters) > The device password salt size will be set to [" 
-                + Utilities::Tools::toString(newConfiguration.devicePasswordSaltSize) + "].");
+                + Convert::toString(newConfiguration.devicePasswordSaltSize) + "].");
     }
 
     if(newConfiguration.userPasswordHashAlgorithm == HashAlgorithmType::INVALID)
@@ -528,8 +528,8 @@ void SyncServer_Core::SecurityManager::processAuthorizationRequest
         try
         {
             boost::throw_exception(std::logic_error("SecurityManager::processAuthorizationRequest() > "
-                "Source [" + Utilities::Tools::toString(request.getSource()) + "] or target ["
-                + Utilities::Tools::toString(request.getTarget()) + "] component not found."));
+                "Source [" + Convert::toString(request.getSource()) + "] or target ["
+                + Convert::toString(request.getTarget()) + "] component not found."));
         }
         catch(const std::logic_error &)
         {
@@ -543,14 +543,14 @@ void SyncServer_Core::SecurityManager::processAuthorizationRequest
     if(userData == nullptr)
     {//authorization is not given if no user data is found
         logDebugMessage("(processAuthorizationRequest) > No data was found for user <"
-                + Utilities::Tools::toString(request.getUser()) + ">.");
+                + Convert::toString(request.getUser()) + ">.");
 
         try
         {
             boost::throw_exception
             (
                 UserNotFoundException("(processAuthorizationRequest) > No data was found for user <"
-                    + Utilities::Tools::toString(request.getUser()) + ">.")
+                    + Convert::toString(request.getUser()) + ">.")
             );
         }
         catch(const UserNotFoundException &) { promise->set_exception(boost::current_exception()); }
@@ -567,7 +567,7 @@ void SyncServer_Core::SecurityManager::processAuthorizationRequest
             boost::throw_exception
             (
                 std::logic_error("SecurityManager::processAuthorizationRequest() > Set ["
-                    + Utilities::Tools::toString(request.getInstruction()->getParentSet())
+                    + Convert::toString(request.getInstruction()->getParentSet())
                     + "] not found or its minimum access level is not defined.")
             );
         }
@@ -580,7 +580,7 @@ void SyncServer_Core::SecurityManager::processAuthorizationRequest
     else if(userData->data->getUserAccessLevel() < minAccessLevel)
     {//authorization is not given if the user does not have the minimum required access level
         logDebugMessage("(processAuthorizationRequest) > Insufficient access level for user <"
-                        + Utilities::Tools::toString(request.getUser()) + ">.");
+                        + Convert::toString(request.getUser()) + ">.");
 
         try
         {
@@ -588,7 +588,7 @@ void SyncServer_Core::SecurityManager::processAuthorizationRequest
             (
                 InsufficientUserAccessException("(processAuthorizationRequest) > "
                     "Insufficient access level for user <"
-                    + Utilities::Tools::toString(request.getUser()) + ">.")
+                    + Convert::toString(request.getUser()) + ">.")
             );
         }
         catch(const InsufficientUserAccessException &)
@@ -610,8 +610,8 @@ void SyncServer_Core::SecurityManager::processAuthorizationRequest
                 (
                     std::logic_error("SecurityManager::processAuthorizationRequest() > "
                         "An invalid user access rule was found for user ["
-                        + Utilities::Tools::toString(request.getUser()) + "] and set ["
-                        + Utilities::Tools::toString(currentRule.getSetType()) + "].")
+                        + Convert::toString(request.getUser()) + "] and set ["
+                        + Convert::toString(currentRule.getSetType()) + "].")
                 );
             }
             catch(const std::logic_error &)
@@ -630,7 +630,7 @@ void SyncServer_Core::SecurityManager::processAuthorizationRequest
     if(!userActionAllowed)
     {//authorization is not given if the user is not explicitly allowed to use the instruction set
         logDebugMessage("(processAuthorizationRequest) > Instruction not allowed for user <"
-                        + Utilities::Tools::toString(request.getUser()) + ">.");
+                        + Convert::toString(request.getUser()) + ">.");
 
         try
         {
@@ -638,7 +638,7 @@ void SyncServer_Core::SecurityManager::processAuthorizationRequest
             (
                 InstructionNotAllowedException("(processAuthorizationRequest) > "
                     "Instruction not allowed for user <"
-                    + Utilities::Tools::toString(request.getUser()) + ">.")
+                    + Convert::toString(request.getUser()) + ">.")
             );
         }
         catch(const InstructionNotAllowedException &)
@@ -656,16 +656,16 @@ void SyncServer_Core::SecurityManager::processAuthorizationRequest
         if(deviceData == nullptr)
         {//authorization is not given if no data is found for the device
             logDebugMessage("(processAuthorizationRequest) > No data was found for device ["
-                    + Utilities::Tools::toString(request.getDevice()) + "] belonging to user ["
-                    + Utilities::Tools::toString(request.getUser()) + "].");
+                    + Convert::toString(request.getDevice()) + "] belonging to user ["
+                    + Convert::toString(request.getUser()) + "].");
 
             try
             {
                 boost::throw_exception
                 (
                     DeviceNotFoundException("(processAuthorizationRequest) > "
-                        "No data was found for device [" + Utilities::Tools::toString(request.getDevice()) 
-                        + "] belonging to user [" + Utilities::Tools::toString(request.getUser()) + "].")
+                        "No data was found for device [" + Convert::toString(request.getDevice()) 
+                        + "] belonging to user [" + Convert::toString(request.getUser()) + "].")
                 );
             }
             catch(const DeviceNotFoundException &)
@@ -679,15 +679,15 @@ void SyncServer_Core::SecurityManager::processAuthorizationRequest
         if(deviceData->data->getDeviceOwner() != request.getUser())
         {//authorization is not given if the device does not belong to the user
             logDebugMessage("(processAuthorizationRequest) > Device ["
-                    + Utilities::Tools::toString(request.getDevice()) + "] does not belong to user [" 
-                    + Utilities::Tools::toString(request.getUser()) + "], as expected.");
+                    + Convert::toString(request.getDevice()) + "] does not belong to user [" 
+                    + Convert::toString(request.getUser()) + "], as expected.");
             try
             {
                 boost::throw_exception
                 (
                     UnexpectedDeviceException("(processAuthorizationRequest) > Device ["
-                        + Utilities::Tools::toString(request.getDevice()) + "] does not belong to user [" 
-                        + Utilities::Tools::toString(request.getUser()) + "], as expected.")
+                        + Convert::toString(request.getDevice()) + "] does not belong to user [" 
+                        + Convert::toString(request.getUser()) + "], as expected.")
                 );
             }
             catch(const UnexpectedDeviceException &)
@@ -701,14 +701,14 @@ void SyncServer_Core::SecurityManager::processAuthorizationRequest
         if(deviceData->data->isDeviceLocked())
         {//authorization is not given if the device is locked
             logDebugMessage("(processAuthorizationRequest) > Device <"
-                            + Utilities::Tools::toString(request.getDevice()) + "> is locked.");
+                            + Convert::toString(request.getDevice()) + "> is locked.");
 
             try
             {
                 boost::throw_exception
                 (
                     DeviceLockedException("(processAuthorizationRequest) > Device <"
-                        + Utilities::Tools::toString(request.getDevice()) + "> is locked.")
+                        + Convert::toString(request.getDevice()) + "> is locked.")
                 );
             }
             catch(const DeviceLockedException &)
@@ -753,7 +753,7 @@ void SyncServer_Core::SecurityManager::processUserAuthenticationRequest
             boost::throw_exception
             (
                 std::logic_error("SecurityManager::processUserAuthenticationRequest() > Source ["
-                    + Utilities::Tools::toString(request.getSource()) + "] component not found.")
+                    + Convert::toString(request.getSource()) + "] component not found.")
             );
         }
         catch(const std::logic_error &)
@@ -822,8 +822,8 @@ void SyncServer_Core::SecurityManager::processUserAuthenticationRequest
             {//access is not allowed if the required time between attempts has not passed
                 logDebugMessage("(processUserAuthenticationRequest) > User <"
                         + request.getUsername() + "> is locked for ["
-                        + Utilities::Tools::toString(delayTimeRemaining(lastAttempt, delayTime))
-                        + "] more seconds because of [" + Utilities::Tools::toString(failedAuthentications)
+                        + Convert::toString(delayTimeRemaining(lastAttempt, delayTime))
+                        + "] more seconds because of [" + Convert::toString(failedAuthentications)
                         + "] failed authentication attempts.");
 
                 try
@@ -832,9 +832,9 @@ void SyncServer_Core::SecurityManager::processUserAuthenticationRequest
                     (
                         UserLockedException("(processUserAuthenticationRequest) > User <"
                         + request.getUsername() + "> is locked for ["
-                        + Utilities::Tools::toString(delayTimeRemaining(lastAttempt, delayTime))
+                        + Convert::toString(delayTimeRemaining(lastAttempt, delayTime))
                         + "] more seconds because of ["
-                        + Utilities::Tools::toString(failedAuthentications)
+                        + Convert::toString(failedAuthentications)
                         + "] failed authentication attempts.")
                     );
                 }
@@ -994,7 +994,7 @@ void SyncServer_Core::SecurityManager::processDeviceAuthenticationRequest
             boost::throw_exception
             (
                 std::logic_error("SecurityManager::processDeviceAuthenticationRequest() > Source ["
-                    + Utilities::Tools::toString(request.getSource()) + "] component not found."));
+                    + Convert::toString(request.getSource()) + "] component not found."));
         }
         catch(const std::logic_error &)
         {
@@ -1008,7 +1008,7 @@ void SyncServer_Core::SecurityManager::processDeviceAuthenticationRequest
     if(deviceData == nullptr)
     {//access is not allowed if no device data is found
         logDebugMessage("(processDeviceAuthenticationRequest) > No data was found for device ["
-                        + Utilities::Tools::toString(request.getDevice()) + "].");
+                        + Convert::toString(request.getDevice()) + "].");
 
         try
         {
@@ -1016,7 +1016,7 @@ void SyncServer_Core::SecurityManager::processDeviceAuthenticationRequest
             (
                 DeviceNotFoundException("(processDeviceAuthenticationRequest) > "
                     "No data was found for device ["
-                    + Utilities::Tools::toString(request.getDevice()) + "].")
+                    + Convert::toString(request.getDevice()) + "].")
             );
         }
         catch(const DeviceNotFoundException &)
@@ -1030,14 +1030,14 @@ void SyncServer_Core::SecurityManager::processDeviceAuthenticationRequest
     if(deviceData->data->isDeviceLocked())
     {//access is not allowed if the device is locked
         logDebugMessage("(processDeviceAuthenticationRequest) > Device <"
-                        + Utilities::Tools::toString(request.getDevice()) + "> is locked.");
+                        + Convert::toString(request.getDevice()) + "> is locked.");
 
         try
         {
             boost::throw_exception
             (
                 DeviceLockedException("(processDeviceAuthenticationRequest) > Device <"
-                    + Utilities::Tools::toString(request.getDevice()) + "> is locked.")
+                    + Convert::toString(request.getDevice()) + "> is locked.")
             );
         }
         catch(const DeviceLockedException &)
@@ -1061,10 +1061,10 @@ void SyncServer_Core::SecurityManager::processDeviceAuthenticationRequest
                     > boost::posix_time::second_clock::universal_time())
             {//access is not allowed if the required time between attempts has not passed
                 logDebugMessage("(processDeviceAuthenticationRequest) > Device <"
-                        + Utilities::Tools::toString(request.getDevice()) + "> is locked for ["
-                        + Utilities::Tools::toString(delayTimeRemaining(lastAttempt, delayTime))
+                        + Convert::toString(request.getDevice()) + "> is locked for ["
+                        + Convert::toString(delayTimeRemaining(lastAttempt, delayTime))
                         + "] more seconds because of ["
-                        + Utilities::Tools::toString(failedAuthentications)
+                        + Convert::toString(failedAuthentications)
                         + "] failed authentication attempts.");
 
                 try
@@ -1072,10 +1072,10 @@ void SyncServer_Core::SecurityManager::processDeviceAuthenticationRequest
                     boost::throw_exception
                     (
                         DeviceLockedException("(processDeviceAuthenticationRequest) Device <"
-                            + Utilities::Tools::toString(request.getDevice()) + "> is locked for ["
-                            + Utilities::Tools::toString(delayTimeRemaining(lastAttempt, delayTime))
+                            + Convert::toString(request.getDevice()) + "> is locked for ["
+                            + Convert::toString(delayTimeRemaining(lastAttempt, delayTime))
                             + "] more seconds because of ["
-                            + Utilities::Tools::toString(failedAuthentications)
+                            + Convert::toString(failedAuthentications)
                             + "] failed authentication attempts.")
                     );
                 }
@@ -1116,7 +1116,7 @@ void SyncServer_Core::SecurityManager::processDeviceAuthenticationRequest
                 if(deviceData->data->passwordsMatch(previousConfigPasswordSalt + previousConfigHashedPassword))
                 {
                     logDebugMessage("(processDeviceAuthenticationRequest) > Device password for <"
-                                    + Utilities::Tools::toString(request.getDevice())
+                                    + Convert::toString(request.getDevice())
                                     + "> authenticated with previous configuration.");
                     
                     passwordVerificationFailed = false;
@@ -1132,7 +1132,7 @@ void SyncServer_Core::SecurityManager::processDeviceAuthenticationRequest
             if(deviceData->data->getFailedAuthenticationAttempts() >= deviceDelayConfig.maxAttempts)
             {
                 logDebugMessage("(processDeviceAuthenticationRequest) > Device <"
-                                + Utilities::Tools::toString(request.getDevice())
+                                + Convert::toString(request.getDevice())
                                 + "> locked because of too many failed authentication attempts.");
                 
                 deviceData->data->setLockedState(true);
@@ -1141,7 +1141,7 @@ void SyncServer_Core::SecurityManager::processDeviceAuthenticationRequest
             databaseManager.Devices().updateDevice(deviceData->data);
             
             logDebugMessage("(processDeviceAuthenticationRequest) > Invalid password supplied for device <"
-                            + Utilities::Tools::toString(request.getDevice()) + ">.");
+                            + Convert::toString(request.getDevice()) + ">.");
 
             try
             {
@@ -1149,7 +1149,7 @@ void SyncServer_Core::SecurityManager::processDeviceAuthenticationRequest
                 (
                     InvalidPassswordException("(processDeviceAuthenticationRequest) > "
                         "Invalid password supplied for device <"
-                        + Utilities::Tools::toString(request.getDevice()) + ">.")
+                        + Convert::toString(request.getDevice()) + ">.")
                 );
             }
             catch(const InvalidPassswordException &)
@@ -1198,7 +1198,7 @@ void SyncServer_Core::SecurityManager::processDerivedCryptoDataGenerationRequest
                 boost::throw_exception
                 (
                     std::logic_error("SecurityManager::processDerivedCryptoDataGenerationRequest() > Source ["
-                        + Utilities::Tools::toString(request.getSource()) + "] component not found.")
+                        + Convert::toString(request.getSource()) + "] component not found.")
                 );
             }
             catch(const std::logic_error &)
@@ -1255,7 +1255,7 @@ void SyncServer_Core::SecurityManager::processSymmetricCryptoDataGenerationReque
                 boost::throw_exception
                 (
                     std::logic_error("SecurityManager::processSymmetricCryptoDataGenerationRequest() > "
-                        "Source [" + Utilities::Tools::toString(request.getSource())
+                        "Source [" + Convert::toString(request.getSource())
                         + "] component not found.")
                 );
             }
@@ -1441,7 +1441,7 @@ void SyncServer_Core::SecurityManager::evictDevice()
     if(evictionTarget != INVALID_DEVICE_ID)
     {
         deviceDataCache.erase(evictionTarget);
-        logDebugMessage("(evictDevice) > Device [" + Utilities::Tools::toString(evictionTarget)
+        logDebugMessage("(evictDevice) > Device [" + Convert::toString(evictionTarget)
                         + "] evicted from cache.");
     }
     else
@@ -1492,7 +1492,7 @@ void SyncServer_Core::SecurityManager::evictUser()
     {
         userDataCache.erase(evictionTarget);
         userNameMap.erase(targetName);
-        logDebugMessage("(evictUser) > User [" + Utilities::Tools::toString(evictionTarget)
+        logDebugMessage("(evictUser) > User [" + Convert::toString(evictionTarget)
                         + "] evicted from cache.");
 
         std::vector<DeviceID> userDevices;
@@ -1505,8 +1505,8 @@ void SyncServer_Core::SecurityManager::evictUser()
         for(const DeviceID currentUserDevice : userDevices)
         {
             deviceDataCache.erase(currentUserDevice);
-            logDebugMessage("(evictUser) > Device [" + Utilities::Tools::toString(currentUserDevice)
-                    + "] for user [" + Utilities::Tools::toString(evictionTarget) 
+            logDebugMessage("(evictUser) > Device [" + Convert::toString(currentUserDevice)
+                    + "] for user [" + Convert::toString(evictionTarget) 
                     + "] evicted from cache.");
         }
     }
@@ -1583,8 +1583,8 @@ Seconds SyncServer_Core::SecurityManager::delayTimeRemaining
               (
                    "SecurityManager::delayTimeRemaining() > "
                    "Unexpected timestamp difference encountered; current ["
-                   + Utilities::Tools::toString(boost::posix_time::second_clock::universal_time())
-                   +"]; last [" + Utilities::Tools::toString(lastFailedAuthenticationTimestamp) + "]."
+                   + Convert::toString(boost::posix_time::second_clock::universal_time())
+                   +"]; last [" + Convert::toString(lastFailedAuthenticationTimestamp) + "]."
               );
     }
 }

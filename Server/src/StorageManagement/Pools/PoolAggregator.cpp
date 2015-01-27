@@ -51,7 +51,7 @@ StorageManagement_Pools::PoolAggregator::PoolAggregator
         {
             throw std::invalid_argument("PoolAggregator::() > Aggregator initialization "
                     "failed; the supplied streaming pool ["
-                    + Utilities::Tools::toString(parameters.streamingPool->getPoolUUID())
+                    + Convert::toString(parameters.streamingPool->getPoolUUID())
                     + "] does not support output streams.");
         }
     }
@@ -100,7 +100,7 @@ StorageManagement_Pools::PoolAggregator::PoolAggregator
            || currentPoolData.first != currentPoolData.second->getPoolUUID())
         {
             throw std::invalid_argument("PoolAggregator::() > Aggregator initialization failed; the supplied pool ["
-                    + Utilities::Tools::toString(currentPoolData.second->getPoolUUID()) + "] is not valid.");
+                    + Convert::toString(currentPoolData.second->getPoolUUID()) + "] is not valid.");
         }
         
         StoredDataID newPoolID = ++lastPoolID;
@@ -115,7 +115,7 @@ StorageManagement_Pools::PoolAggregator::PoolAggregator
             {
                 throw std::invalid_argument("PoolAggregator::() > Aggregator "
                         "initialization failed; the supplied streaming pool ["
-                        + Utilities::Tools::toString(parameters.streamingPoolUUID)
+                        + Convert::toString(parameters.streamingPoolUUID)
                         + "] does not support output streams.");
             }
         }
@@ -132,7 +132,7 @@ StorageManagement_Pools::PoolAggregator::PoolAggregator
         {
             throw std::invalid_argument("PoolAggregator::() > Aggregator initialization "
                     "failed; the supplied link data is for a source pool ["
-                    + Utilities::Tools::toString(currentPoolLinkData.first)
+                    + Convert::toString(currentPoolLinkData.first)
                     + "] that is not present.");
         }
         
@@ -146,9 +146,9 @@ StorageManagement_Pools::PoolAggregator::PoolAggregator
             {
                 throw std::invalid_argument("PoolAggregator::() > Aggregator "
                         "initialization failed; the supplied link ["
-                        + Utilities::Tools::toString(currentLinkData.action)
+                        + Convert::toString(currentLinkData.action)
                         + "] is for a target pool ["
-                        + Utilities::Tools::toString(currentLinkData.targetPool)
+                        + Convert::toString(currentLinkData.targetPool)
                         + "] that is not present.");
             }
 
@@ -161,11 +161,11 @@ StorageManagement_Pools::PoolAggregator::PoolAggregator
                 {
                     throw std::invalid_argument("PoolAggregator::() > Aggregator "
                             "initialization failed; there is a link ["
-                            + Utilities::Tools::toString(existingLink.action)
+                            + Convert::toString(existingLink.action)
                             + "] already defined for the specified source ["
-                            + Utilities::Tools::toString(currentPoolLinkData.first)
+                            + Convert::toString(currentPoolLinkData.first)
                             + "] and target pools ["
-                            + Utilities::Tools::toString(currentLinkData.targetPool)
+                            + Convert::toString(currentLinkData.targetPool)
                             + "].");
                 }
             }
@@ -189,7 +189,7 @@ StorageManagement_Pools::PoolAggregator::~PoolAggregator()
     if(pendingStorageActions.size() > 0)
     {
         logDebugMessage("(~) > There are <" 
-                + Utilities::Tools::toString(pendingStorageActions.size())
+                + Convert::toString(pendingStorageActions.size())
                 + "> storage actions still pending.");
         
         pendingStorageActions.clear();
@@ -237,7 +237,7 @@ ByteVectorPtr StorageManagement_Pools::PoolAggregator::retrieveData(StoredDataID
                 {
                     throw std::runtime_error("PoolAggregator::storeData() > Failed to retrieve data; "
                             "too much non-streamable data requested: ["
-                            + Utilities::Tools::toString(dataSize) + "] bytes.");
+                            + Convert::toString(dataSize) + "] bytes.");
                 }
                 
                 ByteVectorPtr result = sourcePool->retrieveData(currentEntityIDData.entityID);
@@ -260,7 +260,7 @@ ByteVectorPtr StorageManagement_Pools::PoolAggregator::retrieveData(StoredDataID
     else
     {
         throw std::runtime_error("PoolAggregator::retrieveData() > Failed to retrieve "
-                "the requested data; ID [" + Utilities::Tools::toString(id) + "] not found.");
+                "the requested data; ID [" + Convert::toString(id) + "] not found.");
     }
 }
 
@@ -385,7 +385,7 @@ void StorageManagement_Pools::PoolAggregator::discardData(StoredDataID id, bool 
     else
     {
         throw std::runtime_error("PoolAggregator::discardData() > Failed to discard "
-                "the requested data; ID [" + Utilities::Tools::toString(id) + "] not found.");
+                "the requested data; ID [" + Convert::toString(id) + "] not found.");
     }
 }
 
@@ -495,7 +495,7 @@ PoolInputStreamPtr StorageManagement_Pools::PoolAggregator::getInputStream(Store
     else
     {
         throw std::runtime_error("PoolAggregator::getInputStream() > Failed to retrieve "
-                "the requested input stream; ID [" + Utilities::Tools::toString(id) + "] not found.");
+                "the requested input stream; ID [" + Convert::toString(id) + "] not found.");
     }
 }
 
@@ -529,7 +529,7 @@ PoolOutputStreamPtr StorageManagement_Pools::PoolAggregator::getOutputStream(Dat
         {
             throw std::runtime_error("PoolAggregator::getOutputStream() > Failed to retrieve "
                     "output stream; the streaming pool cannot store ["
-                    + Utilities::Tools::toString(dataSize) + "] bytes of data.");
+                    + Convert::toString(dataSize) + "] bytes of data.");
         }
 
         StoredDataID newEntityID = ++lastEntityID;
@@ -578,7 +578,7 @@ void StorageManagement_Pools::PoolAggregator::releaseStreamedData(StoredDataID s
         {
             throw std::runtime_error("PoolAggregator::releaseStreamedData() > Failed to release "
                     "streamed data; unexpected ID data for entity ["
-                    + Utilities::Tools::toString(streamedEntityID) + "] encountered.");
+                    + Convert::toString(streamedEntityID) + "] encountered.");
         }
 
         //retrieves the usual sequence for storing data
@@ -623,7 +623,7 @@ void StorageManagement_Pools::PoolAggregator::releaseStreamedData(StoredDataID s
     else
     {
         throw std::runtime_error("PoolAggregator::releaseStreamedData() > Failed to release "
-                "streamed data; ID [" + Utilities::Tools::toString(streamedEntityID) + "] not found.");
+                "streamed data; ID [" + Convert::toString(streamedEntityID) + "] not found.");
     }
 }
 //</editor-fold>
@@ -644,9 +644,9 @@ PoolID StorageManagement_Pools::PoolAggregator::addPool(DataPool * pool)
         if(currentPool.second == pool)
         {
             throw std::invalid_argument("PoolAggregator::addPool() > Pool addition failed; "
-                    "the specified pool [" + Utilities::Tools::toString(pool->getPoolUUID())
+                    "the specified pool [" + Convert::toString(pool->getPoolUUID())
                     + "] has already been added as ["
-                    + Utilities::Tools::toString(currentPool.first) + "].");
+                    + Convert::toString(currentPool.first) + "].");
         }
     }
 
@@ -705,7 +705,7 @@ void StorageManagement_Pools::PoolAggregator::removePool(PoolID pool)
     else
     {
         throw std::invalid_argument("PoolAggregator::removePool() > Pool removal failed; "
-                "the specified pool [" + Utilities::Tools::toString(pool) + "] was not found.");
+                "the specified pool [" + Convert::toString(pool) + "] was not found.");
     }
 }
 
@@ -729,10 +729,10 @@ void StorageManagement_Pools::PoolAggregator::addPoolLink
             if(currentLink.targetPool == params.targetPool)
             {
                 throw std::invalid_argument("PoolAggregator::addPoolLink() > Pool link addition failed; "
-                        "there is a link [" + Utilities::Tools::toString(currentLink.action)
+                        "there is a link [" + Convert::toString(currentLink.action)
                         + "] already defined for the specified source ["
-                        + Utilities::Tools::toString(sourcePool) + "] and target ["
-                        + Utilities::Tools::toString(params.targetPool) + "] pools.");
+                        + Convert::toString(sourcePool) + "] and target ["
+                        + Convert::toString(params.targetPool) + "] pools.");
             }
         }
 
@@ -743,7 +743,7 @@ void StorageManagement_Pools::PoolAggregator::addPoolLink
     else
     {
         throw std::invalid_argument("PoolAggregator::addPoolLink() > Pool link addition failed; "
-                "the specified source pool [" + Utilities::Tools::toString(sourcePool)
+                "the specified source pool [" + Convert::toString(sourcePool)
                 + "] was not found.");
     }
 }
@@ -776,7 +776,7 @@ void StorageManagement_Pools::PoolAggregator::removePoolLink(PoolID sourcePool, 
         if(!linkRemoved)
         {
             throw std::invalid_argument("PoolAggregator::removePoolLink() > Pool link removal failed; "
-                    "the specified target pool [" + Utilities::Tools::toString(targetPool)
+                    "the specified target pool [" + Convert::toString(targetPool)
                     + "] was not found.");
         }
 
@@ -785,7 +785,7 @@ void StorageManagement_Pools::PoolAggregator::removePoolLink(PoolID sourcePool, 
     else
     {
         throw std::invalid_argument("PoolAggregator::removePoolLink() > Pool link removal failed; "
-                "the specified source pool [" + Utilities::Tools::toString(sourcePool)
+                "the specified source pool [" + Convert::toString(sourcePool)
                 + "] was not found.");
     }
 }
@@ -900,7 +900,7 @@ StorageManagement_Pools::PoolAggregator::exportIDDataForPool(PoolID pool) const
     else
     {
         throw std::invalid_argument("PoolAggregator::exportIDDataForPool(ID) > Pool ID data export failed; "
-                "the specified pool [" + Utilities::Tools::toString(pool) + "] was not found.");
+                "the specified pool [" + Convert::toString(pool) + "] was not found.");
     }
 }
 
@@ -946,7 +946,7 @@ StorageManagement_Pools::PoolAggregator::exportIDDataForEntity(StoredDataID enti
     else
     {
         throw std::invalid_argument("PoolAggregator::exportIDDataForEntity() > Entity ID data export failed; "
-                "the specified entity [" + Utilities::Tools::toString(entity) + "] was not found.");
+                "the specified entity [" + Convert::toString(entity) + "] was not found.");
     }
 }
 
@@ -976,13 +976,13 @@ void StorageManagement_Pools::PoolAggregator::importIDData
             if(pools.find(pool) == pools.end())
             {
                 throw std::invalid_argument("PoolAggregator::importIDData() > ID data import failed; "
-                        "the specified pool [" + Utilities::Tools::toString(pool) + "] was not found.");
+                        "the specified pool [" + Convert::toString(pool) + "] was not found.");
             }
 
             if(currentPoolData.second.size() == 0)
             {
                 throw std::invalid_argument("PoolAggregator::importIDData() > ID data import failed; "
-                        "no data supplied for pool [" + Utilities::Tools::toString(pool) + "].");
+                        "no data supplied for pool [" + Convert::toString(pool) + "].");
             }
         }
 
@@ -995,17 +995,17 @@ void StorageManagement_Pools::PoolAggregator::importIDData
                 {
                     throw std::invalid_argument("PoolAggregator::importIDData() > "
                             "ID data import failed; the supplied data ["
-                            + Utilities::Tools::toString(currentEntityData.aggregatorEntityID) 
-                            + "/" + Utilities::Tools::toString(currentEntityData.poolEntityID)
+                            + Convert::toString(currentEntityData.aggregatorEntityID) 
+                            + "/" + Convert::toString(currentEntityData.poolEntityID)
                             + "] is not valid.");
                 }
 
                 if(pools.at(pool)->getEntitySize(currentEntityData.poolEntityID) <= 0)
                 {
                     throw std::invalid_argument("PoolAggregator::importIDData() > ID data import failed;"
-                            "the specified pool [" + Utilities::Tools::toString(pool)
+                            "the specified pool [" + Convert::toString(pool)
                             + "] does not have the specified entity ["
-                            + Utilities::Tools::toString(currentEntityData.poolEntityID) + "].");
+                            + Convert::toString(currentEntityData.poolEntityID) + "].");
                 }
             }
 
@@ -1035,7 +1035,7 @@ void StorageManagement_Pools::PoolAggregator::importIDDataForPool
     {
         throw std::invalid_argument("PoolAggregator::importIDDataForPool(ID) > "
                 "Pool ID data import failed; the specified pool ["
-                + Utilities::Tools::toString(pool) + "] was not found.");
+                + Convert::toString(pool) + "] was not found.");
     }
 
     for(const EntityIDData & currentIDData : idData)
@@ -1047,8 +1047,8 @@ void StorageManagement_Pools::PoolAggregator::importIDDataForPool
             {
                 throw std::invalid_argument("PoolAggregator::importIDData(ID) > "
                         "ID data import failed; the supplied data ["
-                        + Utilities::Tools::toString(currentIDData.aggregatorEntityID) + "/"
-                        + Utilities::Tools::toString(currentIDData.poolEntityID)
+                        + Convert::toString(currentIDData.aggregatorEntityID) + "/"
+                        + Convert::toString(currentIDData.poolEntityID)
                         + "] is not valid.");
             }
 
@@ -1056,9 +1056,9 @@ void StorageManagement_Pools::PoolAggregator::importIDDataForPool
             {
                 throw std::invalid_argument("PoolAggregator::importIDData(ID) > "
                         "ID data import failed; the specified pool ["
-                        + Utilities::Tools::toString(pool)
+                        + Convert::toString(pool)
                         + "] does not have the specified entity ["
-                        + Utilities::Tools::toString(currentIDData.poolEntityID)
+                        + Convert::toString(currentIDData.poolEntityID)
                         + "].");
             }
         }
@@ -1115,16 +1115,16 @@ void StorageManagement_Pools::PoolAggregator::importIDDataForEntity
                 {
                     throw std::invalid_argument("PoolAggregator::importIDDataForEntity() > "
                         "Entity ID data import failed; the supplied data ["
-                        + Utilities::Tools::toString(currentIDData.entity) + "/"
-                        + Utilities::Tools::toString(pool) + "] is not valid.");
+                        + Convert::toString(currentIDData.entity) + "/"
+                        + Convert::toString(pool) + "] is not valid.");
                 }
 
                 if(pools.at(pool)->getEntitySize(currentIDData.entity) <= 0)
                 {
                     throw std::invalid_argument("PoolAggregator::importIDDataForEntity() > "
                         "Entity ID data import failed; the specified pool ["
-                        + Utilities::Tools::toString(pool) + "] does not have the specified entity ["
-                        + Utilities::Tools::toString(currentIDData.entity) + "].");
+                        + Convert::toString(pool) + "] does not have the specified entity ["
+                        + Convert::toString(currentIDData.entity) + "].");
                 }
             }
 
@@ -1136,7 +1136,7 @@ void StorageManagement_Pools::PoolAggregator::importIDDataForEntity
     {
         throw std::invalid_argument("PoolAggregator::importIDDataForEntity() > "
                 "Entity ID data import failed; the specified entity ["
-                + Utilities::Tools::toString(entity) + "] is already present.");
+                + Convert::toString(entity) + "] is already present.");
     }
 }
 
@@ -1298,7 +1298,7 @@ void StorageManagement_Pools::PoolAggregator::processStoreActionSequence
                         cleanupPartialStore(dataIDs, data->size());
                         throw std::runtime_error("PoolAggregator::processStoreActionSequence(ByteVectorPtr) > "
                                 "Failed to store data; remove action for ["
-                                + Utilities::Tools::toString(currentLink.source) + "] failed.");
+                                + Convert::toString(currentLink.source) + "] failed.");
                     }
                 } break;
 
@@ -1359,7 +1359,7 @@ void StorageManagement_Pools::PoolAggregator::processStoreActionSequence
     {
         throw std::runtime_error("PoolAggregator::processStoreActionSequence(DataSize) > "
                 "Failed to process action sequence; entity ID ["
-                + Utilities::Tools::toString(entityID) + "] not found.");
+                + Convert::toString(entityID) + "] not found.");
     }
 
     //retrieves the list of IDs for the current entity
@@ -1406,10 +1406,10 @@ void StorageManagement_Pools::PoolAggregator::processStoreActionSequence
                             {
                                 throw std::runtime_error("PoolAggregator::processStoreActionSequence() > "
                                         "Failed to process action sequence; copy action for source ["
-                                        + Utilities::Tools::toString(currentLink.source) + "] and target ["
-                                        + Utilities::Tools::toString(currentLink.target) 
+                                        + Convert::toString(currentLink.source) + "] and target ["
+                                        + Convert::toString(currentLink.target) 
                                         + "] failed; too much non-streamable data requested: ["
-                                        + Utilities::Tools::toString(dataSize) + "] bytes..");
+                                        + Convert::toString(dataSize) + "] bytes..");
                             }
                             
                             //copies the data from the source to the target pool
@@ -1423,14 +1423,14 @@ void StorageManagement_Pools::PoolAggregator::processStoreActionSequence
                             {
                                 throw std::runtime_error("PoolAggregator::processStoreActionSequence(DataSize) > "
                                         "Failed to process action sequence; copy action for source ["
-                                        + Utilities::Tools::toString(currentLink.source) + "] and target ["
-                                        + Utilities::Tools::toString(currentLink.target)
+                                        + Convert::toString(currentLink.source) + "] and target ["
+                                        + Convert::toString(currentLink.target)
                                         + "] failed; target pool unable to store data.");
                             }
                             
                             logDebugMessage("(processStoreActionSequence) > Failed to process action sequence; "
-                                    "copy action for source [" + Utilities::Tools::toString(currentLink.source) 
-                                    + "] and target [" + Utilities::Tools::toString(currentLink.target)
+                                    "copy action for source [" + Convert::toString(currentLink.source) 
+                                    + "] and target [" + Convert::toString(currentLink.target)
                                     + "] failed; target pool unable to store data.");
                         }
                         
@@ -1443,15 +1443,15 @@ void StorageManagement_Pools::PoolAggregator::processStoreActionSequence
                         {
                             throw std::runtime_error("PoolAggregator::processStoreActionSequence(DataSize) > "
                                     "Failed to process action sequence; copy action for source ["
-                                    + Utilities::Tools::toString(currentLink.source) + "] and target ["
-                                    + Utilities::Tools::toString(currentLink.target)
+                                    + Convert::toString(currentLink.source) + "] and target ["
+                                    + Convert::toString(currentLink.target)
                                     + "] failed; unable to find source entity ID..");
                         }
 
                         logDebugMessage("(processStoreActionSequence) > Failed to process action sequence; "
                                     "copy action for source ["
-                                    + Utilities::Tools::toString(currentLink.source) + "] and target ["
-                                    + Utilities::Tools::toString(currentLink.target)
+                                    + Convert::toString(currentLink.source) + "] and target ["
+                                    + Convert::toString(currentLink.target)
                                     + "] failed; unable to find source entity ID..");
                     }
                 } break;
@@ -1480,12 +1480,12 @@ void StorageManagement_Pools::PoolAggregator::processStoreActionSequence
                         {
                             throw std::runtime_error("PoolAggregator::processStoreActionSequence() > "
                                     "Failed to process action sequence; remove action failed for ["
-                                    + Utilities::Tools::toString(currentLink.source) + "].");
+                                    + Convert::toString(currentLink.source) + "].");
                         }
 
                         logDebugMessage("(processStoreActionSequence) > Failed to process action sequence; "
                                     "remove action failed for ["
-                                    + Utilities::Tools::toString(currentLink.source) + "].");
+                                    + Convert::toString(currentLink.source) + "].");
                     }
                 } break;
 
@@ -1598,11 +1598,11 @@ void StorageManagement_Pools::PoolAggregator::processPendingActions()
                             {
                                 throw std::runtime_error("PoolAggregator::processPendingActions() > "
                                         "Failed to process pending actions; copy action for source ["
-                                        + Utilities::Tools::toString(currentActionData->linkData.source)
+                                        + Convert::toString(currentActionData->linkData.source)
                                         + "] and target ["
-                                        + Utilities::Tools::toString(currentActionData->linkData.target)
+                                        + Convert::toString(currentActionData->linkData.target)
                                         + "] failed; too much non-streamable data requested: ["
-                                        + Utilities::Tools::toString(dataSize) + "] bytes..");
+                                        + Convert::toString(dataSize) + "] bytes..");
                             }
                             
                             //copies the data from the source to the target pool
@@ -1616,17 +1616,17 @@ void StorageManagement_Pools::PoolAggregator::processPendingActions()
                             {
                                 throw std::runtime_error("PoolAggregator::processPendingActions() > "
                                         "Failed to process pending actions; copy action for source ["
-                                        + Utilities::Tools::toString(currentActionData->linkData.source)
+                                        + Convert::toString(currentActionData->linkData.source)
                                         + "] and target ["
-                                        + Utilities::Tools::toString(currentActionData->linkData.target)
+                                        + Convert::toString(currentActionData->linkData.target)
                                         + "] failed; target unable to store data.");
                             }
                             
                             logDebugMessage("(processPendingActions) > Failed to process pending actions; "
                                     "copy action for source ["
-                                    + Utilities::Tools::toString(currentActionData->linkData.source)
+                                    + Convert::toString(currentActionData->linkData.source)
                                     + "] and target ["
-                                    + Utilities::Tools::toString(currentActionData->linkData.target)
+                                    + Convert::toString(currentActionData->linkData.target)
                                     + "] failed; target pool unable to store data.");
                         }
                         
@@ -1639,17 +1639,17 @@ void StorageManagement_Pools::PoolAggregator::processPendingActions()
                         {
                             throw std::runtime_error("PoolAggregator::processPendingActions() > "
                                     "Failed to process pending actions; copy action for source ["
-                                    + Utilities::Tools::toString(currentActionData->linkData.source)
+                                    + Convert::toString(currentActionData->linkData.source)
                                     + "] and target ["
-                                    + Utilities::Tools::toString(currentActionData->linkData.target)
+                                    + Convert::toString(currentActionData->linkData.target)
                                     + "] failed; unable to find source entity ID.");
                         }
 
                         logDebugMessage("(processPendingActions) > Failed to process pending actions; "
                                     "copy action for source ["
-                                    + Utilities::Tools::toString(currentActionData->linkData.source)
+                                    + Convert::toString(currentActionData->linkData.source)
                                     + "] and target ["
-                                    + Utilities::Tools::toString(currentActionData->linkData.target)
+                                    + Convert::toString(currentActionData->linkData.target)
                                     + "] failed; unable to find source entity ID.");
                     }
                 } break;
@@ -1678,12 +1678,12 @@ void StorageManagement_Pools::PoolAggregator::processPendingActions()
                         {
                             throw std::runtime_error("PoolAggregator::processPendingActions() > "
                                     "Failed to process pending actions; remove action failed for ["
-                                    + Utilities::Tools::toString(currentActionData->linkData.source) + "].");
+                                    + Convert::toString(currentActionData->linkData.source) + "].");
                         }
                         
                         logDebugMessage("(processPendingActions) > Failed to process pending actions; "
                                     "remove action failed for ["
-                                    + Utilities::Tools::toString(currentActionData->linkData.source) + "].");
+                                    + Convert::toString(currentActionData->linkData.source) + "].");
                     }
                 } break;
 
@@ -1755,7 +1755,7 @@ StorageManagement_Pools::PoolAggregator::getUsableSpaceForPoolChain
             delete processedPools;
         
         throw std::invalid_argument("PoolAggregator::getUsableSpaceForPoolChain() > "
-                "The specified pool ID [" + Utilities::Tools::toString(pool)
+                "The specified pool ID [" + Convert::toString(pool)
                 + "] is not valid.");
     }
 
@@ -1854,7 +1854,7 @@ StorageManagement_Pools::PoolAggregator::unwindPoolChain
             delete processedPools;
         
         throw std::invalid_argument("PoolAggregator::unwindPoolChain() > "
-                "The specified pool ID [" + Utilities::Tools::toString(pool)
+                "The specified pool ID [" + Convert::toString(pool)
                 + "] is not valid.");
     }
 
@@ -1894,7 +1894,7 @@ StorageManagement_Pools::PoolAggregator::unwindPoolChain
                             delete processedPools;
                         
                         throw std::runtime_error("PoolAggregator::unwindPoolChain() > The target pool <" 
-                                                 + Utilities::Tools::toString(currentLinkParameters.targetPool)
+                                                 + Convert::toString(currentLinkParameters.targetPool)
                                                  + "> does not have enough free space.");
                     }
 
@@ -1925,7 +1925,7 @@ StorageManagement_Pools::PoolAggregator::unwindPoolChain
                             delete processedPools;
                         
                         throw std::runtime_error("PoolAggregator::unwindPoolChain() > The target pool <" 
-                                                 + Utilities::Tools::toString(currentLinkParameters.targetPool)
+                                                 + Convert::toString(currentLinkParameters.targetPool)
                                                  + "> does not have enough free space.");
                     }
 

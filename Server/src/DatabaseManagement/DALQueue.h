@@ -28,13 +28,15 @@
 #include <boost/unordered_map.hpp>
 #include "Types/Types.h"
 #include "../Utilities/Tools.h"
+#include "../Utilities/Strings/Common.h"
+#include "../Utilities/Strings/Database.h"
 #include "../Utilities/FileLogger.h"
 #include "Containers/DataContainer.h"
 #include "Interfaces/DatabaseAbstractionLayer.h"
 
 #include "DALCache.h"
 
-using Utilities::Tools;
+namespace Convert = Utilities::Strings;
 
 using boost::shared_ptr;
 using boost::tuples::tuple;

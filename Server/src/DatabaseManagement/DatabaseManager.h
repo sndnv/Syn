@@ -23,7 +23,8 @@
 #include <string>
 #include <boost/any.hpp>
 #include "Types/Types.h"
-#include "../Utilities/Tools.h"
+#include "../Utilities/Strings/Common.h"
+#include "../Utilities/Strings/Database.h"
 #include "../Utilities/FileLogger.h"
 #include "Containers/DataContainer.h"
 #include "Containers/LogDataContainer.h"
@@ -45,7 +46,7 @@
 #include "../InstructionManagement/Interfaces/InstructionTarget.h"
 #include "../InstructionManagement/Sets/DatabaseManagerInstructionSet.h"
 
-using Utilities::Tools;
+namespace Convert = Utilities::Strings;
 
 using std::string;
 using std::vector;

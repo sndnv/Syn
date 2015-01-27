@@ -32,9 +32,10 @@
 #include "../Interfaces/DataPool.h"
 #include "Streams/PoolStreams.h"
 
+#include "../../Utilities/Strings/Common.h"
+#include "../../Utilities/Strings/Storage.h"
 #include "../../Utilities/FileLogger.h"
 #include "../../Utilities/ThreadPool.h"
-#include "../../Utilities/Tools.h"
 
 using Common_Types::Seconds;
 using Common_Types::Timestamp;
@@ -65,6 +66,8 @@ using StorageManagement_Types::INVALID_DATA_SIZE;
 using StorageManagement_Types::MAX_DATA_SIZE;
 
 using StorageManagement_Interfaces::DataPool;
+
+namespace Convert = Utilities::Strings;
 
 namespace StorageManagement_Pools
 {
