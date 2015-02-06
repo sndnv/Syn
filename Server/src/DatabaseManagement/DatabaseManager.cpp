@@ -17,6 +17,8 @@
 
 #include "DatabaseManager.h"
 
+namespace InstructionResults = InstructionManagement_Sets::DatabaseManagerInstructions::Results;
+
 SyncServer_Core::DatabaseManager::DatabaseManager(Utilities::FileLoggerParameters loggerParameters, DALQueue::DALQueueParameters defaultQueueParams,
                                                   DALCache::DALCacheParameters defaultCacheParams, FunctionCallTimeoutPeriod functionTimeout)
                                                   : defaultCacheParameters(defaultCacheParams), functionCallTimeout(functionTimeout)

@@ -29,6 +29,7 @@ namespace InstructionManagement_Types
         CONNECTION_MANAGER, //Networking
         DATABASE_MANAGER, DAL, DAL_CACHE, DAL_QUEUE, DAL_MIGRATOR, DAL_DISTRIBUTED_CACHE, //Database Management
         STORAGE_MANAGER, //Storage
+        SESSION_MANAGER, //Sessions
         FILE_LOGGER, THREAD_POOL //Utilities
     };
     
@@ -142,6 +143,16 @@ namespace InstructionManagement_Types
         /* FUNCTIONS_SESSIONS */
         GET_SESSIONS_BY_CONSTRAINT,
         GET_SESSION
+    };
+    
+    enum class SessionManagerInstructionType
+    {
+        GET_SESSION,
+        GET_SESSIONS_BY_CONSTRAINT,
+        FORCE_SESSION_EXPIRATION,
+        FORCE_SESSION_REAUTHENTICATION,
+        FORCE_EXPIRATION_PROCESS,
+        DEBUG_GET_STATE
     };
 }
 

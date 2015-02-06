@@ -333,14 +333,15 @@ namespace DatabaseManagement_DALs
                 currentToken++;
                 bool isActive = ((*currentToken).compare("TRUE") == 0);
                 currentToken++;
-                TransferredDataAmount xferedData = boost::lexical_cast<TransferredDataAmount>(*currentToken);
+                TransferredDataAmount dataSent = boost::lexical_cast<TransferredDataAmount>(*currentToken);
                 currentToken++;
-                currentToken++; //skipping pending transfers
-                currentToken++; //skipping failed transfers
-                currentToken++; //skipping completed transfers
-                unsigned long numCommands = boost::lexical_cast<unsigned long>(*currentToken);
+                TransferredDataAmount dataRec = boost::lexical_cast<TransferredDataAmount>(*currentToken);
+                currentToken++;
+                unsigned long cmdsSent = boost::lexical_cast<unsigned long>(*currentToken);
+                currentToken++;
+                unsigned long cmdsRec = boost::lexical_cast<unsigned long>(*currentToken);
 
-                return SessionDataContainerPtr(new SessionDataContainer(id, openT, closeT, lastActT, type, device, user, isPersistent, isActive, xferedData, numCommands));
+                return SessionDataContainerPtr(new SessionDataContainer(id, openT, closeT, lastActT, type, device, user, isPersistent, isActive, dataSent, dataRec, cmdsSent, cmdsRec));
             }
 
             static StatisticDataContainerPtr toStat(std::string value, DBObjectID id)
@@ -508,6 +509,7 @@ namespace DatabaseManagement_DALs
                 
                 std::deque<UserAuthorizationRule> rules;
                 rules.push_back(UserAuthorizationRule(InstructionManagement_Types::InstructionSetType::DATABASE_MANAGER));
+                rules.push_back(UserAuthorizationRule(InstructionManagement_Types::InstructionSetType::SESSION_MANAGER));
 
                 return UserDataContainerPtr(new UserDataContainer(id, username, password, maxSize, maxNum, level, pwReset, locked, create, login, timestampLastFailedAuth, failedAttempts, rules));
             }
@@ -583,11 +585,8 @@ namespace DatabaseManagement_DALs
                 return container->toString() + "," + Convert::toString(container->getOpenTimestamp()) + "," + Convert::toString(container->getCloseTimestamp()) + ","
                        + Convert::toString(container->getLastActivityTimestamp()) + "," + Convert::toString(container->getSessionType()) + ","
                        + Convert::toString(container->getDevice()) + "," + Convert::toString(container->getUser()) + ","+ Convert::toString(container->isSessionPersistent()) + ","
-                       + Convert::toString(container->isSessionActive()) + "," + Convert::toString(container->getDataTransferred()) + ","
-                       + Convert::toString(container->getPendingTransfers().size()) + "," + Convert::toString(container->getFailedTransfers().size()) + ","
-                       + Convert::toString(container->getCompletedTransfers().size()) + ","+ Convert::toString(container->getNumberOfCommandsSent()) + ","
-                       + Convert::toString(container->getPendingCommands().size()) + "," + Convert::toString(container->getFailedCommands().size()) + ","
-                       + Convert::toString(container->getCompletedCommands().size());
+                       + Convert::toString(container->isSessionActive()) + "," + Convert::toString(container->getDataSent()) + "," + Convert::toString(container->getDataReceived()) + ","
+                       + Convert::toString(container->getCommandsSent()) + "," + Convert::toString(container->getCommandsReceived());
             }
 
             static std::string toString(StatisticDataContainerPtr container)

@@ -32,7 +32,7 @@ SyncServer_Core::SecurityManager::PasswordHashingParameters::PasswordHashingPara
 }
 
 SyncServer_Core::SecurityManager::SecurityManager
-(SecurityManagerParameters params, Utilities::FileLogger * debugLogger)
+(const SecurityManagerParameters & params, Utilities::FileLogger * debugLogger)
 : threadPool(params.threadPoolSize, debugLogger), debugLogger(debugLogger),
   databaseManager(params.databaseManager), instructionDispatcher(params.instructionDispatcher),
   maxUserDataEntries(params.maxUserDataEntries),
@@ -195,6 +195,20 @@ SyncServer_Core::SecurityManager::~SecurityManager()
     userDataCache.clear();
     deviceDataCache.clear();
     
+    if(authenticationTokens.size() > 0)
+    {
+        logDebugMessage("(~) > Token(s) found for [" + Convert::toString(authenticationTokens.size()) + "] users.");
+
+        for(auto currentUserTokens : authenticationTokens)
+        {
+            logDebugMessage("(~) > [" + Convert::toString(authenticationTokens.size())
+                    + "] token(s) found for user [" + Convert::toString(currentUserTokens.first) + "].");
+            currentUserTokens.second.clear();
+        }
+        
+        authenticationTokens.clear();
+    }
+    
     for(auto currentRule : userNameRules)
         delete currentRule.second;
     
@@ -214,6 +228,8 @@ SyncServer_Core::SecurityManager::~SecurityManager()
         delete currentRule.second;
     
     devicePasswordRules.clear();
+    
+    debugLogger = nullptr;
 }
 
 void SyncServer_Core::SecurityManager::registerSecurableComponent(Securable & component)
@@ -515,6 +531,40 @@ void SyncServer_Core::SecurityManager::discardPreviousPasswordHashingParameters(
     previousHashingConfig = PasswordHashingParameters();
 }
 
+void SyncServer_Core::SecurityManager::removeAuthenticationToken(TokenID tokenID, UserID userID)
+{
+    boost::lock_guard<boost::mutex> dataLock(authDataMutex);
+
+    auto userTokens = authenticationTokens.find(userID);
+    if(userTokens != authenticationTokens.end())
+    {
+        auto currentToken = userTokens->second.begin();
+        while(currentToken != userTokens->second.end() && (*currentToken)->getID() != tokenID)
+        {
+            ++currentToken;
+        }
+
+        if(currentToken != userTokens->second.end())
+        {
+            userTokens->second.erase(currentToken);
+        }
+        else
+        {
+            throw std::invalid_argument("SecurityManager::removeAuthenticationToken() > "
+                    "Token [" + Utilities::Strings::toString(tokenID) + "] was not found for user ["
+                    + Utilities::Strings::toString(userID) + "].");
+        }
+
+        if(userTokens->second.size() == 0)
+            authenticationTokens.erase(userTokens);
+    }
+    else
+    {
+        throw std::invalid_argument("SecurityManager::removeAuthenticationToken() > "
+                "No tokens were found for user [" + Utilities::Strings::toString(userID) + "].");
+    }
+}
+
 void SyncServer_Core::SecurityManager::processAuthorizationRequest
 (const AuthorizationRequest & request, AuthorizationTokenPromisePtr promise)
 {
@@ -555,6 +605,57 @@ void SyncServer_Core::SecurityManager::processAuthorizationRequest
         }
         catch(const UserNotFoundException &) { promise->set_exception(boost::current_exception()); }
         return;
+    }
+    
+    auto userTokens = authenticationTokens.find(request.getUser());
+    if(userTokens == authenticationTokens.end())
+    {//authorization is not given if the user is not authenticated
+        logDebugMessage("(processAuthorizationRequest) > No authentication tokens were found for user <"
+                + Convert::toString(request.getUser()) + ">.");
+
+        try
+        {
+            boost::throw_exception
+            (
+                UserNotAuthenticatedException("(processAuthorizationRequest) > "
+                    "No authentication tokens were found for user <"
+                    + Convert::toString(request.getUser()) + ">.")
+            );
+        }
+        catch(const UserNotAuthenticatedException &) { promise->set_exception(boost::current_exception()); }
+        return;
+    }
+    else
+    {
+        bool validTokenFound = false;
+        for(AuthenticationTokenPtr currentToken : userTokens->second)
+        {
+            if(!currentToken->isExpired()
+               && currentToken->getUserID() == request.getUser()
+               && currentToken->getDeviceID() == request.getDevice())
+            {
+                validTokenFound = true;
+                break;
+            }
+        }
+        
+        if(!validTokenFound)
+        {//authorization is not given if no valid token is found
+            logDebugMessage("(processAuthorizationRequest) > No valid authentication token was found for user <"
+                    + Convert::toString(request.getUser()) + ">.");
+
+            try
+            {
+                boost::throw_exception
+                (
+                    UserNotAuthenticatedException("(processAuthorizationRequest) > "
+                        "No valid authentication token was found for user <"
+                        + Convert::toString(request.getUser()) + ">.")
+                );
+            }
+            catch(const UserNotAuthenticatedException &) { promise->set_exception(boost::current_exception()); }
+            return;
+        }
     }
 
     UserAccessLevel minAccessLevel =
@@ -697,7 +798,7 @@ void SyncServer_Core::SecurityManager::processAuthorizationRequest
             
             return;
         }
-
+        
         if(deviceData->data->isDeviceLocked())
         {//authorization is not given if the device is locked
             logDebugMessage("(processAuthorizationRequest) > Device <"
@@ -969,10 +1070,20 @@ void SyncServer_Core::SecurityManager::processUserAuthenticationRequest
                 ++lastAuthenticationTokenID,
                 SecurityManagement_Crypto::SaltGenerator::getRandomSalt(authenticationTokenSignatureSize),
                 (boost::posix_time::second_clock::universal_time()
-                    + boost::posix_time::seconds(authenticationTokenValidityDuration))
+                    + boost::posix_time::seconds(authenticationTokenValidityDuration)),
+                userData->data->getUserID()
             );
 
     AuthenticationTokenPtr newTokenPtr(newToken);
+    auto userTokens = authenticationTokens.find(userData->data->getUserID());
+    if(userTokens != authenticationTokens.end())
+    {
+        userTokens->second.push_back(newTokenPtr);
+    }
+    else
+    {
+        authenticationTokens.insert({userData->data->getUserID(), std::deque<AuthenticationTokenPtr>{newTokenPtr}});
+    }
 
     ++successfulRequestsNumber;
 
@@ -994,7 +1105,8 @@ void SyncServer_Core::SecurityManager::processDeviceAuthenticationRequest
             boost::throw_exception
             (
                 std::logic_error("SecurityManager::processDeviceAuthenticationRequest() > Source ["
-                    + Convert::toString(request.getSource()) + "] component not found."));
+                    + Convert::toString(request.getSource()) + "] component not found.")
+            );
         }
         catch(const std::logic_error &)
         {
@@ -1172,11 +1284,22 @@ void SyncServer_Core::SecurityManager::processDeviceAuthenticationRequest
                 ++lastAuthenticationTokenID,
                 SecurityManagement_Crypto::SaltGenerator::getRandomSalt(authenticationTokenSignatureSize),
                 (boost::posix_time::second_clock::universal_time()
-                    + boost::posix_time::seconds(authenticationTokenValidityDuration))
+                    + boost::posix_time::seconds(authenticationTokenValidityDuration)),
+                deviceData->data->getDeviceOwner(),
+                deviceData->data->getDeviceID()
             );
 
     AuthenticationTokenPtr newTokenPtr(newToken);
-
+    auto userTokens = authenticationTokens.find(deviceData->data->getDeviceOwner());
+    if(userTokens != authenticationTokens.end())
+    {
+        userTokens->second.push_back(newTokenPtr);
+    }
+    else
+    {
+        authenticationTokens.insert({deviceData->data->getDeviceOwner(), std::deque<AuthenticationTokenPtr>{newTokenPtr}});
+    }
+    
     ++successfulRequestsNumber;
 
     promise->set_value(newTokenPtr);

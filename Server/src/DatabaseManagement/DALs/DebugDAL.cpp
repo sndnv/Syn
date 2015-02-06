@@ -270,14 +270,20 @@ void DatabaseManagement_DALs::DebugDAL::mainThread()
                             {
                                 if(currentPair.second.find(boost::any_cast<std::string>(currentRequestData->get<2>())) != std::string::npos)
                                 {
+                                    dataLock.unlock();
                                     onSuccess(dalID, currentRequest, Stringifier::toUser(currentPair.second, currentPair.first));
+                                    dataLock.lock();
                                     done = true;
                                     break;
                                 }
                             }
                             
                             if(!done)
+                            {
+                                dataLock.unlock();
                                 onFailure(dalID, currentRequest, objectID);
+                                dataLock.lock();
+                            }
                             
                             break;
                         }
@@ -285,9 +291,17 @@ void DatabaseManagement_DALs::DebugDAL::mainThread()
                         if(objectID != Common_Types::INVALID_OBJECT_ID)
                         {
                             if(data.find(objectID) != data.end())
+                            {
+                                dataLock.unlock();
                                 onSuccess(dalID, currentRequest, Stringifier::toContainer(data[objectID], dalType, objectID));
+                                dataLock.lock();
+                            }
                             else
+                            {
+                                dataLock.unlock();
                                 onFailure(dalID, currentRequest, objectID);
+                                dataLock.lock();
+                            }
                         }
                         else //for debugging purposes, always return all objects (no constraint check)
                         {
@@ -296,9 +310,17 @@ void DatabaseManagement_DALs::DebugDAL::mainThread()
                                 vect->addDataContainer(Stringifier::toContainer(currentEntry.second, dalType, currentEntry.first));
                             
                             if(!vect->isEmpty())
+                            {
+                                dataLock.unlock();
                                 onSuccess(dalID, currentRequest, vect);
+                                dataLock.lock();
+                            }
                             else
+                            {
+                                dataLock.unlock();
                                 onFailure(dalID, currentRequest, objectID);
+                                dataLock.lock();
+                            }
                         }
                         
                     } break;
@@ -317,9 +339,17 @@ void DatabaseManagement_DALs::DebugDAL::mainThread()
                             logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Convert::toString(dalType) + " (Main Thread) > INSERT failed for request; object exists <#" + Convert::toString(i) + "/" + Convert::toString(currentRequest) + ">.");
                         
                         if(successful)
+                        {
+                            dataLock.unlock();
                             onSuccess(dalID, currentRequest, container);
+                            dataLock.lock();
+                        }
                         else
+                        {
+                            dataLock.unlock();
                             onFailure(dalID, currentRequest, container->getContainerID());
+                            dataLock.lock();
+                        }
                     } break;
                         
                     case RequestType::UPDATE:
@@ -329,12 +359,16 @@ void DatabaseManagement_DALs::DebugDAL::mainThread()
                         if(data.find(container->getContainerID()) != data.end())
                         {
                             data[container->getContainerID()] = Stringifier::toString(container);
+                            dataLock.unlock();
                             onSuccess(dalID, currentRequest, container);
+                            dataLock.lock();
                         }
                         else
                         {
                             logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Convert::toString(dalType) + " (Main Thread) > UPDATE failed for request <#" + Convert::toString(i) + "/" + Convert::toString(currentRequest) + ">.");
+                            dataLock.unlock();
                             onFailure(dalID, currentRequest, container->getContainerID());
+                            dataLock.lock();
                         }
                     } break;
                     
@@ -348,19 +382,25 @@ void DatabaseManagement_DALs::DebugDAL::mainThread()
                         {
                             DataContainerPtr container = Stringifier::toContainer((*containerIterator).second, dalType, id);
                             data.erase(containerIterator);
+                            dataLock.unlock();
                             onSuccess(dalID, currentRequest, container);
+                            dataLock.lock();
                         }
                         else
                         {
                             logger.logMessage(Utilities::FileLogSeverity::Debug, "DebugDAL / " + Convert::toString(dalType) + " (Main Thread) > REMOVE failed for request <#" + Convert::toString(i) + "/" + Convert::toString(currentRequest) + "/" + Convert::toString(id) + ">.");
+                            dataLock.unlock();
                             onFailure(dalID, currentRequest, id);
+                            dataLock.lock();
                         }
                     } break;
                     
                     default:
                     {
                         logger.logMessage(Utilities::FileLogSeverity::Error, "DebugDAL / " + Convert::toString(dalType) + " (Main Thread) > Unexpected request type encountered for new request <" + Convert::toString(currentRequest) + ">.");
+                        dataLock.unlock();
                         onFailure(dalID, currentRequest, DBObjectID());
+                        dataLock.lock();
                     } break;
                 }
                 

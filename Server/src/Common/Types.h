@@ -82,6 +82,8 @@ namespace Common_Types
     typedef unsigned long DataPoolRetention;
     const DataPoolRetention INVALID_DATA_POOL_RETENTION = 0;
     
+    enum class SessionType { INVALID, COMMAND, DATA };
+    
     //User Management Types
     enum class UserLockType { NONE, FAILED_LOGIN, ADMIN_FORCED, USER_FORCED, INACTIVITY }; //TODO - implement
     

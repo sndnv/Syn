@@ -43,7 +43,6 @@ namespace DatabaseManagement_Types
                                      MINIMIZE_MEMORY_USAGE, DB_IMMEDIATE_FLUSH, DB_CACHE_FLUSH_INTERVAL, DB_OPERATION_MODE, DB_MAX_READ_RETRIES, DB_MAX_WRITE_RETRIES };
     enum class LogSeverity { INVALID, Info, Warning, Error, Debug };
     enum class DataTransferType { INVALID, PUSH, PULL };
-    enum class SessionType { INVALID, COMMAND, DATA, ADMIN };
     enum class ScheduleIntervalType { INVALID, SECONDS, MINUTES, HOURS, DAYS, MONTHS };
     enum class ConflictResolutionRule_Directory { INVALID, OVERWRITE_SOURCE, OVERWRITE_DESTINATION, MERGE, RENAME_AND_COPY, COPY_AND_RENAME, STOP, ASK };
     enum class ConflictResolutionRule_File { INVALID, OVERWRITE_SOURCE, OVERWRITE_DESTINATION, RENAME_AND_COPY, COPY_AND_RENAME, STOP, ASK };

@@ -92,6 +92,7 @@ using SecurityManagement_Types::InvalidPassswordException;
 using SecurityManagement_Types::UnexpectedDeviceException;
 using SecurityManagement_Types::InstructionNotAllowedException;
 using SecurityManagement_Types::InsufficientUserAccessException;
+using SecurityManagement_Types::UserNotAuthenticatedException;
 
 //Crypto
 using SecurityManagement_Crypto::HashGenerator;
@@ -280,7 +281,7 @@ namespace SyncServer_Core
              * algorithms are not valid, or if the specified authentication delay parameters
              * are not valid
              */
-            SecurityManager(SecurityManagerParameters params, Utilities::FileLogger * debugLogger = nullptr);
+            SecurityManager(const SecurityManagerParameters & params, Utilities::FileLogger * debugLogger = nullptr);
             
             /**
              * Clears all data structures and frees all memory associated with the rules.
@@ -317,7 +318,10 @@ namespace SyncServer_Core
              * - <code>UserLockedException</code><br>
              * - <code>InsufficientUserAccessException</code><br>
              * 
-             * Note: The caller must ensure the request is not destroyed until processing is finished.
+             * Note 1: The caller must ensure the request is not destroyed until processing is finished.
+             * 
+             * Note 2: All tokens must be removed with a call to <code>removeAuthenticationToken()</code>
+             * after they become of no further use.
              * 
              * @param request reference to the request to be processed
              * @return a smart pointer to the promise that will have the result of the operation
@@ -334,7 +338,10 @@ namespace SyncServer_Core
             /**
              * Posts the supplied device authentication request for asynchronous processing.
              * 
-             * Note: The caller must ensure the request is not destroyed until processing is finished.
+             * Note1 : The caller must ensure the request is not destroyed until processing is finished.
+             * 
+             * Note 2: All tokens must be removed with a call to <code>removeAuthenticationToken()</code>
+             * after they become of no further use.
              * 
              * @param request reference to the request to be processed
              * @return a smart pointer to the promise that will have the result of the operation
@@ -583,6 +590,17 @@ namespace SyncServer_Core
              */
             void discardPreviousPasswordHashingParameters();
             
+            /**
+             * Removes the specified token from the manager.
+             * 
+             * @param tokenID the ID of the token to be removed
+             * @param userID the ID of the user associated with the token
+             * 
+             * @throw invalid_argument if the specified token for the specified user
+             * cannot be found
+             */
+            void removeAuthenticationToken(TokenID tokenID, UserID userID);
+            
         private:
             /** Data structure holding user cache data. */
             struct UserData
@@ -626,6 +644,7 @@ namespace SyncServer_Core
             boost::unordered_map<DeviceID, DeviceData> deviceDataCache; //cached device data
             
             //Tokens
+            boost::unordered_map<UserID, std::deque<AuthenticationTokenPtr>> authenticationTokens; //authentication tokens
             TokenID lastAuthorizationTokenID;                   //the ID of the last token to be generated
             TokenID lastAuthenticationTokenID;                  //the ID of the last token to be generated
             RandomDataSize authorizationTokenSignatureSize;     //signature size for authorization tokens
@@ -667,6 +686,7 @@ namespace SyncServer_Core
              * - <code>InsufficientUserAccessException</code><br>
              * - <code>UnrecognisedDeviceException</code><br>
              * - <code>DeviceLockedException</code><br>
+             * - <code>UserNotAuthenticatedException</code><br>
              * 
              * Note: The caller must ensure the request is not destroyed until processing is finished.
              * 

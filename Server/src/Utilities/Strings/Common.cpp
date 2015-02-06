@@ -35,6 +35,20 @@ const boost::unordered_map<std::string, UserAccessLevel> Maps::stringToUserAcces
     {"INVALID", UserAccessLevel::INVALID}
 };
 
+const boost::unordered_map<SessionType, std::string> Maps::sessionTypeToString
+{
+    {SessionType::COMMAND,  "COMMAND"},
+    {SessionType::DATA,     "DATA"},
+    {SessionType::INVALID,  "INVALID"}
+};
+
+const boost::unordered_map<std::string, SessionType> Maps::stringToSessionType
+{
+    {"COMMAND", SessionType::COMMAND},
+    {"DATA",    SessionType::DATA},
+    {"INVALID", SessionType::INVALID}
+};
+
 std::string Utilities::Strings::toString(bool var) { return (var) ? "TRUE" : "FALSE"; }
 std::string Utilities::Strings::toString(int var) { return boost::lexical_cast<std::string>(var); }
 std::string Utilities::Strings::toString(long var) { return boost::lexical_cast<std::string>(var); }
@@ -126,4 +140,20 @@ boost::posix_time::ptime Utilities::Strings::toTimestamp(std::string var)
 UserAccessLevel Utilities::Strings::toUserAccessLevel(std::string var)
 {
     return Maps::stringToUserAccessLevel.at(var);
+}
+
+std::string Utilities::Strings::toString(SessionType var)
+{
+    if(Maps::sessionTypeToString.find(var) != Maps::sessionTypeToString.end())
+        return Maps::sessionTypeToString.at(var);
+    else
+        return "INVALID";
+}
+
+SessionType Utilities::Strings::toSessionType(std::string var)
+{
+    if(Maps::stringToSessionType.find(var) != Maps::stringToSessionType.end())
+        return Maps::stringToSessionType.at(var);
+    else
+        return SessionType::INVALID;
 }

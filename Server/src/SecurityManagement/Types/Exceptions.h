@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EXCEPTIONS_H
-#define	EXCEPTIONS_H
+#ifndef SECURITY_EXCEPTIONS_H
+#define	SECURITY_EXCEPTIONS_H
 
 #include <stdexcept>
 #include <string>
@@ -126,7 +126,33 @@ namespace SecurityManagement_Types
             
             ~UserLockedException() noexcept {}
     };
+    
+    /**
+     * Exception class signifying that a user is not authenticated.
+     */
+    class UserNotAuthenticatedException : public std::runtime_error
+    {
+        public:
+            UserNotAuthenticatedException(const std::string & message)
+            : std::runtime_error("UserNotAuthenticatedException {" + message + "}.")
+            {}
+            
+            ~UserNotAuthenticatedException() noexcept {}
+    };
+    
+    /**
+     * Exception class signifying that an invalid authorization token was encountered.
+     */
+    class InvalidAuthorizationTokenException : public std::runtime_error
+    {
+        public:
+            InvalidAuthorizationTokenException(const std::string & message)
+            : std::runtime_error("InvalidAuthorizationTokenException {" + message + "}.")
+            {}
+            
+            ~InvalidAuthorizationTokenException() noexcept {}
+    };
 }
 
-#endif	/* EXCEPTIONS_H */
+#endif	/* SECURITY_EXCEPTIONS_H */
 

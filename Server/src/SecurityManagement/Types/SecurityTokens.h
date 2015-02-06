@@ -78,7 +78,7 @@ namespace SecurityManagement_Types
             
             bool operator==(const AuthorizationToken & rhs) const
             {
-                return (id == rhs.id && signature == rhs.signature);
+                return (id == rhs.id && signature == rhs.signature && authorizedSet == rhs.authorizedSet);
             }
             
             bool operator!=(const AuthorizationToken & rhs) const
@@ -109,11 +109,16 @@ namespace SecurityManagement_Types
              * @param tokenID the unique ID of the token
              * @param signatureData the unique signature of the token
              * @param expiration the expiration time of the token
+             * @param userID the ID of the user associated with the token
+             * @param deviceID the ID of the device associated with the request (optional)
              * 
              * @throw invalid_argument if any of the arguments are invalid
              */
-            AuthenticationToken(TokenID tokenID, RandomData signatureData, Common_Types::Timestamp expiration)
-            : id(tokenID), signature(signatureData), expirationTime(expiration)
+            AuthenticationToken(TokenID tokenID, RandomData signatureData,
+                                Common_Types::Timestamp expiration, Common_Types::UserID userID,
+                                Common_Types::DeviceID deviceID = Common_Types::INVALID_DEVICE_ID)
+            : id(tokenID), signature(signatureData), expirationTime(expiration),
+              user(userID), device(deviceID)
             {
                 if(id <= INVALID_TOKEN_ID)
                     throw std::invalid_argument("AuthenticationToken::() > Invalid token ID supplied.");
@@ -123,6 +128,9 @@ namespace SecurityManagement_Types
                 
                 if(isExpired())
                     throw std::invalid_argument("AuthenticationToken::() > The token has already expired.");
+                
+                if(user == Common_Types::INVALID_USER_ID)
+                    throw std::invalid_argument("AuthenticationToken::() > Invalid user ID supplied");
             }
             
             AuthenticationToken(const AuthenticationToken & other) = delete;
@@ -133,17 +141,25 @@ namespace SecurityManagement_Types
             ~AuthenticationToken() {}
             
             /** Retrieves the ID of the token.\n\n@return the token ID */
-            TokenID getID() const { return (!isExpired()) ? id : INVALID_TOKEN_ID; }
+            TokenID getID() const { return id; }
             /** Retrieves the signature of the token.\n\n@returnt the token signature */
-            RandomData getSignature() const { return (!isExpired()) ? signature : RandomData(); }
+            RandomData getSignature() const { return signature; }
             /** Retrieves the expiration time of the token.\n\n@returnt the token expiration time */
             Common_Types::Timestamp getExpirationTime() const { return expirationTime; }
             /** Checks whether or not the token has expired.\n\n@return <code>true</code>, if the token has expired */
             bool isExpired() const { return (expirationTime <= boost::posix_time::second_clock::universal_time()); }
+            /** Retrieves the ID of the user associated with the token.\n\n@return the user ID */
+            Common_Types::UserID getUserID() const { return user; }
+            /** Retrieves the ID of the device associated with the token.\n\n@return the device ID, if any */
+            Common_Types::DeviceID getDeviceID() const { return device; }
             
             bool operator==(const AuthenticationToken & rhs) const
             {
-                return (id == rhs.id && signature == rhs.signature && expirationTime == rhs.expirationTime);
+                return (id == rhs.id
+                        && signature == rhs.signature
+                        && expirationTime == rhs.expirationTime
+                        && user == rhs.user
+                        && device == rhs.device);
             }
             
             bool operator!=(const AuthenticationToken & rhs) const
@@ -155,6 +171,8 @@ namespace SecurityManagement_Types
             TokenID id;
             RandomData signature;
             Common_Types::Timestamp expirationTime;
+            Common_Types::UserID user;
+            Common_Types::DeviceID device;
     };
     
     typedef boost::shared_ptr<AuthenticationToken> AuthenticationTokenPtr;

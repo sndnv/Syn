@@ -68,10 +68,10 @@ using Common_Types::SyncID;
 using Common_Types::UserID;
 using Common_Types::DeviceID;
 using Common_Types::ScheduleID;
+using Common_Types::SessionType;
 using DatabaseManagement_Types::DatabaseManagerOperationMode;
 using DatabaseManagement_Types::LogSeverity;
 using DatabaseManagement_Types::DataTransferType;
-using DatabaseManagement_Types::SessionType;
 using DatabaseManagement_Types::ScheduleIntervalType;
 using DatabaseManagement_Types::ConflictResolutionRule_Directory;
 using DatabaseManagement_Types::ConflictResolutionRule_File;
@@ -100,7 +100,6 @@ using SyncServer_Core::DatabaseManagement::DALQueue;
 
 using InstructionManagement_Sets::InstructionPtr;
 using InstructionManagement_Types::DatabaseManagerInstructionType;
-namespace InstructionResults = InstructionManagement_Sets::DatabaseManagerInstructions::Results;
 
 //TODO - remove
 using Utilities::FileLogSeverity;

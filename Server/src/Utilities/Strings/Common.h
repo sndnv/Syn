@@ -33,6 +33,7 @@
 using Common_Types::Byte;
 using Common_Types::ByteVector;
 using Common_Types::UserAccessLevel;
+using Common_Types::SessionType;
 
 namespace Utilities
 {
@@ -42,6 +43,8 @@ namespace Utilities
         {
             static const boost::unordered_map<UserAccessLevel, std::string> userAccessLevelToString;
             static const boost::unordered_map<std::string, UserAccessLevel> stringToUserAccessLevel;
+            static const boost::unordered_map<SessionType, std::string> sessionTypeToString;
+            static const boost::unordered_map<std::string, SessionType> stringToSessionType;
         };
         
         std::string toString(bool var);
@@ -58,10 +61,12 @@ namespace Utilities
         std::string toString(ByteVector var);
         std::string toString(boost::posix_time::ptime var);
         std::string toString(UserAccessLevel var);
+        std::string toString(SessionType var);
         
         CryptoPP::SecByteBlock toSecByteBlock(std::string var);
         boost::posix_time::ptime toTimestamp(std::string var);
         UserAccessLevel toUserAccessLevel(std::string var);
+        SessionType toSessionType(std::string var);
     }
 }
 

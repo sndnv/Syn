@@ -191,22 +191,6 @@ const boost::unordered_map<std::string, DataTransferType> Maps::stringToDataTran
     {"INVALID", DataTransferType::INVALID}
 };
 
-const boost::unordered_map<SessionType, std::string> Maps::sessionTypeToString
-{
-    {SessionType::ADMIN,    "ADMIN"},
-    {SessionType::COMMAND,  "COMMAND"},
-    {SessionType::DATA,     "DATA"},
-    {SessionType::INVALID,  "INVALID"}
-};
-
-const boost::unordered_map<std::string, SessionType> Maps::stringToSessionType
-{
-    {"ADMIN",   SessionType::ADMIN},
-    {"COMMAND", SessionType::COMMAND},
-    {"DATA",    SessionType::DATA},
-    {"INVALID", SessionType::INVALID}
-};
-
 const boost::unordered_map<ScheduleIntervalType, std::string> Maps::scheduleIntervalTypeToString
 {
     {ScheduleIntervalType::DAYS,    "DAYS"},
@@ -419,22 +403,6 @@ DataTransferType Utilities::Strings::toDataTransferType(std::string var)
         return Maps::stringToDataTransferType.at(var);
     else
         return DataTransferType::INVALID;
-}
-
-std::string Utilities::Strings::toString(SessionType var)
-{
-    if(Maps::sessionTypeToString.find(var) != Maps::sessionTypeToString.end())
-        return Maps::sessionTypeToString.at(var);
-    else
-        return "INVALID";
-}
-
-SessionType Utilities::Strings::toSessionType(std::string var)
-{
-    if(Maps::stringToSessionType.find(var) != Maps::stringToSessionType.end())
-        return Maps::stringToSessionType.at(var);
-    else
-        return SessionType::INVALID;
 }
 
 std::string Utilities::Strings::toString(ScheduleIntervalType var)
