@@ -90,16 +90,16 @@ SyncServer_Core::SessionManager::~SessionManager()
 
 void SyncServer_Core::SessionManager::postAuthorizationToken(const AuthorizationTokenPtr token)
 {
+    if(getType() != token->getAuthorizedSet())
+    {
+        throw std::logic_error("SessionManager::postAuthorizationToken() > The token with ID ["
+                + Convert::toString(token->getID()) + "] is not for the expected instruction set.");
+    }
+    
     boost::lock_guard<boost::mutex> instructionDataLock(instructionDataMutex);
 
     if(authorizationTokens.find(token->getID()) == authorizationTokens.end())
     {
-        if(getType() != token->getAuthorizedSet())
-        {
-            throw std::logic_error("SessionManager::postAuthorizationToken() > The token with ID ["
-                    + Convert::toString(token->getID()) + "] is not for the expected instruction set.");
-        }
-
         authorizationTokens.insert({token->getID(), token});
     }
     else
@@ -136,7 +136,7 @@ bool SyncServer_Core::SessionManager::registerInstructionSet
             set->bindInstructionHandler(SessionManagerInstructionType::DEBUG_GET_STATE,
                                         debugGetStateHandlerBind);
         }
-        catch(std::invalid_argument & ex)
+        catch(const std::invalid_argument & ex)
         {
             logDebugMessage("(registerInstructionSet) > Exception encountered: <"
                             + std::string(ex.what()) + ">");
@@ -1010,7 +1010,7 @@ void SyncServer_Core::SessionManager::forceSessionExpirationHandler
                                 + Convert::toString(actualInstruction->sessionID) + "].")
                     );
                 }
-                catch(const std::logic_error &)
+                catch(const std::invalid_argument &)
                 {
                     instruction->getPromise().set_exception(boost::current_exception());
                     return;
@@ -1075,7 +1075,7 @@ void SyncServer_Core::SessionManager::forceSessionReauthenticationHandler
                                               + Convert::toString(actualInstruction->sessionID) + "].")
                     );
                 }
-                catch(const std::logic_error &)
+                catch(const std::invalid_argument &)
                 {
                     instruction->getPromise().set_exception(boost::current_exception());
                     return;
@@ -1207,4 +1207,33 @@ void SyncServer_Core::SessionManager::debugGetStateHandler
                     (new InstructionResults::DebugGetState{resultData});
                     
     instruction->getPromise().set_value(result);
+}
+
+void SyncServer_Core::SessionManager::verifyAuthorizationToken(AuthorizationTokenPtr token)
+{
+    if(!token)
+    {
+       throw InvalidAuthorizationTokenException("SessionManager::verifyAuthorizationToken() > "
+                "An empty token was supplied."); 
+    }
+
+    boost::lock_guard<boost::mutex> instructionDataLock(instructionDataMutex);
+
+    auto requestedToken = authorizationTokens.find(token->getID());
+    if(requestedToken != authorizationTokens.end())
+    {
+        if(*(requestedToken->second) == *token && token->getAuthorizedSet() == getType())
+            authorizationTokens.erase(requestedToken);
+        else
+        {
+            throw InvalidAuthorizationTokenException("SessionManager::verifyAuthorizationToken() > "
+                    "The supplied token [" + Convert::toString(token->getID())
+                    + "] does not match the one expected by the manager.");
+        }
+    }
+    else
+    {
+        throw InvalidAuthorizationTokenException("SessionManager::verifyAuthorizationToken() > "
+                "The supplied token [" + Convert::toString(token->getID()) + "] was not found.");
+    }
 }

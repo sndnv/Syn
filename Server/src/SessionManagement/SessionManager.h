@@ -33,6 +33,7 @@
 #include "../SecurityManagement/SecurityManager.h"
 #include "../SecurityManagement/Types/SecurityTokens.h"
 #include "../SecurityManagement/Types/SecurityRequests.h"
+#include "../SecurityManagement/Types/Exceptions.h"
 #include "../SecurityManagement/Interfaces/Securable.h"
 #include "../DatabaseManagement/DatabaseManager.h"
 #include "../DatabaseManagement/Containers/SessionDataContainer.h"
@@ -405,34 +406,7 @@ namespace SyncServer_Core
              * 
              * @throw InvalidAuthorizationTokenException if an invalid token is encountered
              */
-            void verifyAuthorizationToken(AuthorizationTokenPtr token)
-            {
-                if(!token)
-                {
-                   throw InvalidAuthorizationTokenException("SessionManager::verifyAuthorizationToken() > "
-                            "An empty token was supplied."); 
-                }
-                
-                boost::lock_guard<boost::mutex> instructionDataLock(instructionDataMutex);
-                
-                auto requestedToken = authorizationTokens.find(token->getID());
-                if(requestedToken != authorizationTokens.end())
-                {
-                    if(*(requestedToken->second) == *token && token->getAuthorizedSet() == getType())
-                        authorizationTokens.erase(requestedToken);
-                    else
-                    {
-                        throw InvalidAuthorizationTokenException("SessionManager::verifyAuthorizationToken() > "
-                                "The supplied token [" + Convert::toString(token->getID())
-                                + "] does not match the one expected by the manager.");
-                    }
-                }
-                else
-                {
-                    throw InvalidAuthorizationTokenException("SessionManager::verifyAuthorizationToken() > "
-                            "The supplied token [" + Convert::toString(token->getID()) + "] was not found.");
-                }
-            }
+            void verifyAuthorizationToken(AuthorizationTokenPtr token);
             
             /**
              * Logs the specified message, if a debugging file logger is assigned to the manager.

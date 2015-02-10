@@ -30,7 +30,8 @@ namespace InstructionManagement_Types
         DATABASE_MANAGER, DAL, DAL_CACHE, DAL_QUEUE, DAL_MIGRATOR, DAL_DISTRIBUTED_CACHE, //Database Management
         STORAGE_MANAGER, //Storage
         SESSION_MANAGER, //Sessions
-        FILE_LOGGER, THREAD_POOL //Utilities
+        FILE_LOGGER, THREAD_POOL, //Utilities
+        USER_MANAGER_ADMIN, USER_MANAGER_SELF, DEVICE_MANAGER //Entities
     };
     
     enum class DatabaseManagerInstructionType
@@ -153,6 +154,30 @@ namespace InstructionManagement_Types
         FORCE_SESSION_REAUTHENTICATION,
         FORCE_EXPIRATION_PROCESS,
         DEBUG_GET_STATE
+    };
+    
+    enum class UserManagerAdminInstructionType
+    {
+        GET_USER,
+        GET_USERS_BY_CONSTRAINT,
+        ADD_USER,
+        REMOVE_USER,
+        RESET_PASSWORD,
+        FORCE_PASSWORD_RESET,
+        LOCK_USER,
+        UNLOCK_USER,
+        UPDATE_ACCESS_LEVEL,
+        RESET_FAILED_AUTHENTICATION_ATTEMPTS,
+        ADD_AUTHORIZATION_RULE,
+        REMOVE_AUTHORIZATION_RULE,
+        CLEAR_AUTHORIZATION_RULES,
+        DEBUG_GET_STATE
+    };
+    
+    enum class UserManagerSelfInstructionType
+    {
+        GET_USER,
+        RESET_PASSWORD
     };
 }
 

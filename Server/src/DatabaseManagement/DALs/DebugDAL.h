@@ -489,10 +489,6 @@ namespace DatabaseManagement_DALs
                 currentToken++;
                 PasswordData password = Convert::toSecByteBlock(*currentToken);
                 currentToken++;
-                unsigned long maxSize = boost::lexical_cast<unsigned long>(*currentToken);
-                currentToken++;
-                unsigned long maxNum = boost::lexical_cast<unsigned long>(*currentToken);
-                currentToken++;
                 UserAccessLevel level = Convert::toUserAccessLevel(*currentToken);
                 currentToken++;
                 bool pwReset = ((*currentToken).compare("TRUE") == 0);
@@ -510,8 +506,10 @@ namespace DatabaseManagement_DALs
                 std::deque<UserAuthorizationRule> rules;
                 rules.push_back(UserAuthorizationRule(InstructionManagement_Types::InstructionSetType::DATABASE_MANAGER));
                 rules.push_back(UserAuthorizationRule(InstructionManagement_Types::InstructionSetType::SESSION_MANAGER));
+                rules.push_back(UserAuthorizationRule(InstructionManagement_Types::InstructionSetType::USER_MANAGER_ADMIN));
+                rules.push_back(UserAuthorizationRule(InstructionManagement_Types::InstructionSetType::USER_MANAGER_SELF));
 
-                return UserDataContainerPtr(new UserDataContainer(id, username, password, maxSize, maxNum, level, pwReset, locked, create, login, timestampLastFailedAuth, failedAttempts, rules));
+                return UserDataContainerPtr(new UserDataContainer(id, username, password, level, pwReset, locked, create, login, timestampLastFailedAuth, failedAttempts, rules));
             }
 
             static DataContainerPtr toContainer(std::string value, DatabaseObjectType type, DBObjectID id)
@@ -657,8 +655,7 @@ namespace DatabaseManagement_DALs
 
             static std::string toString(UserDataContainerPtr container)
             {
-                return container->toString() + "," + container->getUsername() + "," + Convert::toString(container->getPasswordData()) + "," 
-                        + Convert::toString(container->getMaxFileSize()) + "," + Convert::toString(container->getMaxNumberOfFiles())
+                return container->toString() + "," + container->getUsername() + "," + Convert::toString(container->getPasswordData())
                         + "," + Convert::toString(container->getUserAccessLevel()) + "," + Convert::toString(container->getForcePasswordReset()) 
                         + "," + Convert::toString(container->isUserLocked()) + "," + Convert::toString(container->getCreationTimestamp()) 
                         + "," + Convert::toString(container->getLastSuccessfulAuthenticationTimestamp())

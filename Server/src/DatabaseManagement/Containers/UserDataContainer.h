@@ -50,16 +50,12 @@ namespace DatabaseManagement_Containers
              * 
              * @param user
              * @param pass
-             * @param maximumFileSize
-             * @param maximumNumberOfFiles
              * @param access
              * @param forcePassReset
              */
-            UserDataContainer(std::string user, PasswordData pass, unsigned long maximumFileSize,
-                              unsigned long maximumNumberOfFiles, UserAccessLevel access, bool forcePassReset)
+            UserDataContainer(std::string user, PasswordData pass, UserAccessLevel access, bool forcePassReset)
             : DataContainer(boost::uuids::random_generator()(), DatabaseObjectType::USER),
-              username(user), password(pass), maxFileSize(maximumFileSize), maxNumberOfFiles(maximumNumberOfFiles),
-              accessLevel(access), forcePasswordReset(forcePassReset), isLocked(false),
+              username(user), password(pass), accessLevel(access), forcePasswordReset(forcePassReset), isLocked(false),
               timestampCreation(INVALID_DATE_TIME), timestampLastSuccessfulAuthentication(INVALID_DATE_TIME),
               timestampLastFailedAuthentication(INVALID_DATE_TIME), failedAuthenticationAttempts(0)
             {}
@@ -72,8 +68,6 @@ namespace DatabaseManagement_Containers
              * @param id
              * @param user
              * @param pass
-             * @param maximumFileSize
-             * @param maximumNumberOfFiles
              * @param access
              * @param forcePassReset
              * @param locked
@@ -83,27 +77,24 @@ namespace DatabaseManagement_Containers
              * @param failedAuthAttempts
              * @param accessRules
              */
-            UserDataContainer(UserID id, std::string user, PasswordData pass, unsigned long maximumFileSize, 
-                              unsigned long maximumNumberOfFiles, UserAccessLevel access, bool forcePassReset,
-                              bool locked, Timestamp createTime, Timestamp lastSuccessfulAuthTime,
+            UserDataContainer(UserID id, std::string user, PasswordData pass, UserAccessLevel access,
+                              bool forcePassReset, bool locked, Timestamp createTime, Timestamp lastSuccessfulAuthTime,
                               Timestamp lastFailedAuthTime, unsigned int failedAuthAttempts,
                               std::deque<UserAuthorizationRule> accessRules)
-                    : DataContainer(id, DatabaseObjectType::USER), username(user), password(pass), maxFileSize(maximumFileSize),
-                      maxNumberOfFiles(maximumNumberOfFiles), accessLevel(access), forcePasswordReset(forcePassReset),
-                      isLocked(locked), timestampCreation(createTime), timestampLastSuccessfulAuthentication(lastSuccessfulAuthTime),
-                      timestampLastFailedAuthentication(lastFailedAuthTime), failedAuthenticationAttempts(failedAuthAttempts),
-                      rules(accessRules)
+            : DataContainer(id, DatabaseObjectType::USER), username(user), password(pass), accessLevel(access),
+              forcePasswordReset(forcePassReset), isLocked(locked), timestampCreation(createTime),
+              timestampLastSuccessfulAuthentication(lastSuccessfulAuthTime),
+              timestampLastFailedAuthentication(lastFailedAuthTime), failedAuthenticationAttempts(failedAuthAttempts),
+              rules(accessRules)
             {}
             
-            UserDataContainer() = delete;                                       //No default constructor
-            UserDataContainer(const UserDataContainer&) = default;              //Default copy constructor
-            ~UserDataContainer() = default;                                     //Default destructor
-            UserDataContainer& operator=(const UserDataContainer&) = default;   //Default assignment operator
+            UserDataContainer() = delete;
+            UserDataContainer(const UserDataContainer&) = default;
+            ~UserDataContainer() = default;
+            UserDataContainer& operator=(const UserDataContainer&) = default;
             
             UserID getUserID()                                  const { return containerID; }
             std::string getUsername()                           const { return username; }
-            unsigned long getMaxFileSize()                      const { return maxFileSize; }
-            unsigned long getMaxNumberOfFiles()                 const { return maxNumberOfFiles; }
             UserAccessLevel getUserAccessLevel()                const { return accessLevel; }
             bool getForcePasswordReset()                        const { return forcePasswordReset; }
             bool isUserLocked()                                 const { return isLocked; }
@@ -123,12 +114,16 @@ namespace DatabaseManagement_Containers
             void resetPassword(const PasswordData & newPassword)    { if(newPassword.size() > 0) { password = newPassword; modified = true; } }
             void forceUserPasswordReset()                           { forcePasswordReset = true; modified = true; }
             void setUserAccessLevel(UserAccessLevel newLevel)       { accessLevel = newLevel; modified = true; }
-            void setMaxFileSize(unsigned long newSize)              { maxFileSize = newSize; modified = true; }
-            void setMaxNumberOfFiles(unsigned long numberOfFiles)   { maxNumberOfFiles = numberOfFiles; modified = true; }
-            void setLockedState(const bool locked)                  { isLocked = locked; modified = true; }
-            void addAcessRule(UserAuthorizationRule rule)           { rules.push_back(rule); modified = true; }
+            void setLockedState(bool locked)                        { isLocked = locked; modified = true; }
+            void addAccessRule(UserAuthorizationRule rule)          { rules.push_back(rule); modified = true; }
             void removeAccessRule(UserAuthorizationRule rule)       { rules.erase(std::remove(rules.begin(), rules.end(), rule));  modified = true; }
             void clearAccessRules()                                 { rules.clear(); modified = true; }
+            
+            void resetFailedAuthenticationAttempts()
+            {
+                failedAuthenticationAttempts = 0;
+                modified = true;
+            }
             
             void setLastSuccessfulAuthenticationTimestamp()
             {
@@ -148,8 +143,6 @@ namespace DatabaseManagement_Containers
         private:
             std::string username;
             PasswordData password;
-            unsigned long maxFileSize;
-            unsigned long maxNumberOfFiles;
             UserAccessLevel accessLevel;
             bool forcePasswordReset;
             bool isLocked;

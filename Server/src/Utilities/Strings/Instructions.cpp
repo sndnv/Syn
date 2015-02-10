@@ -21,8 +21,10 @@ using Maps = Utilities::Strings::InstructionsMaps;
 
 const boost::unordered_map<InstructionSetType, std::string> Maps::instructionSetTypeToString
 {
-    {InstructionSetType::DATABASE_MANAGER,  "DATABASE_MANAGER"},
-    {InstructionSetType::SESSION_MANAGER,   "SESSION_MANAGER"},
+    {InstructionSetType::DATABASE_MANAGER,      "DATABASE_MANAGER"},
+    {InstructionSetType::SESSION_MANAGER,       "SESSION_MANAGER"},
+    {InstructionSetType::USER_MANAGER_ADMIN,    "USER_MANAGER_ADMIN"},
+    {InstructionSetType::USER_MANAGER_SELF,     "USER_MANAGER_SELF"},
     {InstructionSetType::INVALID, "INVALID"}
 };
 
@@ -30,6 +32,8 @@ const boost::unordered_map<std::string, InstructionSetType> Maps::stringToInstru
 {
     {"DATABASE_MANAGER",    InstructionSetType::DATABASE_MANAGER},
     {"SESSION_MANAGER",     InstructionSetType::SESSION_MANAGER},
+    {"USER_MANAGER_ADMIN",  InstructionSetType::USER_MANAGER_ADMIN},
+    {"USER_MANAGER_SELF",   InstructionSetType::USER_MANAGER_SELF},
     {"INVALID", InstructionSetType::INVALID}
 };
 

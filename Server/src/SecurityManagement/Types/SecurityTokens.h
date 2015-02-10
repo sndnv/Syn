@@ -46,11 +46,15 @@ namespace SecurityManagement_Types
              * @param tokenID the unique ID of the token
              * @param signatureData the unique signature of the token
              * @param set the instruction set which the token is generated for
+             * @param userID the ID of the user associated with the token
+             * @param deviceID the ID of the device associated with the request (optional)
              * 
              * @throw invalid_argument if any of the arguments are invalid
              */
-            AuthorizationToken(TokenID tokenID, RandomData signatureData, InstructionSetType set)
-            : id(tokenID), signature(signatureData), authorizedSet(set)
+            AuthorizationToken(TokenID tokenID, RandomData signatureData, InstructionSetType set,
+                               Common_Types::UserID userID,
+                               Common_Types::DeviceID deviceID = Common_Types::INVALID_DEVICE_ID)
+            : id(tokenID), signature(signatureData), authorizedSet(set), user(userID), device(deviceID)
             {
                 if(id <= INVALID_TOKEN_ID)
                     throw std::invalid_argument("AuthorizationToken::() > Invalid token ID supplied.");
@@ -60,6 +64,9 @@ namespace SecurityManagement_Types
                 
                 if(set == InstructionSetType::INVALID)
                     throw std::invalid_argument("AuthorizationToken::() > Invalid instruction set supplied.");
+                
+                if(user == Common_Types::INVALID_USER_ID)
+                    throw std::invalid_argument("AuthorizationToken::() > Invalid user ID supplied");
             }
             
             AuthorizationToken(const AuthorizationToken & other) = delete;
@@ -75,10 +82,18 @@ namespace SecurityManagement_Types
             RandomData getSignature() const { return signature; }
             /** Retrieves the authorized instruction set type.\n\n@return the set type */
             InstructionSetType getAuthorizedSet() const { return authorizedSet; }
+            /** Retrieves the ID of the user associated with the token.\n\n@return the user ID */
+            Common_Types::UserID getUserID() const { return user; }
+            /** Retrieves the ID of the device associated with the token.\n\n@return the device ID, if any */
+            Common_Types::DeviceID getDeviceID() const { return device; }
             
             bool operator==(const AuthorizationToken & rhs) const
             {
-                return (id == rhs.id && signature == rhs.signature && authorizedSet == rhs.authorizedSet);
+                return (id == rhs.id
+                        && signature == rhs.signature
+                        && authorizedSet == rhs.authorizedSet
+                        && user == rhs.user
+                        && device == rhs.device);
             }
             
             bool operator!=(const AuthorizationToken & rhs) const
@@ -90,6 +105,8 @@ namespace SecurityManagement_Types
             TokenID id;
             RandomData signature;
             InstructionSetType authorizedSet;
+            Common_Types::UserID user;
+            Common_Types::DeviceID device;
     };
     
     typedef boost::shared_ptr<AuthorizationToken> AuthorizationTokenPtr;

@@ -83,7 +83,9 @@ namespace SecurityManagement_Types
         SECURITY_MANAGER,   //
         NETWORK_MANAGER,    //
         STORAGE_MANAGER,    //
-        SESSION_MANAGER     //
+        SESSION_MANAGER,    //
+        USER_MANAGER,       //
+        DEVICE_MANAGER      //
     };
     
     //TODO - make common & update DALCache

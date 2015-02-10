@@ -53,7 +53,6 @@ namespace Convert = Utilities::Strings;
 
 namespace SyncServer_Core
 {
-    //TODO - add support for multiple sets from single target
     /**
      * Class for managing instruction managing and dispatching.\n
      * 

@@ -827,7 +827,9 @@ void SyncServer_Core::SecurityManager::processAuthorizationRequest
             (
                 ++lastAuthorizationTokenID,
                 SecurityManagement_Crypto::SaltGenerator::getRandomSalt(authorizationTokenSignatureSize),
-                request.getInstruction()->getParentSet()
+                request.getInstruction()->getParentSet(),
+                request.getUser(),
+                request.getDevice()
             );
 
     AuthorizationTokenPtr newTokenPtr(newToken);
