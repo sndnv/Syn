@@ -142,6 +142,12 @@ namespace DatabaseManagement_Containers
                 modified = true;
             }
             
+            void resetFailedAuthenticationAttempts()
+            {
+                failedAuthenticationAttempts = 0;
+                modified = true;
+            }
+            
         private:
             UserID deviceOwner;
             IPAddress ipAddress;

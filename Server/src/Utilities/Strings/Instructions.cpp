@@ -25,16 +25,20 @@ const boost::unordered_map<InstructionSetType, std::string> Maps::instructionSet
     {InstructionSetType::SESSION_MANAGER,       "SESSION_MANAGER"},
     {InstructionSetType::USER_MANAGER_ADMIN,    "USER_MANAGER_ADMIN"},
     {InstructionSetType::USER_MANAGER_SELF,     "USER_MANAGER_SELF"},
-    {InstructionSetType::INVALID, "INVALID"}
+    {InstructionSetType::DEVICE_MANAGER_ADMIN,  "DEVICE_MANAGER_ADMIN"},
+    {InstructionSetType::DEVICE_MANAGER_USER,   "DEVICE_MANAGER_USER"},
+    {InstructionSetType::INVALID,               "INVALID"}
 };
 
 const boost::unordered_map<std::string, InstructionSetType> Maps::stringToInstructionSetType
 {
-    {"DATABASE_MANAGER",    InstructionSetType::DATABASE_MANAGER},
-    {"SESSION_MANAGER",     InstructionSetType::SESSION_MANAGER},
-    {"USER_MANAGER_ADMIN",  InstructionSetType::USER_MANAGER_ADMIN},
-    {"USER_MANAGER_SELF",   InstructionSetType::USER_MANAGER_SELF},
-    {"INVALID", InstructionSetType::INVALID}
+    {"DATABASE_MANAGER",        InstructionSetType::DATABASE_MANAGER},
+    {"SESSION_MANAGER",         InstructionSetType::SESSION_MANAGER},
+    {"USER_MANAGER_ADMIN",      InstructionSetType::USER_MANAGER_ADMIN},
+    {"USER_MANAGER_SELF",       InstructionSetType::USER_MANAGER_SELF},
+    {"DEVICE_MANAGER_ADMIN",    InstructionSetType::DEVICE_MANAGER_ADMIN},
+    {"DEVICE_MANAGER_USER",     InstructionSetType::DEVICE_MANAGER_USER},
+    {"INVALID",                 InstructionSetType::INVALID}
 };
 
 std::string Utilities::Strings::toString(InstructionSetType var)

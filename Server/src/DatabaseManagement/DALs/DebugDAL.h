@@ -508,6 +508,8 @@ namespace DatabaseManagement_DALs
                 rules.push_back(UserAuthorizationRule(InstructionManagement_Types::InstructionSetType::SESSION_MANAGER));
                 rules.push_back(UserAuthorizationRule(InstructionManagement_Types::InstructionSetType::USER_MANAGER_ADMIN));
                 rules.push_back(UserAuthorizationRule(InstructionManagement_Types::InstructionSetType::USER_MANAGER_SELF));
+                rules.push_back(UserAuthorizationRule(InstructionManagement_Types::InstructionSetType::DEVICE_MANAGER_ADMIN));
+                rules.push_back(UserAuthorizationRule(InstructionManagement_Types::InstructionSetType::DEVICE_MANAGER_USER));
 
                 return UserDataContainerPtr(new UserDataContainer(id, username, password, level, pwReset, locked, create, login, timestampLastFailedAuth, failedAttempts, rules));
             }

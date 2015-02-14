@@ -106,7 +106,7 @@ namespace InstructionManagement_Sets
               userID(id), rawPassword(password)
             {}
             
-            bool isValid() { return (userID != INVALID_USER_ID || !rawPassword.empty()); }
+            bool isValid() { return (userID != INVALID_USER_ID && !rawPassword.empty()); }
             UserID userID;
             const std::string rawPassword;
         };

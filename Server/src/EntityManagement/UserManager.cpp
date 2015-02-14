@@ -21,9 +21,10 @@ namespace Convert = Utilities::Strings;
 namespace Instructions = InstructionManagement_Sets::UserManagerInstructions;
 namespace InstructionResults = InstructionManagement_Sets::UserManagerInstructions::Results;
 
-EntityManagement::UserManager::UserManager(const UserManagerParameters & params,  Utilities::FileLogger * debugLogger)
-: debugLogger(debugLogger), databaseManager(params.databaseManager), securityManager(params.securityManager),
-  instructionsReceived(0), instructionsProcessed(0)
+EntityManagement::UserManager::UserManager
+(const UserManagerParameters & params,  Utilities::FileLogger * debugLogger)
+: debugLogger(debugLogger), databaseManager(params.databaseManager),
+  securityManager(params.securityManager), instructionsReceived(0), instructionsProcessed(0)
 {}
 
 EntityManagement::UserManager::~UserManager()
@@ -37,7 +38,8 @@ EntityManagement::UserManager::~UserManager()
     debugLogger = nullptr;
 }
 
-void EntityManagement::UserManager::postAuthorizationToken(const SecurityManagement_Types::AuthorizationTokenPtr token)
+void EntityManagement::UserManager::postAuthorizationToken
+(const SecurityManagement_Types::AuthorizationTokenPtr token)
 {
     if(UserManagerAdminInstructionTarget::getType() != token->getAuthorizedSet()
        && UserManagerSelfInstructionTarget::getType() != token->getAuthorizedSet())
@@ -59,7 +61,8 @@ void EntityManagement::UserManager::postAuthorizationToken(const SecurityManagem
     }
 }
 
-bool EntityManagement::UserManager::registerInstructionSet(InstructionManagement_Sets::InstructionSetPtr<UserManagerAdminInstructionType> set) const
+bool EntityManagement::UserManager::registerInstructionSet
+(InstructionManagement_Sets::InstructionSetPtr<UserManagerAdminInstructionType> set) const
 {
     if(set)
     {
@@ -67,24 +70,52 @@ bool EntityManagement::UserManager::registerInstructionSet(InstructionManagement
 
         try
         {
-            set->bindInstructionHandler(UserManagerAdminInstructionType::GET_USER,                  adminGetUserHandlerBind);
-            set->bindInstructionHandler(UserManagerAdminInstructionType::GET_USERS_BY_CONSTRAINT,   adminGetUsersHandlerBind);
-            set->bindInstructionHandler(UserManagerAdminInstructionType::ADD_USER,                  adminAddUserHandlerBind);
-            set->bindInstructionHandler(UserManagerAdminInstructionType::REMOVE_USER,               adminRemoveUserHandlerBind);
-            set->bindInstructionHandler(UserManagerAdminInstructionType::RESET_PASSWORD,            adminResetPasswordHandlerBind);
-            set->bindInstructionHandler(UserManagerAdminInstructionType::FORCE_PASSWORD_RESET,      adminForcePasswordResetHandlerBind);
-            set->bindInstructionHandler(UserManagerAdminInstructionType::LOCK_USER,                 adminLockUserHandlerBind);
-            set->bindInstructionHandler(UserManagerAdminInstructionType::UNLOCK_USER,               adminUnlockUserHandlerBind);
-            set->bindInstructionHandler(UserManagerAdminInstructionType::UPDATE_ACCESS_LEVEL,       adminUpdateAccessLevelBind);
-            set->bindInstructionHandler(UserManagerAdminInstructionType::RESET_FAILED_AUTHENTICATION_ATTEMPTS, adminResetFailedAuthenticationAttemptsHandlerBind);
-            set->bindInstructionHandler(UserManagerAdminInstructionType::ADD_AUTHORIZATION_RULE,    adminAddAuthorizationRuleHandlerBind);
-            set->bindInstructionHandler(UserManagerAdminInstructionType::REMOVE_AUTHORIZATION_RULE, adminRemoveAuthorizationRuleHandlerBind);
-            set->bindInstructionHandler(UserManagerAdminInstructionType::CLEAR_AUTHORIZATION_RULES, adminClearAuthorizationRulesHandlerBind);
-            set->bindInstructionHandler(UserManagerAdminInstructionType::DEBUG_GET_STATE,           debugGetStateHandlerBind);
+            set->bindInstructionHandler(UserManagerAdminInstructionType::GET_USER,
+                                        adminGetUserHandlerBind);
+            
+            set->bindInstructionHandler(UserManagerAdminInstructionType::GET_USERS_BY_CONSTRAINT,
+                                        adminGetUsersHandlerBind);
+            
+            set->bindInstructionHandler(UserManagerAdminInstructionType::ADD_USER,
+                                        adminAddUserHandlerBind);
+            
+            set->bindInstructionHandler(UserManagerAdminInstructionType::REMOVE_USER,
+                                        adminRemoveUserHandlerBind);
+            
+            set->bindInstructionHandler(UserManagerAdminInstructionType::RESET_PASSWORD,
+                                        adminResetPasswordHandlerBind);
+            
+            set->bindInstructionHandler(UserManagerAdminInstructionType::FORCE_PASSWORD_RESET,
+                                        adminForcePasswordResetHandlerBind);
+            
+            set->bindInstructionHandler(UserManagerAdminInstructionType::LOCK_USER,
+                                        adminLockUserHandlerBind);
+            
+            set->bindInstructionHandler(UserManagerAdminInstructionType::UNLOCK_USER,
+                                        adminUnlockUserHandlerBind);
+            
+            set->bindInstructionHandler(UserManagerAdminInstructionType::UPDATE_ACCESS_LEVEL,
+                                        adminUpdateAccessLevelBind);
+            
+            set->bindInstructionHandler(UserManagerAdminInstructionType::RESET_FAILED_AUTHENTICATION_ATTEMPTS,
+                                        adminResetFailedAuthenticationAttemptsHandlerBind);
+            
+            set->bindInstructionHandler(UserManagerAdminInstructionType::ADD_AUTHORIZATION_RULE,
+                                        adminAddAuthorizationRuleHandlerBind);
+            
+            set->bindInstructionHandler(UserManagerAdminInstructionType::REMOVE_AUTHORIZATION_RULE,
+                                        adminRemoveAuthorizationRuleHandlerBind);
+            
+            set->bindInstructionHandler(UserManagerAdminInstructionType::CLEAR_AUTHORIZATION_RULES,
+                                        adminClearAuthorizationRulesHandlerBind);
+            
+            set->bindInstructionHandler(UserManagerAdminInstructionType::DEBUG_GET_STATE,
+                                        debugGetStateHandlerBind);
         }
         catch(const std::invalid_argument & ex)
         {
-            logDebugMessage("(registerInstructionSet) > Exception encountered: <" + std::string(ex.what()) + ">");
+            logDebugMessage("(registerInstructionSet) > Exception encountered: <"
+                            + std::string(ex.what()) + ">");
             return false;
         }
 
@@ -97,7 +128,8 @@ bool EntityManagement::UserManager::registerInstructionSet(InstructionManagement
     }
 }
 
-bool EntityManagement::UserManager::registerInstructionSet(InstructionManagement_Sets::InstructionSetPtr<UserManagerSelfInstructionType> set) const
+bool EntityManagement::UserManager::registerInstructionSet
+(InstructionManagement_Sets::InstructionSetPtr<UserManagerSelfInstructionType> set) const
 {
     if(set)
     {
@@ -105,12 +137,17 @@ bool EntityManagement::UserManager::registerInstructionSet(InstructionManagement
 
         try
         {
-            set->bindInstructionHandler(UserManagerSelfInstructionType::GET_USER,       selfGetUserHandlerBind);
-            set->bindInstructionHandler(UserManagerSelfInstructionType::RESET_PASSWORD, selfResetPasswordHandlerBind);
+            set->bindInstructionHandler(UserManagerSelfInstructionType::GET_USER,
+                                        selfGetUserHandlerBind);
+            
+            set->bindInstructionHandler(UserManagerSelfInstructionType::RESET_PASSWORD,
+                                        selfResetPasswordHandlerBind);
         }
         catch(const std::invalid_argument & ex)
         {
-            logDebugMessage("(registerInstructionSet) > Exception encountered: <" + std::string(ex.what()) + ">");
+            logDebugMessage("(registerInstructionSet) > Exception encountered: <"
+                            + std::string(ex.what()) + ">");
+            
             return false;
         }
 
@@ -123,7 +160,8 @@ bool EntityManagement::UserManager::registerInstructionSet(InstructionManagement
     }
 }
 
-void EntityManagement::UserManager::adminGetUserHandler(InstructionPtr<UserManagerAdminInstructionType> instruction)
+void EntityManagement::UserManager::adminGetUserHandler
+(InstructionPtr<UserManagerAdminInstructionType> instruction)
 {
     //verifies that the instruction has a valid and expected authorization token
     try
@@ -137,7 +175,8 @@ void EntityManagement::UserManager::adminGetUserHandler(InstructionPtr<UserManag
     }
 
     UserDataContainerPtr resultData;
-    boost::shared_ptr<Instructions::AdminGetUser> actualInstruction = boost::dynamic_pointer_cast<Instructions::AdminGetUser>(instruction);
+    boost::shared_ptr<Instructions::AdminGetUser> actualInstruction =
+            boost::dynamic_pointer_cast<Instructions::AdminGetUser>(instruction);
 
     if(actualInstruction)
     {
@@ -151,12 +190,14 @@ void EntityManagement::UserManager::adminGetUserHandler(InstructionPtr<UserManag
         }
     }
 
-    auto result = boost::shared_ptr<InstructionResults::AdminGetUser>(new InstructionResults::AdminGetUser{resultData});
+    auto result = boost::shared_ptr<InstructionResults::AdminGetUser>(
+        new InstructionResults::AdminGetUser{resultData});
 
     instruction->getPromise().set_value(result);
 }
 
-void EntityManagement::UserManager::adminGetUsersHandler(InstructionPtr<UserManagerAdminInstructionType> instruction)
+void EntityManagement::UserManager::adminGetUsersHandler
+(InstructionPtr<UserManagerAdminInstructionType> instruction)
 {
     //verifies that the instruction has a valid and expected authorization token
     try
@@ -170,19 +211,26 @@ void EntityManagement::UserManager::adminGetUsersHandler(InstructionPtr<UserMana
     }
 
     std::vector<UserDataContainerPtr> resultData;
-    boost::shared_ptr<Instructions::AdminGetUsersByConstraint> actualInstruction = boost::dynamic_pointer_cast<Instructions::AdminGetUsersByConstraint>(instruction);
+    boost::shared_ptr<Instructions::AdminGetUsersByConstraint> actualInstruction =
+            boost::dynamic_pointer_cast<Instructions::AdminGetUsersByConstraint>(instruction);
 
     if(actualInstruction)
     {
-        resultData = databaseManager.Users().getUsersByConstraint(actualInstruction->constraintType, actualInstruction->constraintValue);
+        resultData = databaseManager.Users().getUsersByConstraint
+                (
+                    actualInstruction->constraintType,
+                    actualInstruction->constraintValue
+                );
     }
 
-    auto result = boost::shared_ptr<InstructionResults::AdminGetUsersByConstraint>(new InstructionResults::AdminGetUsersByConstraint{resultData});
+    auto result = boost::shared_ptr<InstructionResults::AdminGetUsersByConstraint>(
+        new InstructionResults::AdminGetUsersByConstraint{resultData});
 
     instruction->getPromise().set_value(result);
 }
 
-void EntityManagement::UserManager::adminAddUserHandler(InstructionPtr<UserManagerAdminInstructionType> instruction)
+void EntityManagement::UserManager::adminAddUserHandler
+(InstructionPtr<UserManagerAdminInstructionType> instruction)
 {
     //verifies that the instruction has a valid and expected authorization token
     try
@@ -196,7 +244,8 @@ void EntityManagement::UserManager::adminAddUserHandler(InstructionPtr<UserManag
     }
 
     bool resultValue = false;
-    boost::shared_ptr<Instructions::AdminAddUser> actualInstruction = boost::dynamic_pointer_cast<Instructions::AdminAddUser>(instruction);
+    boost::shared_ptr<Instructions::AdminAddUser> actualInstruction =
+            boost::dynamic_pointer_cast<Instructions::AdminAddUser>(instruction);
 
     if(actualInstruction)
     {
@@ -206,29 +255,39 @@ void EntityManagement::UserManager::adminAddUserHandler(InstructionPtr<UserManag
             if(securityManager.isUserNameValid(actualInstruction->username, nameValidationErrorMessage))
             {
                 PasswordData newUserPassword(securityManager.hashUserPassword(actualInstruction->rawPassword));
-                UserDataContainerPtr newUserContainer(new UserDataContainer(actualInstruction->username, newUserPassword, actualInstruction->accessLevel, actualInstruction->forcePasswordReset));
+                
+                UserDataContainerPtr newUserContainer(new UserDataContainer(actualInstruction->username,
+                                                                            newUserPassword,
+                                                                            actualInstruction->accessLevel,
+                                                                            actualInstruction->forcePasswordReset));
+                
                 resultValue = databaseManager.Users().addUser(newUserContainer);
             }
             else
             {
-                throwInstructionException("UserManager::adminAddUserHandler() > Invalid user name supplied: [" + nameValidationErrorMessage + "].", instruction);
+                throwInstructionException("UserManager::adminAddUserHandler() > Invalid user name supplied: ["
+                                          + nameValidationErrorMessage + "].", instruction);
                 return;
             }
         }
         catch(const std::exception & ex)
         {
-            logDebugMessage("(adminAddUserHandler) > Exception encountered: [" + std::string(ex.what()) + "].");
+            logDebugMessage("(adminAddUserHandler) > Exception encountered: ["
+                            + std::string(ex.what()) + "].");
+            
             instruction->getPromise().set_exception(boost::current_exception());
             return;
         }
     }
 
-    auto result = boost::shared_ptr<InstructionResults::AdminAddUser>(new InstructionResults::AdminAddUser{resultValue});
+    auto result = boost::shared_ptr<InstructionResults::AdminAddUser>(
+        new InstructionResults::AdminAddUser{resultValue});
 
     instruction->getPromise().set_value(result);
 }
 
-void EntityManagement::UserManager::adminRemoveUserHandler(InstructionPtr<UserManagerAdminInstructionType> instruction)
+void EntityManagement::UserManager::adminRemoveUserHandler
+(InstructionPtr<UserManagerAdminInstructionType> instruction)
 {
     //verifies that the instruction has a valid and expected authorization token
     try
@@ -242,19 +301,22 @@ void EntityManagement::UserManager::adminRemoveUserHandler(InstructionPtr<UserMa
     }
 
     bool resultValue = false;
-    boost::shared_ptr<Instructions::AdminRemoveUser> actualInstruction = boost::dynamic_pointer_cast<Instructions::AdminRemoveUser>(instruction);
+    boost::shared_ptr<Instructions::AdminRemoveUser> actualInstruction =
+            boost::dynamic_pointer_cast<Instructions::AdminRemoveUser>(instruction);
 
     if(actualInstruction)
     {
         resultValue = databaseManager.Users().removeUser(actualInstruction->userID);
     }
 
-    auto result = boost::shared_ptr<InstructionResults::AdminRemoveUser>(new InstructionResults::AdminRemoveUser{resultValue});
+    auto result = boost::shared_ptr<InstructionResults::AdminRemoveUser>(
+        new InstructionResults::AdminRemoveUser{resultValue});
 
     instruction->getPromise().set_value(result);
 }
 
-void EntityManagement::UserManager::adminResetPasswordHandler(InstructionPtr<UserManagerAdminInstructionType> instruction)
+void EntityManagement::UserManager::adminResetPasswordHandler
+(InstructionPtr<UserManagerAdminInstructionType> instruction)
 {
     //verifies that the instruction has a valid and expected authorization token
     try
@@ -268,7 +330,8 @@ void EntityManagement::UserManager::adminResetPasswordHandler(InstructionPtr<Use
     }
 
     bool resultValue = false;
-    boost::shared_ptr<Instructions::AdminResetPassword> actualInstruction = boost::dynamic_pointer_cast<Instructions::AdminResetPassword>(instruction);
+    boost::shared_ptr<Instructions::AdminResetPassword> actualInstruction =
+            boost::dynamic_pointer_cast<Instructions::AdminResetPassword>(instruction);
 
     if(actualInstruction)
     {
@@ -284,25 +347,34 @@ void EntityManagement::UserManager::adminResetPasswordHandler(InstructionPtr<Use
             }
             else
             {
-                logDebugMessage("(adminResetPasswordHandler) > User [" + Convert::toString(actualInstruction->userID) + "] not found.");
-                throwInstructionException("UserManager::adminResetPasswordHandler() > User [" + Convert::toString(actualInstruction->userID) + "] not found.", instruction);
+                logDebugMessage("(adminResetPasswordHandler) > User ["
+                                + Convert::toString(actualInstruction->userID)
+                                + "] not found.");
+                
+                throwInstructionException("UserManager::adminResetPasswordHandler() > User ["
+                                          + Convert::toString(actualInstruction->userID)
+                                          + "] not found.", instruction);
                 return;
             }
         }
         catch(const std::exception & ex)
         {
-            logDebugMessage("(adminResetPasswordHandler) > Exception encountered: [" + std::string(ex.what()) + "].");
+            logDebugMessage("(adminResetPasswordHandler) > Exception encountered: ["
+                            + std::string(ex.what()) + "].");
+            
             instruction->getPromise().set_exception(boost::current_exception());
             return;
         }
     }
 
-    auto result = boost::shared_ptr<InstructionResults::AdminResetPassword>(new InstructionResults::AdminResetPassword{resultValue});
+    auto result = boost::shared_ptr<InstructionResults::AdminResetPassword>(
+        new InstructionResults::AdminResetPassword{resultValue});
 
     instruction->getPromise().set_value(result);
 }
 
-void EntityManagement::UserManager::adminForcePasswordResetHandler(InstructionPtr<UserManagerAdminInstructionType> instruction)
+void EntityManagement::UserManager::adminForcePasswordResetHandler
+(InstructionPtr<UserManagerAdminInstructionType> instruction)
 {
     //verifies that the instruction has a valid and expected authorization token
     try
@@ -316,11 +388,13 @@ void EntityManagement::UserManager::adminForcePasswordResetHandler(InstructionPt
     }
 
     bool resultValue = false;
-    boost::shared_ptr<Instructions::AdminForcePasswordReset> actualInstruction = boost::dynamic_pointer_cast<Instructions::AdminForcePasswordReset>(instruction);
+    boost::shared_ptr<Instructions::AdminForcePasswordReset> actualInstruction =
+            boost::dynamic_pointer_cast<Instructions::AdminForcePasswordReset>(instruction);
 
     if(actualInstruction)
     {
         UserDataContainerPtr userData = databaseManager.Users().getUser(actualInstruction->userID);
+        
         if(userData)
         {
             userData->forceUserPasswordReset();
@@ -328,18 +402,24 @@ void EntityManagement::UserManager::adminForcePasswordResetHandler(InstructionPt
         }
         else
         {
-            logDebugMessage("(adminForcePasswordResetHandler) > User [" + Convert::toString(actualInstruction->userID) + "] not found.");
-            throwInstructionException("UserManager::adminResetPasswordHandler() > User [" + Convert::toString(actualInstruction->userID) + "] not found.", instruction);
+            logDebugMessage("(adminForcePasswordResetHandler) > User ["
+                            + Convert::toString(actualInstruction->userID) + "] not found.");
+            
+            throwInstructionException("UserManager::adminResetPasswordHandler() > User ["
+                                      + Convert::toString(actualInstruction->userID)
+                                      + "] not found.", instruction);
             return;
         }
     }
 
-    auto result = boost::shared_ptr<InstructionResults::AdminForcePasswordReset>(new InstructionResults::AdminForcePasswordReset{resultValue});
+    auto result = boost::shared_ptr<InstructionResults::AdminForcePasswordReset>(
+        new InstructionResults::AdminForcePasswordReset{resultValue});
 
     instruction->getPromise().set_value(result);
 }
 
-void EntityManagement::UserManager::adminLockUserHandler(InstructionPtr<UserManagerAdminInstructionType> instruction)
+void EntityManagement::UserManager::adminLockUserHandler
+(InstructionPtr<UserManagerAdminInstructionType> instruction)
 {
     //verifies that the instruction has a valid and expected authorization token
     try
@@ -353,7 +433,8 @@ void EntityManagement::UserManager::adminLockUserHandler(InstructionPtr<UserMana
     }
 
     bool resultValue = false;
-    boost::shared_ptr<Instructions::AdminLockUser> actualInstruction = boost::dynamic_pointer_cast<Instructions::AdminLockUser>(instruction);
+    boost::shared_ptr<Instructions::AdminLockUser> actualInstruction =
+            boost::dynamic_pointer_cast<Instructions::AdminLockUser>(instruction);
 
     if(actualInstruction)
     {
@@ -368,18 +449,24 @@ void EntityManagement::UserManager::adminLockUserHandler(InstructionPtr<UserMana
         }
         else
         {
-            logDebugMessage("(adminLockUserHandler) > User [" + Convert::toString(actualInstruction->userID) + "] not found.");
-            throwInstructionException("UserManager::adminLockUserHandler() > User [" + Convert::toString(actualInstruction->userID) + "] not found.", instruction);
+            logDebugMessage("(adminLockUserHandler) > User ["
+                            + Convert::toString(actualInstruction->userID) + "] not found.");
+            
+            throwInstructionException("UserManager::adminLockUserHandler() > User ["
+                                      + Convert::toString(actualInstruction->userID)
+                                      + "] not found.", instruction);
             return;
         }
     }
 
-    auto result = boost::shared_ptr<InstructionResults::AdminLockUser>(new InstructionResults::AdminLockUser{resultValue});
+    auto result = boost::shared_ptr<InstructionResults::AdminLockUser>(
+        new InstructionResults::AdminLockUser{resultValue});
 
     instruction->getPromise().set_value(result);
 }
 
-void EntityManagement::UserManager::adminUnlockUserHandler(InstructionPtr<UserManagerAdminInstructionType> instruction)
+void EntityManagement::UserManager::adminUnlockUserHandler
+(InstructionPtr<UserManagerAdminInstructionType> instruction)
 {
     //verifies that the instruction has a valid and expected authorization token
     try
@@ -393,7 +480,8 @@ void EntityManagement::UserManager::adminUnlockUserHandler(InstructionPtr<UserMa
     }
 
     bool resultValue = false;
-    boost::shared_ptr<Instructions::AdminUnlockUser> actualInstruction = boost::dynamic_pointer_cast<Instructions::AdminUnlockUser>(instruction);
+    boost::shared_ptr<Instructions::AdminUnlockUser> actualInstruction =
+            boost::dynamic_pointer_cast<Instructions::AdminUnlockUser>(instruction);
 
     if(actualInstruction)
     {
@@ -408,18 +496,24 @@ void EntityManagement::UserManager::adminUnlockUserHandler(InstructionPtr<UserMa
         }
         else
         {
-            logDebugMessage("(adminUnlockUserHandler) > User [" + Convert::toString(actualInstruction->userID) + "] not found.");
-            throwInstructionException("UserManager::adminUnlockUserHandler() > User [" + Convert::toString(actualInstruction->userID) + "] not found.", instruction);
+            logDebugMessage("(adminUnlockUserHandler) > User ["
+                            + Convert::toString(actualInstruction->userID) + "] not found.");
+            
+            throwInstructionException("UserManager::adminUnlockUserHandler() > User ["
+                                      + Convert::toString(actualInstruction->userID)
+                                      + "] not found.", instruction);
             return;
         }
     }
 
-    auto result = boost::shared_ptr<InstructionResults::AdminUnlockUser>(new InstructionResults::AdminUnlockUser{resultValue});
+    auto result = boost::shared_ptr<InstructionResults::AdminUnlockUser>(
+        new InstructionResults::AdminUnlockUser{resultValue});
 
     instruction->getPromise().set_value(result);
 }
 
-void EntityManagement::UserManager::adminUpdateAccessLevel(InstructionPtr<UserManagerAdminInstructionType> instruction)
+void EntityManagement::UserManager::adminUpdateAccessLevel
+(InstructionPtr<UserManagerAdminInstructionType> instruction)
 {
     //verifies that the instruction has a valid and expected authorization token
     try
@@ -433,7 +527,8 @@ void EntityManagement::UserManager::adminUpdateAccessLevel(InstructionPtr<UserMa
     }
 
     bool resultValue = false;
-    boost::shared_ptr<Instructions::AdminUpdateAccessLevel> actualInstruction = boost::dynamic_pointer_cast<Instructions::AdminUpdateAccessLevel>(instruction);
+    boost::shared_ptr<Instructions::AdminUpdateAccessLevel> actualInstruction =
+            boost::dynamic_pointer_cast<Instructions::AdminUpdateAccessLevel>(instruction);
 
     if(actualInstruction)
     {
@@ -448,18 +543,25 @@ void EntityManagement::UserManager::adminUpdateAccessLevel(InstructionPtr<UserMa
         }
         else
         {
-            logDebugMessage("(adminUpdateAccessLevel) > User [" + Convert::toString(actualInstruction->userID) + "] not found.");
-            throwInstructionException("UserManager::adminUpdateAccessLevel() > User [" + Convert::toString(actualInstruction->userID) + "] not found.", instruction);
+            logDebugMessage("(adminUpdateAccessLevel) > User ["
+                            + Convert::toString(actualInstruction->userID)
+                            + "] not found.");
+            
+            throwInstructionException("UserManager::adminUpdateAccessLevel() > User ["
+                                      + Convert::toString(actualInstruction->userID)
+                                      + "] not found.", instruction);
             return;
         }
     }
 
-    auto result = boost::shared_ptr<InstructionResults::AdminUpdateAccessLevel>(new InstructionResults::AdminUpdateAccessLevel{resultValue});
+    auto result = boost::shared_ptr<InstructionResults::AdminUpdateAccessLevel>(
+        new InstructionResults::AdminUpdateAccessLevel{resultValue});
 
     instruction->getPromise().set_value(result);
 }
 
-void EntityManagement::UserManager::adminResetFailedAuthenticationAttemptsHandler(InstructionPtr<UserManagerAdminInstructionType> instruction)
+void EntityManagement::UserManager::adminResetFailedAuthenticationAttemptsHandler
+(InstructionPtr<UserManagerAdminInstructionType> instruction)
 {
     //verifies that the instruction has a valid and expected authorization token
     try
@@ -473,7 +575,8 @@ void EntityManagement::UserManager::adminResetFailedAuthenticationAttemptsHandle
     }
 
     bool resultValue = false;
-    boost::shared_ptr<Instructions::AdminResetFailedAuthenticationAttempts> actualInstruction = boost::dynamic_pointer_cast<Instructions::AdminResetFailedAuthenticationAttempts>(instruction);
+    boost::shared_ptr<Instructions::AdminResetFailedAuthenticationAttempts> actualInstruction =
+            boost::dynamic_pointer_cast<Instructions::AdminResetFailedAuthenticationAttempts>(instruction);
 
     if(actualInstruction)
     {
@@ -488,18 +591,24 @@ void EntityManagement::UserManager::adminResetFailedAuthenticationAttemptsHandle
         }
         else
         {
-            logDebugMessage("(adminResetFailedAuthenticationAttemptsHandler) > User [" + Convert::toString(actualInstruction->userID) + "] not found.");
-            throwInstructionException("UserManager::adminResetFailedAuthenticationAttemptsHandler() > User [" + Convert::toString(actualInstruction->userID) + "] not found.", instruction);
+            logDebugMessage("(adminResetFailedAuthenticationAttemptsHandler) > User ["
+                            + Convert::toString(actualInstruction->userID) + "] not found.");
+            
+            throwInstructionException("UserManager::adminResetFailedAuthenticationAttemptsHandler() > User ["
+                                      + Convert::toString(actualInstruction->userID)
+                                      + "] not found.", instruction);
             return;
         }
     }
 
-    auto result = boost::shared_ptr<InstructionResults::AdminResetFailedAuthenticationAttempts>(new InstructionResults::AdminResetFailedAuthenticationAttempts{resultValue});
+    auto result = boost::shared_ptr<InstructionResults::AdminResetFailedAuthenticationAttempts>(
+        new InstructionResults::AdminResetFailedAuthenticationAttempts{resultValue});
 
     instruction->getPromise().set_value(result);
 }
 
-void EntityManagement::UserManager::adminAddAuthorizationRuleHandler(InstructionPtr<UserManagerAdminInstructionType> instruction)
+void EntityManagement::UserManager::adminAddAuthorizationRuleHandler
+(InstructionPtr<UserManagerAdminInstructionType> instruction)
 {
     //verifies that the instruction has a valid and expected authorization token
     try
@@ -513,7 +622,8 @@ void EntityManagement::UserManager::adminAddAuthorizationRuleHandler(Instruction
     }
 
     bool resultValue = false;
-    boost::shared_ptr<Instructions::AdminAddAuthorizationRule> actualInstruction = boost::dynamic_pointer_cast<Instructions::AdminAddAuthorizationRule>(instruction);
+    boost::shared_ptr<Instructions::AdminAddAuthorizationRule> actualInstruction =
+            boost::dynamic_pointer_cast<Instructions::AdminAddAuthorizationRule>(instruction);
 
     if(actualInstruction)
     {
@@ -525,18 +635,24 @@ void EntityManagement::UserManager::adminAddAuthorizationRuleHandler(Instruction
         }
         else
         {
-            logDebugMessage("(adminAddAuthorizationRuleHandler) > User [" + Convert::toString(actualInstruction->userID) + "] not found.");
-            throwInstructionException("UserManager::adminAddAuthorizationRuleHandler() > User [" + Convert::toString(actualInstruction->userID) + "] not found.", instruction);
+            logDebugMessage("(adminAddAuthorizationRuleHandler) > User ["
+                            + Convert::toString(actualInstruction->userID) + "] not found.");
+            
+            throwInstructionException("UserManager::adminAddAuthorizationRuleHandler() > User ["
+                                      + Convert::toString(actualInstruction->userID)
+                                      + "] not found.", instruction);
             return;
         }
     }
 
-    auto result = boost::shared_ptr<InstructionResults::AdminAddAuthorizationRule>(new InstructionResults::AdminAddAuthorizationRule{resultValue});
+    auto result = boost::shared_ptr<InstructionResults::AdminAddAuthorizationRule>(
+        new InstructionResults::AdminAddAuthorizationRule{resultValue});
 
     instruction->getPromise().set_value(result);
 }
 
-void EntityManagement::UserManager::adminRemoveAuthorizationRuleHandler(InstructionPtr<UserManagerAdminInstructionType> instruction)
+void EntityManagement::UserManager::adminRemoveAuthorizationRuleHandler
+(InstructionPtr<UserManagerAdminInstructionType> instruction)
 {
     //verifies that the instruction has a valid and expected authorization token
     try
@@ -550,7 +666,8 @@ void EntityManagement::UserManager::adminRemoveAuthorizationRuleHandler(Instruct
     }
 
     bool resultValue = false;
-    boost::shared_ptr<Instructions::AdminRemoveAuthorizationRule> actualInstruction = boost::dynamic_pointer_cast<Instructions::AdminRemoveAuthorizationRule>(instruction);
+    boost::shared_ptr<Instructions::AdminRemoveAuthorizationRule> actualInstruction =
+            boost::dynamic_pointer_cast<Instructions::AdminRemoveAuthorizationRule>(instruction);
 
     if(actualInstruction)
     {
@@ -562,18 +679,24 @@ void EntityManagement::UserManager::adminRemoveAuthorizationRuleHandler(Instruct
         }
         else
         {
-            logDebugMessage("(adminRemoveAuthorizationRuleHandler) > User [" + Convert::toString(actualInstruction->userID) + "] not found.");
-            throwInstructionException("UserManager::adminRemoveAuthorizationRuleHandler() > User [" + Convert::toString(actualInstruction->userID) + "] not found.", instruction);
+            logDebugMessage("(adminRemoveAuthorizationRuleHandler) > User ["
+                            + Convert::toString(actualInstruction->userID) + "] not found.");
+            
+            throwInstructionException("UserManager::adminRemoveAuthorizationRuleHandler() > User ["
+                                      + Convert::toString(actualInstruction->userID)
+                                      + "] not found.", instruction);
             return;
         }
     }
 
-    auto result = boost::shared_ptr<InstructionResults::AdminRemoveAuthorizationRule>(new InstructionResults::AdminRemoveAuthorizationRule{resultValue});
+    auto result = boost::shared_ptr<InstructionResults::AdminRemoveAuthorizationRule>(
+        new InstructionResults::AdminRemoveAuthorizationRule{resultValue});
 
     instruction->getPromise().set_value(result);
 }
 
-void EntityManagement::UserManager::adminClearAuthorizationRulesHandler(InstructionPtr<UserManagerAdminInstructionType> instruction)
+void EntityManagement::UserManager::adminClearAuthorizationRulesHandler
+(InstructionPtr<UserManagerAdminInstructionType> instruction)
 {
     //verifies that the instruction has a valid and expected authorization token
     try
@@ -587,7 +710,8 @@ void EntityManagement::UserManager::adminClearAuthorizationRulesHandler(Instruct
     }
 
     bool resultValue = false;
-    boost::shared_ptr<Instructions::AdminClearAuthorizationRules> actualInstruction = boost::dynamic_pointer_cast<Instructions::AdminClearAuthorizationRules>(instruction);
+    boost::shared_ptr<Instructions::AdminClearAuthorizationRules> actualInstruction =
+            boost::dynamic_pointer_cast<Instructions::AdminClearAuthorizationRules>(instruction);
 
     if(actualInstruction)
     {
@@ -602,18 +726,24 @@ void EntityManagement::UserManager::adminClearAuthorizationRulesHandler(Instruct
         }
         else
         {
-            logDebugMessage("(adminClearAuthorizationRulesHandler) > User [" + Convert::toString(actualInstruction->userID) + "] not found.");
-            throwInstructionException("UserManager::adminClearAuthorizationRulesHandler() > User [" + Convert::toString(actualInstruction->userID) + "] not found.", instruction);
+            logDebugMessage("(adminClearAuthorizationRulesHandler) > User ["
+                            + Convert::toString(actualInstruction->userID) + "] not found.");
+            
+            throwInstructionException("UserManager::adminClearAuthorizationRulesHandler() > User ["
+                                      + Convert::toString(actualInstruction->userID)
+                                      + "] not found.", instruction);
             return;
         }
     }
 
-    auto result = boost::shared_ptr<InstructionResults::AdminClearAuthorizationRules>(new InstructionResults::AdminClearAuthorizationRules{resultValue});
+    auto result = boost::shared_ptr<InstructionResults::AdminClearAuthorizationRules>(
+        new InstructionResults::AdminClearAuthorizationRules{resultValue});
 
     instruction->getPromise().set_value(result);
 }
 
-void EntityManagement::UserManager::debugGetStateHandler(InstructionPtr<UserManagerAdminInstructionType> instruction)
+void EntityManagement::UserManager::debugGetStateHandler
+(InstructionPtr<UserManagerAdminInstructionType> instruction)
 {
     //verifies that the instruction has a valid and expected authorization token
     try
@@ -627,7 +757,8 @@ void EntityManagement::UserManager::debugGetStateHandler(InstructionPtr<UserMana
     }
 
     std::string resultData;
-    boost::shared_ptr<Instructions::DebugGetState> actualInstruction = boost::dynamic_pointer_cast<Instructions::DebugGetState>(instruction);
+    boost::shared_ptr<Instructions::DebugGetState> actualInstruction =
+            boost::dynamic_pointer_cast<Instructions::DebugGetState>(instruction);
 
     if(actualInstruction)
     {
@@ -636,12 +767,14 @@ void EntityManagement::UserManager::debugGetStateHandler(InstructionPtr<UserMana
         resultData += "authorizationTokens size;" + Convert::toString(authorizationTokens.size()) + "\n";
     }
 
-    auto result = boost::shared_ptr<InstructionResults::DebugGetState>(new InstructionResults::DebugGetState{resultData});
+    auto result = boost::shared_ptr<InstructionResults::DebugGetState>(
+        new InstructionResults::DebugGetState{resultData});
 
     instruction->getPromise().set_value(result);
 }
 
-void EntityManagement::UserManager::selfGetUserHandler(InstructionPtr<UserManagerSelfInstructionType> instruction)
+void EntityManagement::UserManager::selfGetUserHandler
+(InstructionPtr<UserManagerSelfInstructionType> instruction)
 {
     //verifies that the instruction has a valid and expected authorization token
     try
@@ -655,19 +788,22 @@ void EntityManagement::UserManager::selfGetUserHandler(InstructionPtr<UserManage
     }
 
     UserDataContainerPtr resultData;
-    boost::shared_ptr<Instructions::SelfGetUser> actualInstruction = boost::dynamic_pointer_cast<Instructions::SelfGetUser>(instruction);
+    boost::shared_ptr<Instructions::SelfGetUser> actualInstruction =
+            boost::dynamic_pointer_cast<Instructions::SelfGetUser>(instruction);
 
     if(actualInstruction)
     {
         resultData = databaseManager.Users().getUser(actualInstruction->getToken()->getUserID());
     }
 
-    auto result = boost::shared_ptr<InstructionResults::SelfGetUser>(new InstructionResults::SelfGetUser{resultData});
+    auto result = boost::shared_ptr<InstructionResults::SelfGetUser>(
+        new InstructionResults::SelfGetUser{resultData});
 
     instruction->getPromise().set_value(result);
 }
 
-void EntityManagement::UserManager::selfResetPasswordHandler(InstructionPtr<UserManagerSelfInstructionType> instruction)
+void EntityManagement::UserManager::selfResetPasswordHandler
+(InstructionPtr<UserManagerSelfInstructionType> instruction)
 {
     //verifies that the instruction has a valid and expected authorization token
     try
@@ -681,13 +817,16 @@ void EntityManagement::UserManager::selfResetPasswordHandler(InstructionPtr<User
     }
 
     bool resultValue = false;
-    boost::shared_ptr<Instructions::SelfResetPassword> actualInstruction = boost::dynamic_pointer_cast<Instructions::SelfResetPassword>(instruction);
+    boost::shared_ptr<Instructions::SelfResetPassword> actualInstruction =
+            boost::dynamic_pointer_cast<Instructions::SelfResetPassword>(instruction);
 
     if(actualInstruction)
     {
         try
         {
-            UserDataContainerPtr userData = databaseManager.Users().getUser(actualInstruction->getToken()->getUserID());
+            UserDataContainerPtr userData =
+                    databaseManager.Users().getUser(actualInstruction->getToken()->getUserID());
+            
             if(userData)
             {
                 PasswordData newUserPassword(securityManager.hashUserPassword(actualInstruction->rawPassword));
@@ -697,20 +836,28 @@ void EntityManagement::UserManager::selfResetPasswordHandler(InstructionPtr<User
             }
             else
             {
-                logDebugMessage("(selfResetPasswordHandler) > User [" + Convert::toString(actualInstruction->getToken()->getUserID()) + "] not found.");
-                throwInstructionException("UserManager::selfResetPasswordHandler() > User [" + Convert::toString(actualInstruction->getToken()->getUserID()) + "] not found.", instruction);
+                logDebugMessage("(selfResetPasswordHandler) > User ["
+                                + Convert::toString(actualInstruction->getToken()->getUserID())
+                                + "] not found.");
+                
+                throwInstructionException("UserManager::selfResetPasswordHandler() > User ["
+                                          + Convert::toString(actualInstruction->getToken()->getUserID())
+                                          + "] not found.", instruction);
                 return;
             }
         }
         catch(const std::exception & ex)
         {
-            logDebugMessage("(selfResetPasswordHandler) > Exception encountered: [" + std::string(ex.what()) + "].");
+            logDebugMessage("(selfResetPasswordHandler) > Exception encountered: ["
+                            + std::string(ex.what()) + "].");
+            
             instruction->getPromise().set_exception(boost::current_exception());
             return;
         }
     }
 
-    auto result = boost::shared_ptr<InstructionResults::SelfResetPassword>(new InstructionResults::SelfResetPassword{resultValue});
+    auto result = boost::shared_ptr<InstructionResults::SelfResetPassword>(
+        new InstructionResults::SelfResetPassword{resultValue});
 
     instruction->getPromise().set_value(result);
 }
