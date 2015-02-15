@@ -54,7 +54,7 @@ namespace Utilities
              * 
              * @param fullFilePath full path to the log file
              * @param maximumFileSize maximum log file size (for file rotation)
-             * @param minimumSeverity the lowes severity level that will be recorded (DEBUG < INFO < WARNING < ERROR)
+             * @param minimumSeverity the lowest severity level that will be recorded (DEBUG < INFO < WARNING < ERROR)
              * @return the new logger object
              */
             FileLogger(std::string fullFilePath, unsigned long maximumFileSize, FileLogSeverity minimumSeverity = FileLogSeverity::Debug);

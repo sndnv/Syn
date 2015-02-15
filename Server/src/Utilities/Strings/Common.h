@@ -34,6 +34,7 @@ using Common_Types::Byte;
 using Common_Types::ByteVector;
 using Common_Types::UserAccessLevel;
 using Common_Types::SessionType;
+using Common_Types::LogSeverity;
 
 namespace Utilities
 {
@@ -45,6 +46,8 @@ namespace Utilities
             static const boost::unordered_map<std::string, UserAccessLevel> stringToUserAccessLevel;
             static const boost::unordered_map<SessionType, std::string> sessionTypeToString;
             static const boost::unordered_map<std::string, SessionType> stringToSessionType;
+            static const boost::unordered_map<LogSeverity, std::string> logSeverityToString;
+            static const boost::unordered_map<std::string, LogSeverity> stringToLogSeverity;
         };
         
         std::string toString(bool var);
@@ -62,11 +65,13 @@ namespace Utilities
         std::string toString(boost::posix_time::ptime var);
         std::string toString(UserAccessLevel var);
         std::string toString(SessionType var);
+        std::string toString(LogSeverity var);
         
         CryptoPP::SecByteBlock toSecByteBlock(std::string var);
         boost::posix_time::ptime toTimestamp(std::string var);
         UserAccessLevel toUserAccessLevel(std::string var);
         SessionType toSessionType(std::string var);
+        LogSeverity toLogSeverity(std::string var);
     }
 }
 

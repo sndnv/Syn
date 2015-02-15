@@ -32,44 +32,61 @@ namespace DatabaseManagement_Containers
     class VectorDataContainer : public DatabaseManagement_Containers::DataContainer
     {
         public:
-            VectorDataContainer() : DataContainer(Common_Types::INVALID_OBJECT_ID, DatabaseObjectType::VECTOR) {}
+            VectorDataContainer()
+            : DataContainer(Common_Types::INVALID_OBJECT_ID, DatabaseObjectType::VECTOR)
+            {}
             
-            VectorDataContainer(const VectorDataContainer&) = default;              //Default copy constructor
-            ~VectorDataContainer() = default;                                       //Default destructor
-            VectorDataContainer& operator=(const VectorDataContainer&) = default;   //Default assignment operator
+            VectorDataContainer(const VectorDataContainer&) = default;
+            ~VectorDataContainer() = default;
+            VectorDataContainer& operator=(const VectorDataContainer&) = default;
             
             /**
              * Retrieves the list of stored containers.
              * 
              * @return the containers
              */
-            std::vector<DataContainerPtr> getContainers()   const { return containers; }
+            std::vector<DataContainerPtr> getContainers() const
+            {
+                return containers;
+            }
             
             /**
              * Retrieves the state of the vector container.
              * 
              * @return true, if there are no stored containers
              */
-            bool isEmpty()                                  const { return (containers.size() == 0) ? true : false; };
+            bool isEmpty() const
+            {
+                return (containers.size() == 0);
+            };
             
             /**
              * Retrieves the number of stored containers.
              * 
              * @return the number of containers/size of internal vector
              */
-            unsigned long size()                            const { return containers.size(); }
+            unsigned long size() const
+            {
+                return containers.size();
+            }
             
             /**
              * Removes all stored containers.
              */
-            void clear()                                        { containers.clear(); }
+            void clear()
+            {
+                containers.clear();
+            }
             
             /**
              * Stores the specified container.
              * 
              * @param container the container to be stored
              */
-            void addDataContainer(DataContainerPtr container)   { containers.push_back(container); }
+            void addDataContainer(DataContainerPtr container)
+            {
+                containers.push_back(container);
+            }
             
         private:
             std::vector<DataContainerPtr> containers;

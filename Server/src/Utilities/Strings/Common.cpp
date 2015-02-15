@@ -49,6 +49,26 @@ const boost::unordered_map<std::string, SessionType> Maps::stringToSessionType
     {"INVALID", SessionType::INVALID}
 };
 
+const boost::unordered_map<LogSeverity, std::string> Maps::logSeverityToString
+{
+    {LogSeverity::None,     "NONE"},
+    {LogSeverity::Debug,    "DEBUG"},
+    {LogSeverity::Error,    "ERROR"},
+    {LogSeverity::Info,     "INFO"},
+    {LogSeverity::Warning,  "WARN"},
+    {LogSeverity::INVALID,  "INVALID"}
+};
+
+const boost::unordered_map<std::string, LogSeverity> Maps::stringToLogSeverity
+{
+    {"NONE",    LogSeverity::None},
+    {"DEBUG",   LogSeverity::Debug},
+    {"ERROR",   LogSeverity::Error},
+    {"INFO",    LogSeverity::Info},
+    {"WARN",    LogSeverity::Warning},
+    {"INVALID", LogSeverity::INVALID}
+};
+
 std::string Utilities::Strings::toString(bool var) { return (var) ? "TRUE" : "FALSE"; }
 std::string Utilities::Strings::toString(int var) { return boost::lexical_cast<std::string>(var); }
 std::string Utilities::Strings::toString(long var) { return boost::lexical_cast<std::string>(var); }
@@ -156,4 +176,20 @@ SessionType Utilities::Strings::toSessionType(std::string var)
         return Maps::stringToSessionType.at(var);
     else
         return SessionType::INVALID;
+}
+
+std::string Utilities::Strings::toString(LogSeverity var)
+{
+    if(Maps::logSeverityToString.find(var) != Maps::logSeverityToString.end())
+        return Maps::logSeverityToString.at(var);
+    else
+        return "INVALID";
+}
+
+LogSeverity Utilities::Strings::toLogSeverity(std::string var)
+{
+    if(Maps::stringToLogSeverity.find(var) != Maps::stringToLogSeverity.end())
+        return Maps::stringToLogSeverity.at(var);
+    else
+        return LogSeverity::INVALID;
 }

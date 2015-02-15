@@ -20,7 +20,8 @@
 
 namespace EntityManagement_Types
 {
-    
+    typedef unsigned int DatabaseLoggingSourceID;
+    const DatabaseLoggingSourceID INVALID_DATABASE_LOGGING_SOURCE_ID = 0;
 }
 
 #endif	/* ENTITY_MANAGEMENT_TYPES_H */

@@ -55,13 +55,15 @@ namespace DatabaseManagement_Containers
              * @param owner device owner
              * @param transferType default transfer type
              */
-            DeviceDataContainer(std::string name, PasswordData pass, UserID owner, DataTransferType transferType) 
-                : DataContainer(boost::uuids::random_generator()(), DatabaseObjectType::DEVICE),
-                  deviceOwner(owner), ipAddress(INVALID_IP_ADDRESS), ipPort(INVALID_IP_PORT),
-                  xferType(transferType), deviceProvidedID("UNDEFINED"), deviceName(name),
-                  password(pass), deviceInfo("UNDEFINED"), isLocked(false),
-                  timestampLastSuccessfulAuthentication(INVALID_DATE_TIME),
-                  timestampLastFailedAuthentication(INVALID_DATE_TIME), failedAuthenticationAttempts(0)
+            DeviceDataContainer(std::string name, PasswordData pass, UserID owner,
+                                DataTransferType transferType) 
+            : DataContainer(boost::uuids::random_generator()(), DatabaseObjectType::DEVICE),
+              deviceOwner(owner), ipAddress(INVALID_IP_ADDRESS), ipPort(INVALID_IP_PORT),
+              xferType(transferType), deviceProvidedID("UNDEFINED"), deviceName(name),
+              password(pass), deviceInfo("UNDEFINED"), isLocked(false),
+              timestampLastSuccessfulAuthentication(INVALID_DATE_TIME),
+              timestampLastFailedAuthentication(INVALID_DATE_TIME),
+              failedAuthenticationAttempts(0)
             {}
             
             /**
@@ -83,20 +85,24 @@ namespace DatabaseManagement_Containers
              * @param lastFailedAuthTime 
              * @param failedAuthAttempts 
              */
-            DeviceDataContainer(DeviceID id, std::string providedID, std::string name, PasswordData pass, UserID owner,
-                                IPAddress address, IPPort port, DataTransferType transferType,
+            DeviceDataContainer(DeviceID id, std::string providedID, std::string name,
+                                PasswordData pass, UserID owner, IPAddress address,
+                                IPPort port, DataTransferType transferType,
                                 std::string info, bool locked, Timestamp lastSuccessfulAuthTime,
                                 Timestamp lastFailedAuthTime, unsigned int failedAuthAttempts)
-                : DataContainer(id, DatabaseObjectType::DEVICE), deviceOwner(owner), ipAddress(address),
-                  ipPort(port), xferType(transferType), deviceProvidedID(providedID), deviceName(name),
-                  password(pass), deviceInfo(info), isLocked(locked), timestampLastSuccessfulAuthentication(lastSuccessfulAuthTime),
-                  timestampLastFailedAuthentication(lastFailedAuthTime), failedAuthenticationAttempts(failedAuthAttempts)
+            : DataContainer(id, DatabaseObjectType::DEVICE), deviceOwner(owner),
+              ipAddress(address), ipPort(port), xferType(transferType),
+              deviceProvidedID(providedID), deviceName(name),
+              password(pass), deviceInfo(info), isLocked(locked),
+              timestampLastSuccessfulAuthentication(lastSuccessfulAuthTime),
+              timestampLastFailedAuthentication(lastFailedAuthTime),
+              failedAuthenticationAttempts(failedAuthAttempts)
             {}
             
-            DeviceDataContainer() = delete;                                         //No default constructor
-            DeviceDataContainer(const DeviceDataContainer&) = default;              //Default copy constructor
-            ~DeviceDataContainer() = default;                                       //Default destructor
-            DeviceDataContainer& operator=(const DeviceDataContainer&) = default;   //Default assignment operator
+            DeviceDataContainer() = delete;
+            DeviceDataContainer(const DeviceDataContainer&) = default;
+            ~DeviceDataContainer() = default;
+            DeviceDataContainer& operator=(const DeviceDataContainer&) = default;
             
             DeviceID getDeviceID()             const { return containerID; }
             UserID getDeviceOwner()            const { return deviceOwner; }
@@ -110,7 +116,7 @@ namespace DatabaseManagement_Containers
             Timestamp getLastSuccessfulAuthenticationTimestamp()    const { return timestampLastSuccessfulAuthentication; }
             Timestamp getLastFailedAuthenticationTimestamp()        const { return timestampLastFailedAuthentication; }
             unsigned int getFailedAuthenticationAttempts()          const { return failedAuthenticationAttempts; }
-            bool passwordsMatch(const PasswordData & otherPassword) const{ return (password == otherPassword); }
+            bool passwordsMatch(const PasswordData & otherPassword) const { return (password == otherPassword); }
             const PasswordData & getPasswordData()                  const { return password; }
             
             const SaltData getPasswordSalt(SaltSize size) const

@@ -56,7 +56,8 @@ namespace DatabaseManagement_Containers
             SessionDataContainer(SessionType sessionType, DeviceID deviceID, UserID userID, bool persistent)
                     : DataContainer(boost::uuids::random_generator()(), DatabaseObjectType::SESSION),
                       timestampOpen(boost::posix_time::second_clock::universal_time()), 
-                      timestampClose(INVALID_DATE_TIME), timestampLastActivity(boost::posix_time::second_clock::universal_time()),
+                      timestampClose(INVALID_DATE_TIME),
+                      timestampLastActivity(boost::posix_time::second_clock::universal_time()),
                       type(sessionType), device(deviceID), user(userID), isPersistent(persistent),
                       isActive(true), dataSent(0), dataReceived(0), commandsSent(0), commandsReceived(0)
             {}

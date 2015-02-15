@@ -25,8 +25,9 @@
 #include "../Types/Types.h"
 #include <boost/uuid/random_generator.hpp>
 
-using DatabaseManagement_Types::LogSeverity;
+using Common_Types::LogSeverity;
 using Common_Types::LogID;
+using Common_Types::Timestamp;
 
 namespace DatabaseManagement_Containers
 {
@@ -43,8 +44,11 @@ namespace DatabaseManagement_Containers
              * @param timestamp event timestamp
              * @param message event message
              */
-            LogDataContainer(LogSeverity severity, std::string source, boost::posix_time::ptime timestamp, std::string message)
-                    : LogDataContainer(boost::uuids::random_generator()(), severity, source, timestamp, message) {}
+            LogDataContainer(LogSeverity severity, std::string source,
+                             Timestamp timestamp, std::string message)
+            : LogDataContainer(boost::uuids::random_generator()(),
+              severity, source, timestamp, message)
+            {}
             
             /**
              * Creates a new log data container.
@@ -57,24 +61,27 @@ namespace DatabaseManagement_Containers
              * @param timestamp event timestamp
              * @param message event message
              */
-            LogDataContainer(LogID id, LogSeverity severity, std::string source, boost::posix_time::ptime timestamp, std::string message)
-                    : DataContainer(id, DatabaseObjectType::LOG), eventSeverity(severity), sourceName(source), eventTimestamp(timestamp), eventMessage(message) {}
+            LogDataContainer(LogID id, LogSeverity severity, std::string source,
+                             Timestamp timestamp, std::string message)
+            : DataContainer(id, DatabaseObjectType::LOG), eventSeverity(severity),
+              sourceName(source), eventTimestamp(timestamp), eventMessage(message)
+            {}
             
-            LogDataContainer() = delete;                                      //No default constructor
-            LogDataContainer(const LogDataContainer&) = default;              //Default copy constructor
-            ~LogDataContainer() = default;                                    //Default destructor
-            LogDataContainer& operator=(const LogDataContainer&) = default;   //Default assignment operator
+            LogDataContainer() = delete;
+            LogDataContainer(const LogDataContainer&) = default;
+            ~LogDataContainer() = default;
+            LogDataContainer& operator=(const LogDataContainer&) = default;
             
-            LogID getLogID()                            const { return containerID; }
-            LogSeverity getLogSeverity()                const { return eventSeverity; }
-            std::string getLogSourceName()              const { return sourceName; }
-            boost::posix_time::ptime getLogTimestamp()  const { return eventTimestamp; }
-            std::string getLogMessage()                 const { return eventMessage; }
+            LogID getLogID()                const { return containerID; }
+            LogSeverity getLogSeverity()    const { return eventSeverity; }
+            std::string getLogSourceName()  const { return sourceName; }
+            Timestamp getLogTimestamp()     const { return eventTimestamp; }
+            std::string getLogMessage()     const { return eventMessage; }
 
         private:
             LogSeverity eventSeverity;
             std::string sourceName;
-            boost::posix_time::ptime eventTimestamp;
+            Timestamp eventTimestamp;
             std::string eventMessage;
     };
     

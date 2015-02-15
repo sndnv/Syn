@@ -31,7 +31,7 @@ namespace InstructionManagement_Types
         STORAGE_MANAGER, //Storage
         SESSION_MANAGER, //Sessions
         FILE_LOGGER, THREAD_POOL, //Utilities
-        USER_MANAGER_ADMIN, USER_MANAGER_SELF, DEVICE_MANAGER_ADMIN, DEVICE_MANAGER_USER //Entities
+        USER_MANAGER_ADMIN, USER_MANAGER_SELF, DEVICE_MANAGER_ADMIN, DEVICE_MANAGER_USER, DATABASE_LOGGER //Entities
     };
     
     enum class DatabaseManagerInstructionType
@@ -207,6 +207,15 @@ namespace InstructionManagement_Types
         LOCK_DEVICE,
         UNLOCK_DEVICE,
         RESET_FAILED_AUTHENTICATION_ATTEMPTS
+    };
+    
+    enum class DatabaseLoggerInstructionType
+    {
+        GET_LOG,
+        GET_LOGS_BY_CONSTRAINT,
+        UPDATE_SOURCE_LOGGING_LEVEL,
+        UPDATE_DEFAULT_LOGGING_LEVEL,
+        DEBUG_GET_STATE
     };
 }
 

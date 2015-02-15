@@ -159,24 +159,6 @@ const boost::unordered_map<std::string, SystemParameterType> Maps::stringToSyste
     {"INVALID",                 SystemParameterType::INVALID}
 };
 
-const boost::unordered_map<LogSeverity, std::string> Maps::logSeverityToString
-{
-    {LogSeverity::Debug,    "DEBUG"},
-    {LogSeverity::Error,    "ERROR"},
-    {LogSeverity::Info,     "INFO"},
-    {LogSeverity::Warning,  "WARN"},
-    {LogSeverity::INVALID,  "INVALID"}
-};
-
-const boost::unordered_map<std::string, LogSeverity> Maps::stringToLogSeverity
-{
-    {"DEBUG",   LogSeverity::Debug},
-    {"ERROR",   LogSeverity::Error},
-    {"INFO",    LogSeverity::Info},
-    {"WARN",    LogSeverity::Warning},
-    {"INVALID", LogSeverity::INVALID}
-};
-
 const boost::unordered_map<DataTransferType, std::string> Maps::dataTransferTypeToString
 {
     {DataTransferType::PULL,    "PULL"},
@@ -371,22 +353,6 @@ SystemParameterType Utilities::Strings::toSystemParameterType(std::string var)
         return Maps::stringToSystemParameterType.at(var);
     else
         return SystemParameterType::INVALID;
-}
-
-std::string Utilities::Strings::toString(LogSeverity var)
-{
-    if(Maps::logSeverityToString.find(var) != Maps::logSeverityToString.end())
-        return Maps::logSeverityToString.at(var);
-    else
-        return "INVALID";
-}
-
-LogSeverity Utilities::Strings::toLogSeverity(std::string var)
-{
-    if(Maps::stringToLogSeverity.find(var) != Maps::stringToLogSeverity.end())
-        return Maps::stringToLogSeverity.at(var);
-    else
-        return LogSeverity::INVALID;
 }
 
 std::string Utilities::Strings::toString(DataTransferType var)

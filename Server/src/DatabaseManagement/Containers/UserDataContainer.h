@@ -77,15 +77,17 @@ namespace DatabaseManagement_Containers
              * @param failedAuthAttempts
              * @param accessRules
              */
-            UserDataContainer(UserID id, std::string user, PasswordData pass, UserAccessLevel access,
-                              bool forcePassReset, bool locked, Timestamp createTime, Timestamp lastSuccessfulAuthTime,
+            UserDataContainer(UserID id, std::string user, PasswordData pass,
+                              UserAccessLevel access, bool forcePassReset, bool locked,
+                              Timestamp createTime, Timestamp lastSuccessfulAuthTime,
                               Timestamp lastFailedAuthTime, unsigned int failedAuthAttempts,
                               std::deque<UserAuthorizationRule> accessRules)
-            : DataContainer(id, DatabaseObjectType::USER), username(user), password(pass), accessLevel(access),
-              forcePasswordReset(forcePassReset), isLocked(locked), timestampCreation(createTime),
+            : DataContainer(id, DatabaseObjectType::USER), username(user), password(pass),
+              accessLevel(access), forcePasswordReset(forcePassReset), isLocked(locked),
+              timestampCreation(createTime),
               timestampLastSuccessfulAuthentication(lastSuccessfulAuthTime),
-              timestampLastFailedAuthentication(lastFailedAuthTime), failedAuthenticationAttempts(failedAuthAttempts),
-              rules(accessRules)
+              timestampLastFailedAuthentication(lastFailedAuthTime),
+              failedAuthenticationAttempts(failedAuthAttempts), rules(accessRules)
             {}
             
             UserDataContainer() = delete;

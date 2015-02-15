@@ -27,7 +27,6 @@ using DatabaseManagement_Types::DatabaseManagerOperationMode;
 using DatabaseManagement_Types::DatabaseFailureAction;
 using DatabaseManagement_Types::StatisticType;
 using DatabaseManagement_Types::SystemParameterType;
-using DatabaseManagement_Types::LogSeverity;
 using DatabaseManagement_Types::DataTransferType;
 using DatabaseManagement_Types::ScheduleIntervalType;
 using DatabaseManagement_Types::ConflictResolutionRule_Directory;
@@ -52,8 +51,6 @@ namespace Utilities
             static const boost::unordered_map<std::string, StatisticType> stringToStatisticType;
             static const boost::unordered_map<SystemParameterType, std::string> systemParameterTypeToString;
             static const boost::unordered_map<std::string, SystemParameterType> stringToSystemParameterType;
-            static const boost::unordered_map<LogSeverity, std::string> logSeverityToString;
-            static const boost::unordered_map<std::string, LogSeverity> stringToLogSeverity;
             static const boost::unordered_map<DataTransferType, std::string> dataTransferTypeToString;
             static const boost::unordered_map<std::string, DataTransferType> stringToDataTransferType;
             static const boost::unordered_map<ScheduleIntervalType, std::string> scheduleIntervalTypeToString;
@@ -73,7 +70,6 @@ namespace Utilities
         std::string toString(DatabaseFailureAction var);
         std::string toString(StatisticType var);
         std::string toString(SystemParameterType var);
-        std::string toString(LogSeverity var);
         std::string toString(DataTransferType var);
         std::string toString(ScheduleIntervalType var);
         std::string toString(ConflictResolutionRule_Directory var);
@@ -86,7 +82,6 @@ namespace Utilities
         DatabaseFailureAction toDatabaseFailureAction(std::string var);
         StatisticType toStatisticType(std::string var);
         SystemParameterType toSystemParameterType(std::string var);
-        LogSeverity toLogSeverity(std::string var);
         DataTransferType toDataTransferType(std::string var);
         ScheduleIntervalType toScheduleIntervalType(std::string var);
         ConflictResolutionRule_Directory toDirConflictResolutionRule(std::string var);

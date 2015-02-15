@@ -510,6 +510,7 @@ namespace DatabaseManagement_DALs
                 rules.push_back(UserAuthorizationRule(InstructionManagement_Types::InstructionSetType::USER_MANAGER_SELF));
                 rules.push_back(UserAuthorizationRule(InstructionManagement_Types::InstructionSetType::DEVICE_MANAGER_ADMIN));
                 rules.push_back(UserAuthorizationRule(InstructionManagement_Types::InstructionSetType::DEVICE_MANAGER_USER));
+                rules.push_back(UserAuthorizationRule(InstructionManagement_Types::InstructionSetType::DATABASE_LOGGER));
 
                 return UserDataContainerPtr(new UserDataContainer(id, username, password, level, pwReset, locked, create, login, timestampLastFailedAuth, failedAttempts, rules));
             }

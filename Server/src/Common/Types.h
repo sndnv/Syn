@@ -45,7 +45,7 @@ namespace Common_Types
     const IPPort INVALID_IP_PORT = 0;
     
     typedef boost::posix_time::ptime Timestamp;
-    const boost::posix_time::ptime INVALID_DATE_TIME = boost::posix_time::ptime(boost::posix_time::min_date_time);
+    const Timestamp INVALID_DATE_TIME = boost::posix_time::ptime(boost::posix_time::min_date_time);
     
     typedef unsigned long Seconds;
     const Seconds MAX_SECONDS = ULONG_MAX;
@@ -136,6 +136,58 @@ namespace Common_Types
     inline bool operator<=(const UserAccessLevel a, const UserAccessLevel b)
     {
         return (userAccessLevelToInt(a) <= userAccessLevelToInt(b));
+    }
+    
+    enum class LogSeverity { INVALID, None, Info, Warning, Error, Debug };
+    
+    /**
+     * Converts the specified log severity to an integer.
+     * 
+     * The following rules hold for the values returned by the function:<br>
+     * - <code>Debug \< Info \< Warning \< Error \< None</code><br>
+     * - <code>INVALID == 0</code>
+     * 
+     * Warning: The actual value returned by the function can change from one
+     * code revision to another and, therefore, should not be used anywhere
+     * as a hard-coded integer or for permanent storage.
+     * 
+     * @param severity the log severity to be converted
+     * @return the representation of the severity as an integer
+     * 
+     * @throw logic_error if an unexpected/invalid severity is encountered
+     */
+    inline unsigned int logSeverityToInt(const LogSeverity severity)
+    {
+        switch(severity)
+        {
+            case LogSeverity::INVALID: return 0;
+            case LogSeverity::Debug: return 1;
+            case LogSeverity::Info: return 2;
+            case LogSeverity::Warning: return 3;
+            case LogSeverity::Error: return 4;
+            case LogSeverity::None: return 5;
+            default: throw std::logic_error("logSeverityToInt() > An unexpected log severity was encountered.");
+        }
+    }
+    
+    inline bool operator>(const LogSeverity a, const LogSeverity b)
+    {
+        return (logSeverityToInt(a) > logSeverityToInt(b));
+    }
+    
+    inline bool operator<(const LogSeverity a, const LogSeverity b)
+    {
+        return (logSeverityToInt(a) < logSeverityToInt(b));
+    }
+    
+    inline bool operator>=(const LogSeverity a, const LogSeverity b)
+    {
+        return (logSeverityToInt(a) >= logSeverityToInt(b));
+    }
+    
+    inline bool operator<=(const LogSeverity a, const LogSeverity b)
+    {
+        return (logSeverityToInt(a) <= logSeverityToInt(b));
     }
 }
 

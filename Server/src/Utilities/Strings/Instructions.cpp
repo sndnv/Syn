@@ -27,6 +27,7 @@ const boost::unordered_map<InstructionSetType, std::string> Maps::instructionSet
     {InstructionSetType::USER_MANAGER_SELF,     "USER_MANAGER_SELF"},
     {InstructionSetType::DEVICE_MANAGER_ADMIN,  "DEVICE_MANAGER_ADMIN"},
     {InstructionSetType::DEVICE_MANAGER_USER,   "DEVICE_MANAGER_USER"},
+    {InstructionSetType::DATABASE_LOGGER,       "DATABASE_LOGGER"},
     {InstructionSetType::INVALID,               "INVALID"}
 };
 
@@ -38,6 +39,7 @@ const boost::unordered_map<std::string, InstructionSetType> Maps::stringToInstru
     {"USER_MANAGER_SELF",       InstructionSetType::USER_MANAGER_SELF},
     {"DEVICE_MANAGER_ADMIN",    InstructionSetType::DEVICE_MANAGER_ADMIN},
     {"DEVICE_MANAGER_USER",     InstructionSetType::DEVICE_MANAGER_USER},
+    {"DATABASE_LOGGER",         InstructionSetType::DATABASE_LOGGER},
     {"INVALID",                 InstructionSetType::INVALID}
 };
 
