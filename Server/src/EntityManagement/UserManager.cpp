@@ -29,7 +29,7 @@ EntityManagement::UserManager::UserManager
 
 EntityManagement::UserManager::~UserManager()
 {
-    logDebugMessage("(~) > Destruction initiated.");
+    logMessage(LogSeverity::Debug, "(~) > Destruction initiated.");
 
     boost::lock_guard<boost::mutex> instructionDataLock(instructionDataMutex);
 
@@ -114,8 +114,8 @@ bool EntityManagement::UserManager::registerInstructionSet
         }
         catch(const std::invalid_argument & ex)
         {
-            logDebugMessage("(registerInstructionSet) > Exception encountered: <"
-                            + std::string(ex.what()) + ">");
+            logMessage(LogSeverity::Error, "(registerInstructionSet) > Exception encountered: <"
+                                           + std::string(ex.what()) + ">");
             return false;
         }
 
@@ -123,7 +123,7 @@ bool EntityManagement::UserManager::registerInstructionSet
     }
     else
     {
-        logDebugMessage("(registerInstructionSet) > The supplied set is not initialised.");
+        logMessage(LogSeverity::Error, "(registerInstructionSet) > The supplied set is not initialised.");
         return false;
     }
 }
@@ -145,8 +145,8 @@ bool EntityManagement::UserManager::registerInstructionSet
         }
         catch(const std::invalid_argument & ex)
         {
-            logDebugMessage("(registerInstructionSet) > Exception encountered: <"
-                            + std::string(ex.what()) + ">");
+            logMessage(LogSeverity::Error, "(registerInstructionSet) > Exception encountered: <"
+                                           + std::string(ex.what()) + ">");
             
             return false;
         }
@@ -155,7 +155,7 @@ bool EntityManagement::UserManager::registerInstructionSet
     }
     else
     {
-        logDebugMessage("(registerInstructionSet) > The supplied set is not initialised.");
+        logMessage(LogSeverity::Error, "(registerInstructionSet) > The supplied set is not initialised.");
         return false;
     }
 }
@@ -262,6 +262,14 @@ void EntityManagement::UserManager::adminAddUserHandler
                                                                             actualInstruction->forcePasswordReset));
                 
                 resultValue = databaseManager.Users().addUser(newUserContainer);
+                
+                if(resultValue)
+                {
+                    logMessage(LogSeverity::Info, "User [" + actualInstruction->username + "]/["
+                            + Convert::toString(newUserContainer->getUserID()) + "] added with access level ["
+                            + Convert::toString(actualInstruction->accessLevel) + "] by user ["
+                            + Convert::toString(actualInstruction->getToken()->getUserID()) + "].");
+                }
             }
             else
             {
@@ -272,8 +280,8 @@ void EntityManagement::UserManager::adminAddUserHandler
         }
         catch(const std::exception & ex)
         {
-            logDebugMessage("(adminAddUserHandler) > Exception encountered: ["
-                            + std::string(ex.what()) + "].");
+            logMessage(LogSeverity::Error, "(adminAddUserHandler) > Exception encountered: ["
+                                           + std::string(ex.what()) + "].");
             
             instruction->getPromise().set_exception(boost::current_exception());
             return;
@@ -307,6 +315,13 @@ void EntityManagement::UserManager::adminRemoveUserHandler
     if(actualInstruction)
     {
         resultValue = databaseManager.Users().removeUser(actualInstruction->userID);
+        
+        if(resultValue)
+        {
+            logMessage(LogSeverity::Info, "User ["
+                    + Convert::toString(actualInstruction->userID) + "] removed by user ["
+                    + Convert::toString(actualInstruction->getToken()->getUserID()) + "].");
+        }
     }
 
     auto result = boost::shared_ptr<InstructionResults::AdminRemoveUser>(
@@ -344,12 +359,19 @@ void EntityManagement::UserManager::adminResetPasswordHandler
 
                 userData->resetPassword(newUserPassword);
                 resultValue = databaseManager.Users().updateUser(userData);
+                
+                if(resultValue)
+                {
+                    logMessage(LogSeverity::Info, "Password for user ["
+                            + Convert::toString(actualInstruction->userID) + "] reset by user ["
+                            + Convert::toString(actualInstruction->getToken()->getUserID()) + "].");
+                }
             }
             else
             {
-                logDebugMessage("(adminResetPasswordHandler) > User ["
-                                + Convert::toString(actualInstruction->userID)
-                                + "] not found.");
+                logMessage(LogSeverity::Error, "(adminResetPasswordHandler) > User ["
+                                               + Convert::toString(actualInstruction->userID)
+                                               + "] not found.");
                 
                 throwInstructionException("UserManager::adminResetPasswordHandler() > User ["
                                           + Convert::toString(actualInstruction->userID)
@@ -359,8 +381,8 @@ void EntityManagement::UserManager::adminResetPasswordHandler
         }
         catch(const std::exception & ex)
         {
-            logDebugMessage("(adminResetPasswordHandler) > Exception encountered: ["
-                            + std::string(ex.what()) + "].");
+            logMessage(LogSeverity::Error, "(adminResetPasswordHandler) > Exception encountered: ["
+                                           + std::string(ex.what()) + "].");
             
             instruction->getPromise().set_exception(boost::current_exception());
             return;
@@ -402,8 +424,9 @@ void EntityManagement::UserManager::adminForcePasswordResetHandler
         }
         else
         {
-            logDebugMessage("(adminForcePasswordResetHandler) > User ["
-                            + Convert::toString(actualInstruction->userID) + "] not found.");
+            logMessage(LogSeverity::Error, "(adminForcePasswordResetHandler) > User ["
+                                           + Convert::toString(actualInstruction->userID)
+                                           + "] not found.");
             
             throwInstructionException("UserManager::adminResetPasswordHandler() > User ["
                                       + Convert::toString(actualInstruction->userID)
@@ -445,12 +468,20 @@ void EntityManagement::UserManager::adminLockUserHandler
             {
                 userData->setLockedState(true);
                 resultValue = databaseManager.Users().updateUser(userData);
+                
+                if(resultValue)
+                {
+                    logMessage(LogSeverity::Info, "User ["
+                            + Convert::toString(actualInstruction->userID) + "] locked by user ["
+                            + Convert::toString(actualInstruction->getToken()->getUserID()) + "].");
+                }
             }
         }
         else
         {
-            logDebugMessage("(adminLockUserHandler) > User ["
-                            + Convert::toString(actualInstruction->userID) + "] not found.");
+            logMessage(LogSeverity::Error, "(adminLockUserHandler) > User ["
+                                           + Convert::toString(actualInstruction->userID)
+                                           + "] not found.");
             
             throwInstructionException("UserManager::adminLockUserHandler() > User ["
                                       + Convert::toString(actualInstruction->userID)
@@ -492,12 +523,20 @@ void EntityManagement::UserManager::adminUnlockUserHandler
             {
                 userData->setLockedState(false);
                 resultValue = databaseManager.Users().updateUser(userData);
+                
+                if(resultValue)
+                {
+                    logMessage(LogSeverity::Info, "User ["
+                            + Convert::toString(actualInstruction->userID) + "] unlocked by user ["
+                            + Convert::toString(actualInstruction->getToken()->getUserID()) + "].");
+                }
             }
         }
         else
         {
-            logDebugMessage("(adminUnlockUserHandler) > User ["
-                            + Convert::toString(actualInstruction->userID) + "] not found.");
+            logMessage(LogSeverity::Error, "(adminUnlockUserHandler) > User ["
+                                           + Convert::toString(actualInstruction->userID)
+                                           + "] not found.");
             
             throwInstructionException("UserManager::adminUnlockUserHandler() > User ["
                                       + Convert::toString(actualInstruction->userID)
@@ -539,13 +578,22 @@ void EntityManagement::UserManager::adminUpdateAccessLevel
             {
                 userData->setUserAccessLevel(actualInstruction->level);
                 resultValue = databaseManager.Users().updateUser(userData);
+                
+                if(resultValue)
+                {
+                    logMessage(LogSeverity::Info, "Access level for user ["
+                            + Convert::toString(actualInstruction->userID)
+                            + "] updated to ["
+                            + Convert::toString(actualInstruction->level) + "] by ["
+                            + Convert::toString(actualInstruction->getToken()->getUserID()) + "].");
+                }
             }
         }
         else
         {
-            logDebugMessage("(adminUpdateAccessLevel) > User ["
-                            + Convert::toString(actualInstruction->userID)
-                            + "] not found.");
+            logMessage(LogSeverity::Error, "(adminUpdateAccessLevel) > User ["
+                                           + Convert::toString(actualInstruction->userID)
+                                           + "] not found.");
             
             throwInstructionException("UserManager::adminUpdateAccessLevel() > User ["
                                       + Convert::toString(actualInstruction->userID)
@@ -587,12 +635,19 @@ void EntityManagement::UserManager::adminResetFailedAuthenticationAttemptsHandle
             {
                 userData->resetFailedAuthenticationAttempts();
                 resultValue = databaseManager.Users().updateUser(userData);
+                
+                if(resultValue)
+                {
+                    logMessage(LogSeverity::Info, "Failed authentication attempts reset for user ["
+                            + Convert::toString(actualInstruction->userID) + "] by user ["
+                            + Convert::toString(actualInstruction->getToken()->getUserID()) + "].");
+                }
             }
         }
         else
         {
-            logDebugMessage("(adminResetFailedAuthenticationAttemptsHandler) > User ["
-                            + Convert::toString(actualInstruction->userID) + "] not found.");
+            logMessage(LogSeverity::Error, "(adminResetFailedAuthenticationAttemptsHandler) > User ["
+                                           + Convert::toString(actualInstruction->userID) + "] not found.");
             
             throwInstructionException("UserManager::adminResetFailedAuthenticationAttemptsHandler() > User ["
                                       + Convert::toString(actualInstruction->userID)
@@ -632,11 +687,21 @@ void EntityManagement::UserManager::adminAddAuthorizationRuleHandler
         {
             userData->addAccessRule(actualInstruction->rule);
             resultValue = databaseManager.Users().updateUser(userData);
+            
+            if(resultValue)
+            {
+                logMessage(LogSeverity::Info, "Authorization rule ["
+                        + Convert::toString(actualInstruction->rule.getSetType())
+                        + "] added for user ["
+                        + Convert::toString(actualInstruction->userID) + "] by user ["
+                        + Convert::toString(actualInstruction->getToken()->getUserID()) + "].");
+            }
         }
         else
         {
-            logDebugMessage("(adminAddAuthorizationRuleHandler) > User ["
-                            + Convert::toString(actualInstruction->userID) + "] not found.");
+            logMessage(LogSeverity::Error, "(adminAddAuthorizationRuleHandler) > User ["
+                                           + Convert::toString(actualInstruction->userID)
+                                           + "] not found.");
             
             throwInstructionException("UserManager::adminAddAuthorizationRuleHandler() > User ["
                                       + Convert::toString(actualInstruction->userID)
@@ -676,11 +741,21 @@ void EntityManagement::UserManager::adminRemoveAuthorizationRuleHandler
         {
             userData->removeAccessRule(actualInstruction->rule);
             resultValue = databaseManager.Users().updateUser(userData);
+            
+            if(resultValue)
+            {
+                logMessage(LogSeverity::Info, "Authorization rule ["
+                        + Convert::toString(actualInstruction->rule.getSetType())
+                        + "] removed for user ["
+                        + Convert::toString(actualInstruction->userID) + "] by user ["
+                        + Convert::toString(actualInstruction->getToken()->getUserID()) + "]..");
+            }
         }
         else
         {
-            logDebugMessage("(adminRemoveAuthorizationRuleHandler) > User ["
-                            + Convert::toString(actualInstruction->userID) + "] not found.");
+            logMessage(LogSeverity::Error, "(adminRemoveAuthorizationRuleHandler) > User ["
+                                           + Convert::toString(actualInstruction->userID)
+                                           + "] not found.");
             
             throwInstructionException("UserManager::adminRemoveAuthorizationRuleHandler() > User ["
                                       + Convert::toString(actualInstruction->userID)
@@ -722,12 +797,20 @@ void EntityManagement::UserManager::adminClearAuthorizationRulesHandler
             {
                 userData->clearAccessRules();
                 resultValue = databaseManager.Users().updateUser(userData);
+                
+                if(resultValue)
+                {
+                    logMessage(LogSeverity::Info, "Authorization rules cleared for user ["
+                            + Convert::toString(actualInstruction->userID) + "] by user ["
+                            + Convert::toString(actualInstruction->getToken()->getUserID()) + "]..");
+                }
             }
         }
         else
         {
-            logDebugMessage("(adminClearAuthorizationRulesHandler) > User ["
-                            + Convert::toString(actualInstruction->userID) + "] not found.");
+            logMessage(LogSeverity::Error, "(adminClearAuthorizationRulesHandler) > User ["
+                                           + Convert::toString(actualInstruction->userID)
+                                           + "] not found.");
             
             throwInstructionException("UserManager::adminClearAuthorizationRulesHandler() > User ["
                                       + Convert::toString(actualInstruction->userID)
@@ -833,12 +916,19 @@ void EntityManagement::UserManager::selfResetPasswordHandler
 
                 userData->resetPassword(newUserPassword);
                 resultValue = databaseManager.Users().updateUser(userData);
+                
+                if(resultValue)
+                {
+                    logMessage(LogSeverity::Info, "User ["
+                            + Convert::toString(actualInstruction->getToken()->getUserID())
+                            + "] reset own password.");
+                }
             }
             else
             {
-                logDebugMessage("(selfResetPasswordHandler) > User ["
-                                + Convert::toString(actualInstruction->getToken()->getUserID())
-                                + "] not found.");
+                logMessage(LogSeverity::Error, "(selfResetPasswordHandler) > User ["
+                                               + Convert::toString(actualInstruction->getToken()->getUserID())
+                                               + "] not found.");
                 
                 throwInstructionException("UserManager::selfResetPasswordHandler() > User ["
                                           + Convert::toString(actualInstruction->getToken()->getUserID())
@@ -848,8 +938,8 @@ void EntityManagement::UserManager::selfResetPasswordHandler
         }
         catch(const std::exception & ex)
         {
-            logDebugMessage("(selfResetPasswordHandler) > Exception encountered: ["
-                            + std::string(ex.what()) + "].");
+            logMessage(LogSeverity::Error, "(selfResetPasswordHandler) > Exception encountered: ["
+                                           + std::string(ex.what()) + "].");
             
             instruction->getPromise().set_exception(boost::current_exception());
             return;

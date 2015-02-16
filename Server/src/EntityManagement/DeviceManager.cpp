@@ -29,7 +29,7 @@ EntityManagement::DeviceManager::DeviceManager
 
 EntityManagement::DeviceManager::~DeviceManager()
 {
-    logDebugMessage("(~) > Destruction initiated.");
+    logMessage(LogSeverity::Debug, "(~) > Destruction initiated.");
 
     boost::lock_guard<boost::mutex> instructionDataLock(instructionDataMutex);
 
@@ -105,8 +105,9 @@ bool EntityManagement::DeviceManager::registerInstructionSet
         }
         catch(const std::invalid_argument & ex)
         {
-            logDebugMessage("(registerInstructionSet) > Exception encountered: <"
-                            + std::string(ex.what()) + ">");
+            logMessage(LogSeverity::Error, "(registerInstructionSet) > Exception encountered: <"
+                    + std::string(ex.what()) + ">");
+            
             return false;
         }
 
@@ -114,7 +115,7 @@ bool EntityManagement::DeviceManager::registerInstructionSet
     }
     else
     {
-        logDebugMessage("(registerInstructionSet) > The supplied set is not initialised.");
+        logMessage(LogSeverity::Error, "(registerInstructionSet) > The supplied set is not initialised.");
         return false;
     }
 }
@@ -160,8 +161,9 @@ bool EntityManagement::DeviceManager::registerInstructionSet
         }
         catch(const std::invalid_argument & ex)
         {
-            logDebugMessage("(registerInstructionSet) > Exception encountered: <"
-                            + std::string(ex.what()) + ">");
+            logMessage(LogSeverity::Error, "(registerInstructionSet) > Exception encountered: <"
+                    + std::string(ex.what()) + ">");
+            
             return false;
         }
 
@@ -169,7 +171,7 @@ bool EntityManagement::DeviceManager::registerInstructionSet
     }
     else
     {
-        logDebugMessage("(registerInstructionSet) > The supplied set is not initialised.");
+        logMessage(LogSeverity::Error, "(registerInstructionSet) > The supplied set is not initialised.");
         return false;
     }
 }
@@ -278,11 +280,19 @@ void EntityManagement::DeviceManager::adminAddDeviceHandler
                                              actualInstruction->rawPassword,
                                              actualInstruction->ownerID,
                                              actualInstruction->transferType);
+            
+            if(resultValue)
+            {
+                logMessage(LogSeverity::Info, "Device [" + actualInstruction->deviceName
+                        + "] for user [" + Convert::toString(actualInstruction->ownerID)
+                        + "] added by user ["
+                        + Convert::toString(actualInstruction->getToken()->getUserID()) + "].");
+            }
         }
         catch(const std::exception & ex)
         {
-            logDebugMessage("(adminAddDeviceHandler) > Exception encountered: ["
-                            + std::string(ex.what()) + "].");
+            logMessage(LogSeverity::Error, "(adminAddDeviceHandler) > Exception encountered: ["
+                    + std::string(ex.what()) + "].");
             
             instruction->getPromise().set_exception(boost::current_exception());
             return;
@@ -316,6 +326,14 @@ void EntityManagement::DeviceManager::adminRemoveDeviceHandler
     if(actualInstruction)
     {
         resultValue = databaseManager.Devices().removeDevice(actualInstruction->deviceID);
+        
+        if(resultValue)
+        {
+            logMessage(LogSeverity::Info, "Device ["
+                    + Convert::toString(actualInstruction->deviceID)
+                    + "] removed by user ["
+                    + Convert::toString(actualInstruction->getToken()->getUserID()) + "].");
+        }
     }
 
     auto result = boost::shared_ptr<InstructionResults::AdminRemoveDevice>(
@@ -349,13 +367,12 @@ void EntityManagement::DeviceManager::adminResetDevicePasswordHandler
         
         if(!deviceData)
         {
-            logDebugMessage("(adminResetDevicePasswordHandler) > Device ["
-                            + Convert::toString(actualInstruction->deviceID)
-                            + "] does not exist.");
+            logMessage(LogSeverity::Error, "(adminResetDevicePasswordHandler) > Device ["
+                    + Convert::toString(actualInstruction->deviceID) + "] not found.");
             
             throwInstructionException("DeviceManager::adminResetDevicePasswordHandler() > Device ["
                                       + Convert::toString(actualInstruction->deviceID)
-                                      + "] does not exist.", instruction);
+                                      + "] not found.", instruction);
             return;
         }
 
@@ -365,11 +382,19 @@ void EntityManagement::DeviceManager::adminResetDevicePasswordHandler
 
             deviceData->resetPassword(newDevicePassword);
             resultValue = databaseManager.Devices().updateDevice(deviceData);
+            
+            if(resultValue)
+            {
+                logMessage(LogSeverity::Info, "Password for device ["
+                        + Convert::toString(actualInstruction->deviceID)
+                        + "] reset by user ["
+                        + Convert::toString(actualInstruction->getToken()->getUserID()) + "].");
+            }
         }
         catch(const std::exception & ex)
         {
-            logDebugMessage("(adminResetDevicePasswordHandler) > Exception encountered: ["
-                            + std::string(ex.what()) + "].");
+            logMessage(LogSeverity::Error, "(adminResetDevicePasswordHandler) > Exception encountered: ["
+                    + std::string(ex.what()) + "].");
             
             instruction->getPromise().set_exception(boost::current_exception());
             return;
@@ -407,13 +432,12 @@ void EntityManagement::DeviceManager::adminUpdateConnectionInfoHandler
         
         if(!deviceData)
         {
-            logDebugMessage("(adminUpdateConnectionInfoHandler) > Device ["
-                            + Convert::toString(actualInstruction->deviceID)
-                            + "] does not exist.");
+            logMessage(LogSeverity::Error, "(adminUpdateConnectionInfoHandler) > Device ["
+                    + Convert::toString(actualInstruction->deviceID) + "] not found.");
             
             throwInstructionException("DeviceManager::adminUpdateConnectionInfoHandler() > Device ["
                                       + Convert::toString(actualInstruction->deviceID)
-                                      + "] does not exist.", instruction);
+                                      + "] not found.", instruction);
             return;
         }
 
@@ -422,6 +446,14 @@ void EntityManagement::DeviceManager::adminUpdateConnectionInfoHandler
         deviceData->setDevicePort(actualInstruction->ipPort);
         deviceData->setTransferType(actualInstruction->transferType);
         resultValue = databaseManager.Devices().updateDevice(deviceData);
+        
+        if(resultValue)
+        {
+            logMessage(LogSeverity::Info, "Connection info about device ["
+                    + Convert::toString(actualInstruction->deviceID)
+                    + "] updated by user ["
+                    + Convert::toString(actualInstruction->getToken()->getUserID()) + "].");
+        }
     }
 
     auto result = boost::shared_ptr<InstructionResults::AdminUpdateConnectionInfo>(
@@ -455,19 +487,26 @@ void EntityManagement::DeviceManager::adminUpdateGeneralInfoHandler
         
         if(!deviceData)
         {
-            logDebugMessage("(adminUpdateGeneralInfoHandler) > Device ["
-                            + Convert::toString(actualInstruction->deviceID)
-                            + "] does not exist.");
+            logMessage(LogSeverity::Error, "(adminUpdateGeneralInfoHandler) > Device ["
+                    + Convert::toString(actualInstruction->deviceID) + "] not found.");
             
             throwInstructionException("DeviceManager::adminUpdateGeneralInfoHandler() > Device ["
                                       + Convert::toString(actualInstruction->deviceID)
-                                      + "] does not exist.", instruction);
+                                      + "] not found.", instruction);
             return;
         }
 
         deviceData->setDeviceName(actualInstruction->deviceName);
         deviceData->setDeviceInfo(actualInstruction->deviceInfo);
         resultValue = databaseManager.Devices().updateDevice(deviceData);
+        
+        if(resultValue)
+        {
+            logMessage(LogSeverity::Info, "General info about device ["
+                    + Convert::toString(actualInstruction->deviceID)
+                    + "] updated by user ["
+                    + Convert::toString(actualInstruction->getToken()->getUserID()) + "].");
+        }
     }
 
     auto result = boost::shared_ptr<InstructionResults::AdminUpdateGeneralInfo>(
@@ -501,13 +540,12 @@ void EntityManagement::DeviceManager::adminLockDeviceHandler
         
         if(!deviceData)
         {
-            logDebugMessage("(adminLockDeviceHandler) > Device ["
-                            + Convert::toString(actualInstruction->deviceID)
-                            + "] does not exist.");
+            logMessage(LogSeverity::Error, "(adminLockDeviceHandler) > Device ["
+                    + Convert::toString(actualInstruction->deviceID) + "] not found.");
             
             throwInstructionException("DeviceManager::adminLockDeviceHandler() > Device ["
                                       + Convert::toString(actualInstruction->deviceID)
-                                      + "] does not exist.", instruction);
+                                      + "] not found.", instruction);
             return;
         }
 
@@ -515,6 +553,13 @@ void EntityManagement::DeviceManager::adminLockDeviceHandler
         {
             deviceData->setLockedState(true);
             resultValue = databaseManager.Devices().updateDevice(deviceData);
+            
+            if(resultValue)
+            {
+                logMessage(LogSeverity::Info, "Device ["
+                        + Convert::toString(actualInstruction->deviceID) + "] locked by user ["
+                        + Convert::toString(actualInstruction->getToken()->getUserID()) + "].");
+            }
         }
     }
 
@@ -549,13 +594,12 @@ void EntityManagement::DeviceManager::adminUnlockDeviceHandler
         
         if(!deviceData)
         {
-            logDebugMessage("(adminUnlockDeviceHandler) > Device ["
-                            + Convert::toString(actualInstruction->deviceID)
-                            + "] does not exist.");
+            logMessage(LogSeverity::Error, "(adminUnlockDeviceHandler) > Device ["
+                    + Convert::toString(actualInstruction->deviceID) + "] not found.");
             
             throwInstructionException("DeviceManager::adminUnlockDeviceHandler() > Device ["
                                       + Convert::toString(actualInstruction->deviceID)
-                                      + "] does not exist.", instruction);
+                                      + "] not found.", instruction);
             return;
         }
 
@@ -563,6 +607,13 @@ void EntityManagement::DeviceManager::adminUnlockDeviceHandler
         {
             deviceData->setLockedState(false);
             resultValue = databaseManager.Devices().updateDevice(deviceData);
+            
+            if(resultValue)
+            {
+                logMessage(LogSeverity::Info, "Device ["
+                        + Convert::toString(actualInstruction->deviceID) + "] unlocked by user ["
+                        + Convert::toString(actualInstruction->getToken()->getUserID()) + "].");
+            }
         }
     }
 
@@ -599,12 +650,12 @@ void EntityManagement::DeviceManager::adminResetFailedAuthenticationAttemptsHand
             
             if(!deviceData)
             {
-                logDebugMessage("(adminResetFailedAuthenticationAttemptsHandler) > Device ["
-                                + Convert::toString(actualInstruction->deviceID) + "] does not exist.");
+                logMessage(LogSeverity::Error, "(adminResetFailedAuthenticationAttemptsHandler) > Device ["
+                        + Convert::toString(actualInstruction->deviceID) + "] not found.");
                 
                 throwInstructionException("DeviceManager::adminResetFailedAuthenticationAttemptsHandler() > Device ["
                                           + Convert::toString(actualInstruction->deviceID)
-                                          + "] does not exist.", instruction);
+                                          + "] not found.", instruction);
                 return;
             }
 
@@ -612,12 +663,20 @@ void EntityManagement::DeviceManager::adminResetFailedAuthenticationAttemptsHand
             {
                 deviceData->resetFailedAuthenticationAttempts();
                 resultValue = databaseManager.Devices().updateDevice(deviceData);
+                
+                if(resultValue)
+                {
+                    logMessage(LogSeverity::Info, "Failed authentication attempts for device ["
+                            + Convert::toString(actualInstruction->deviceID)
+                            + "] reset by user ["
+                            + Convert::toString(actualInstruction->getToken()->getUserID()) + "].");
+                }
             }
         }
         catch(const std::exception & ex)
         {
-            logDebugMessage("(adminResetFailedAuthenticationAttemptsHandler) > Exception encountered: ["
-                            + std::string(ex.what()) + "].");
+            logMessage(LogSeverity::Error, "(adminResetFailedAuthenticationAttemptsHandler) > Exception encountered: ["
+                    + std::string(ex.what()) + "].");
             
             instruction->getPromise().set_exception(boost::current_exception());
             return;
@@ -685,22 +744,20 @@ void EntityManagement::DeviceManager::userGetDeviceHandler
 
         if(!resultData)
         {
-            logDebugMessage("(userGetDeviceHandler) > Device ["
-                            + Convert::toString(actualInstruction->deviceID)
-                            + "] does not exist.");
+            logMessage(LogSeverity::Error, "(userGetDeviceHandler) > Device ["
+                    + Convert::toString(actualInstruction->deviceID) + "] not found.");
             
             throwInstructionException("DeviceManager::userGetDeviceHandler() > Device ["
                                       + Convert::toString(actualInstruction->deviceID)
-                                      + "] does not exist.", instruction);
+                                      + "] not found.", instruction);
             return;
         }
 
         if(resultData->getDeviceOwner() != actualInstruction->getToken()->getUserID())
         {
-            logDebugMessage("(userGetDeviceHandler) > Device ["
-                            + Convert::toString(actualInstruction->deviceID)
-                            + "] does not belong to user ["
-                            + Convert::toString(actualInstruction->getToken()->getUserID()) + "].");
+            logMessage(LogSeverity::Error, "(userGetDeviceHandler) > Device ["
+                    + Convert::toString(actualInstruction->deviceID) + "] does not belong to user ["
+                    + Convert::toString(actualInstruction->getToken()->getUserID()) + "].");
             
             throwInstructionException("DeviceManager::userGetDeviceHandler() > Device ["
                                       + Convert::toString(actualInstruction->deviceID)
@@ -777,11 +834,18 @@ void EntityManagement::DeviceManager::userAddDeviceHandler
                                              actualInstruction->rawPassword,
                                              actualInstruction->getToken()->getUserID(),
                                              actualInstruction->transferType);
+            
+            if(resultValue)
+            {
+                logMessage(LogSeverity::Info, "Device [" + actualInstruction->deviceName
+                        + "] added by owner ["
+                        + Convert::toString(actualInstruction->getToken()->getUserID()) + "].");
+            }
         }
         catch(const std::exception & ex)
         {
-            logDebugMessage("(userAddDeviceHandler) > Exception encountered: ["
-                            + std::string(ex.what()) + "].");
+            logMessage(LogSeverity::Error, "(userAddDeviceHandler) > Exception encountered: ["
+                    + std::string(ex.what()) + "].");
             
             instruction->getPromise().set_exception(boost::current_exception());
             return;
@@ -819,22 +883,20 @@ void EntityManagement::DeviceManager::userRemoveDeviceHandler
         
         if(!deviceData)
         {
-            logDebugMessage("(userRemoveDeviceHandler) > Device ["
-                            + Convert::toString(actualInstruction->deviceID)
-                            + "] does not exist.");
+            logMessage(LogSeverity::Error, "(userRemoveDeviceHandler) > Device ["
+                    + Convert::toString(actualInstruction->deviceID) + "] not found.");
             
             throwInstructionException("DeviceManager::userRemoveDeviceHandler() > Device ["
                                       + Convert::toString(actualInstruction->deviceID)
-                                      + "] does not exist.", instruction);
+                                      + "] not found.", instruction);
             return;
         }
 
         if(deviceData->getDeviceOwner() != actualInstruction->getToken()->getUserID())
         {
-            logDebugMessage("(userRemoveDeviceHandler) > Device ["
-                            + Convert::toString(actualInstruction->deviceID)
-                            + "] does not belong to user ["
-                            + Convert::toString(actualInstruction->getToken()->getUserID()) + "].");
+            logMessage(LogSeverity::Error, "(userRemoveDeviceHandler) > Device ["
+                    + Convert::toString(actualInstruction->deviceID) + "] does not belong to user ["
+                    + Convert::toString(actualInstruction->getToken()->getUserID()) + "].");
             
             throwInstructionException("DeviceManager::userRemoveDeviceHandler() > Device ["
                                       + Convert::toString(actualInstruction->deviceID)
@@ -846,6 +908,14 @@ void EntityManagement::DeviceManager::userRemoveDeviceHandler
         }
 
         resultValue = databaseManager.Devices().removeDevice(actualInstruction->deviceID);
+        
+        if(resultValue)
+        {
+            logMessage(LogSeverity::Info, "Device ["
+                    + Convert::toString(actualInstruction->deviceID)
+                    + "] removed by owner ["
+                    + Convert::toString(actualInstruction->getToken()->getUserID()) + "].");
+        }
     }
 
     auto result = boost::shared_ptr<InstructionResults::UserRemoveDevice>(
@@ -879,22 +949,20 @@ void EntityManagement::DeviceManager::userResetDevicePasswordHandler
         
         if(!deviceData)
         {
-            logDebugMessage("(userResetDevicePasswordHandler) > Device ["
-                            + Convert::toString(actualInstruction->deviceID)
-                            + "] does not exist.");
+            logMessage(LogSeverity::Error, "(userResetDevicePasswordHandler) > Device ["
+                    + Convert::toString(actualInstruction->deviceID) + "] not found.");
             
             throwInstructionException("DeviceManager::userResetDevicePasswordHandler() > Device ["
                                       + Convert::toString(actualInstruction->deviceID)
-                                      + "] does not exist.", instruction);
+                                      + "] not found.", instruction);
             return;
         }
 
         if(deviceData->getDeviceOwner() != actualInstruction->getToken()->getUserID())
         {
-            logDebugMessage("(userResetDevicePasswordHandler) > Device ["
-                            + Convert::toString(actualInstruction->deviceID)
-                            + "] does not belong to user ["
-                            + Convert::toString(actualInstruction->getToken()->getUserID()) + "].");
+            logMessage(LogSeverity::Error, "(userResetDevicePasswordHandler) > Device ["
+                    + Convert::toString(actualInstruction->deviceID) + "] does not belong to user ["
+                    + Convert::toString(actualInstruction->getToken()->getUserID()) + "].");
             
             throwInstructionException("DeviceManager::userResetDevicePasswordHandler() > Device ["
                                       + Convert::toString(actualInstruction->deviceID)
@@ -910,11 +978,19 @@ void EntityManagement::DeviceManager::userResetDevicePasswordHandler
 
             deviceData->resetPassword(newDevicePassword);
             resultValue = databaseManager.Devices().updateDevice(deviceData);
+            
+            if(resultValue)
+            {
+                logMessage(LogSeverity::Info, "Password for device ["
+                        + Convert::toString(actualInstruction->deviceID)
+                        + "] reset by owner ["
+                        + Convert::toString(actualInstruction->getToken()->getUserID()) + "].");
+            }
         }
         catch(const std::exception & ex)
         {
-            logDebugMessage("(userResetDevicePasswordHandler) > Exception encountered: ["
-                            + std::string(ex.what()) + "].");
+            logMessage(LogSeverity::Error, "(userResetDevicePasswordHandler) > Exception encountered: ["
+                    + std::string(ex.what()) + "].");
             
             instruction->getPromise().set_exception(boost::current_exception());
             return;
@@ -952,22 +1028,20 @@ void EntityManagement::DeviceManager::userUpdateConnectionInfoHandler
         
         if(!deviceData)
         {
-            logDebugMessage("(userUpdateConnectionInfoHandler) > Device ["
-                            + Convert::toString(actualInstruction->deviceID)
-                            + "] does not exist.");
+            logMessage(LogSeverity::Error, "(userUpdateConnectionInfoHandler) > Device ["
+                    + Convert::toString(actualInstruction->deviceID) + "] not found.");
             
             throwInstructionException("DeviceManager::userUpdateConnectionInfoHandler() > Device ["
                                       + Convert::toString(actualInstruction->deviceID)
-                                      + "] does not exist.", instruction);
+                                      + "] not found.", instruction);
             return;
         }
 
         if(deviceData->getDeviceOwner() != actualInstruction->getToken()->getUserID())
         {
-            logDebugMessage("(userUpdateConnectionInfoHandler) > Device ["
-                            + Convert::toString(actualInstruction->deviceID)
-                            + "] does not belong to user ["
-                            + Convert::toString(actualInstruction->getToken()->getUserID()) + "].");
+            logMessage(LogSeverity::Error, "(userUpdateConnectionInfoHandler) > Device ["
+                    + Convert::toString(actualInstruction->deviceID) + "] does not belong to user ["
+                    + Convert::toString(actualInstruction->getToken()->getUserID()) + "].");
             
             throwInstructionException("DeviceManager::userUpdateConnectionInfoHandler() > Device ["
                                       + Convert::toString(actualInstruction->deviceID)
@@ -981,6 +1055,14 @@ void EntityManagement::DeviceManager::userUpdateConnectionInfoHandler
         deviceData->setDevicePort(actualInstruction->ipPort);
         deviceData->setTransferType(actualInstruction->transferType);
         resultValue = databaseManager.Devices().updateDevice(deviceData);
+        
+        if(resultValue)
+        {
+            logMessage(LogSeverity::Info, "Connection info for device ["
+                    + Convert::toString(actualInstruction->deviceID)
+                    + "] updated by owner ["
+                    + Convert::toString(actualInstruction->getToken()->getUserID()) + "].");
+        }
     }
 
     auto result = boost::shared_ptr<InstructionResults::UserUpdateConnectionInfo>(
@@ -1014,22 +1096,20 @@ void EntityManagement::DeviceManager::userUpdateGeneralInfoHandler
         
         if(!deviceData)
         {
-            logDebugMessage("(userUpdateGeneralInfoHandler) > Device ["
-                            + Convert::toString(actualInstruction->deviceID)
-                            + "] does not exist.");
+            logMessage(LogSeverity::Error, "(userUpdateGeneralInfoHandler) > Device ["
+                    + Convert::toString(actualInstruction->deviceID) + "] not found.");
             
             throwInstructionException("DeviceManager::userUpdateGeneralInfoHandler() > Device ["
                                       + Convert::toString(actualInstruction->deviceID)
-                                      + "] does not exist.", instruction);
+                                      + "] not found.", instruction);
             return;
         }
 
         if(deviceData->getDeviceOwner() != actualInstruction->getToken()->getUserID())
         {
-            logDebugMessage("(userUpdateGeneralInfoHandler) > Device ["
-                            + Convert::toString(actualInstruction->deviceID)
-                            + "] does not belong to user ["
-                            + Convert::toString(actualInstruction->getToken()->getUserID()) + "].");
+            logMessage(LogSeverity::Error, "(userUpdateGeneralInfoHandler) > Device ["
+                    + Convert::toString(actualInstruction->deviceID) + "] does not belong to user ["
+                    + Convert::toString(actualInstruction->getToken()->getUserID()) + "].");
             
             throwInstructionException("DeviceManager::userUpdateGeneralInfoHandler() > Device ["
                                       + Convert::toString(actualInstruction->deviceID)
@@ -1042,6 +1122,14 @@ void EntityManagement::DeviceManager::userUpdateGeneralInfoHandler
         deviceData->setDeviceName(actualInstruction->deviceName);
         deviceData->setDeviceInfo(actualInstruction->deviceInfo);
         resultValue = databaseManager.Devices().updateDevice(deviceData);
+        
+        if(resultValue)
+        {
+            logMessage(LogSeverity::Info, "General info for device ["
+                    + Convert::toString(actualInstruction->deviceID)
+                    + "] updated by owner ["
+                    + Convert::toString(actualInstruction->getToken()->getUserID()) + "].");
+        }
     }
 
     auto result = boost::shared_ptr<InstructionResults::UserUpdateGeneralInfo>(
@@ -1075,22 +1163,20 @@ void EntityManagement::DeviceManager::userLockDeviceHandler
         
         if(!deviceData)
         {
-            logDebugMessage("(userLockDeviceHandler) > Device ["
-                            + Convert::toString(actualInstruction->deviceID)
-                            + "] does not exist.");
+            logMessage(LogSeverity::Error, "(userLockDeviceHandler) > Device ["
+                    + Convert::toString(actualInstruction->deviceID) + "] not found.");
             
             throwInstructionException("DeviceManager::userLockDeviceHandler() > Device ["
                                       + Convert::toString(actualInstruction->deviceID)
-                                      + "] does not exist.", instruction);
+                                      + "] not found.", instruction);
             return;
         }
 
         if(deviceData->getDeviceOwner() != actualInstruction->getToken()->getUserID())
         {
-            logDebugMessage("(userLockDeviceHandler) > Device ["
-                            + Convert::toString(actualInstruction->deviceID)
-                            + "] does not belong to user ["
-                            + Convert::toString(actualInstruction->getToken()->getUserID()) + "].");
+            logMessage(LogSeverity::Error, "(userLockDeviceHandler) > Device ["
+                    + Convert::toString(actualInstruction->deviceID) + "] does not belong to user ["
+                    + Convert::toString(actualInstruction->getToken()->getUserID()) + "].");
             
             throwInstructionException("DeviceManager::userLockDeviceHandler() > Device ["
                                       + Convert::toString(actualInstruction->deviceID)
@@ -1104,6 +1190,14 @@ void EntityManagement::DeviceManager::userLockDeviceHandler
         {
             deviceData->setLockedState(true);
             resultValue = databaseManager.Devices().updateDevice(deviceData);
+            
+            if(resultValue)
+            {
+                logMessage(LogSeverity::Info, "Device ["
+                        + Convert::toString(actualInstruction->deviceID)
+                        + "] locked by owner ["
+                        + Convert::toString(actualInstruction->getToken()->getUserID()) + "].");
+            }
         }
     }
 
@@ -1138,22 +1232,20 @@ void EntityManagement::DeviceManager::userUnlockDeviceHandler
         
         if(!deviceData)
         {
-            logDebugMessage("(userUnlockDeviceHandler) > Device ["
-                            + Convert::toString(actualInstruction->deviceID)
-                            + "] does not exist.");
+            logMessage(LogSeverity::Error, "(userUnlockDeviceHandler) > Device ["
+                    + Convert::toString(actualInstruction->deviceID) + "] not found.");
             
             throwInstructionException("DeviceManager::userUnlockDeviceHandler() > Device ["
                                       + Convert::toString(actualInstruction->deviceID)
-                                      + "] does not exist.", instruction);
+                                      + "] not found.", instruction);
             return;
         }
 
         if(deviceData->getDeviceOwner() != actualInstruction->getToken()->getUserID())
         {
-            logDebugMessage("(userUnlockDeviceHandler) > Device ["
-                            + Convert::toString(actualInstruction->deviceID)
-                            + "] does not belong to user ["
-                            + Convert::toString(actualInstruction->getToken()->getUserID()) + "].");
+            logMessage(LogSeverity::Error, "(userUnlockDeviceHandler) > Device ["
+                    + Convert::toString(actualInstruction->deviceID) + "] does not belong to user ["
+                    + Convert::toString(actualInstruction->getToken()->getUserID()) + "].");
             
             throwInstructionException("DeviceManager::userUnlockDeviceHandler() > Device ["
                                       + Convert::toString(actualInstruction->deviceID)
@@ -1167,6 +1259,14 @@ void EntityManagement::DeviceManager::userUnlockDeviceHandler
         {
             deviceData->setLockedState(false);
             resultValue = databaseManager.Devices().updateDevice(deviceData);
+            
+            if(resultValue)
+            {
+                logMessage(LogSeverity::Info, "Device ["
+                        + Convert::toString(actualInstruction->deviceID)
+                        + "] unlocked by owner ["
+                        + Convert::toString(actualInstruction->getToken()->getUserID()) + "].");
+            }
         }
     }
 
@@ -1201,22 +1301,20 @@ void EntityManagement::DeviceManager::userResetFailedAuthenticationAttemptsHandl
         
         if(!deviceData)
         {
-            logDebugMessage("(userResetFailedAuthenticationAttemptsHandler) > Device ["
-                            + Convert::toString(actualInstruction->deviceID)
-                            + "] does not exist.");
+            logMessage(LogSeverity::Error, "(userResetFailedAuthenticationAttemptsHandler) > Device ["
+                    + Convert::toString(actualInstruction->deviceID) + "] not found.");
             
             throwInstructionException("DeviceManager::userResetFailedAuthenticationAttemptsHandler() > Device ["
                                       + Convert::toString(actualInstruction->deviceID)
-                                      + "] does not exist.", instruction);
+                                      + "] not found.", instruction);
             return;
         }
 
         if(deviceData->getDeviceOwner() != actualInstruction->getToken()->getUserID())
         {
-            logDebugMessage("(userResetFailedAuthenticationAttemptsHandler) > Device ["
-                            + Convert::toString(actualInstruction->deviceID)
-                            + "] does not belong to user ["
-                            + Convert::toString(actualInstruction->getToken()->getUserID()) + "].");
+            logMessage(LogSeverity::Error, "(userResetFailedAuthenticationAttemptsHandler) > Device ["
+                    + Convert::toString(actualInstruction->deviceID) + "] does not belong to user ["
+                    + Convert::toString(actualInstruction->getToken()->getUserID()) + "].");
             
             throwInstructionException("DeviceManager::userResetFailedAuthenticationAttemptsHandler() > Device ["
                                       + Convert::toString(actualInstruction->deviceID)
@@ -1230,6 +1328,14 @@ void EntityManagement::DeviceManager::userResetFailedAuthenticationAttemptsHandl
         {
             deviceData->resetFailedAuthenticationAttempts();
             resultValue = databaseManager.Devices().updateDevice(deviceData);
+            
+            if(resultValue)
+            {
+                logMessage(LogSeverity::Info, "Failed authentication attempts for device ["
+                        + Convert::toString(actualInstruction->deviceID)
+                        + "] reset by owner ["
+                        + Convert::toString(actualInstruction->getToken()->getUserID()) + "].");
+            }
         }
     }
 

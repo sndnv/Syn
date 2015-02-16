@@ -36,7 +36,7 @@
 #include "../DatabaseManagement/Containers/UserDataContainer.h"
 #include "../InstructionManagement/Sets/UserManagerInstructionSet.h"
 
-#include "Types/Types.h"
+#include "Interfaces/DatabaseLoggingSource.h"
 
 //Database and Security Management
 using SyncServer_Core::DatabaseManager;
@@ -46,6 +46,7 @@ using SyncServer_Core::SecurityManager;
 using SecurityManagement_Types::InvalidAuthorizationTokenException;
 
 //Misc
+using Common_Types::LogSeverity;
 using SecurityManagement_Types::TokenID;
 using SecurityManagement_Types::INVALID_TOKEN_ID;
 using SecurityManagement_Types::AuthorizationTokenPtr;
@@ -92,7 +93,8 @@ namespace EntityManagement
     class UserManager
     : public SecurityManagement_Interfaces::Securable,
       public UserManagerAdminInstructionTarget,
-      public UserManagerSelfInstructionTarget
+      public UserManagerSelfInstructionTarget,
+      public EntityManagement_Interfaces::DatabaseLoggingSource
     {
         public:
             /** Parameters structure holding <code>UserManager</code> configuration. */
@@ -131,8 +133,28 @@ namespace EntityManagement
             bool registerInstructionSet(InstructionManagement_Sets::InstructionSetPtr<UserManagerAdminInstructionType> set) const;
             bool registerInstructionSet(InstructionManagement_Sets::InstructionSetPtr<UserManagerSelfInstructionType> set) const;
             
+            std::string getSourceName() const
+            {
+                return "UserManager";
+            }
+            
+            bool registerLoggingHandler(const std::function<void(LogSeverity, const std::string &)> handler)
+            {
+                if(!dbLogHandler)
+                {
+                    dbLogHandler = handler;
+                    return true;
+                }
+                else
+                {
+                    logMessage(LogSeverity::Error, "(registerLoggingHandler) > The database logging handler is already set.");
+                    return false;
+                }
+            }
+            
         private:
             Utilities::FileLogger * debugLogger;//logger for debugging
+            std::function<void(LogSeverity, const std::string &)> dbLogHandler;//database log handler
             
             //Required Managers
             DatabaseManager & databaseManager;
@@ -271,14 +293,18 @@ namespace EntityManagement
             void verifyAuthorizationToken(AuthorizationTokenPtr token);
             
             /**
-             * Logs the specified message, if a debugging file logger is assigned to the manager.
+             * Logs the specified message, if the database log handler is set.
              * 
-             * Note: Always logs debugging messages.
+             * Note: If a debugging file logger is assigned, the message is sent to it.
              * 
+             * @param severity the severity associated with the message/event
              * @param message the message to be logged
              */
-            void logDebugMessage(const std::string message) const
+            void logMessage(LogSeverity severity, const std::string & message) const
             {
+                if(dbLogHandler)
+                    dbLogHandler(severity, message);
+                
                 if(debugLogger != nullptr)
                     debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "UserManager " + message);
             }
