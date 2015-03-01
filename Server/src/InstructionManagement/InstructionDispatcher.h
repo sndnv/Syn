@@ -34,7 +34,9 @@
 #include "Interfaces/InstructionTarget.h"
 
 #include "../SecurityManagement/Types/SecurityTokens.h"
+#include "../EntityManagement/Interfaces/DatabaseLoggingSource.h"
 
+using Common_Types::LogSeverity;
 using Common_Types::UserAccessLevel;
 using SecurityManagement_Types::AuthorizationTokenPtr;
 using InstructionManagement_Sets::InstructionPtr;
@@ -66,7 +68,7 @@ namespace SyncServer_Core
      * source and one target must be registered.
      * 
      */
-    class InstructionDispatcher
+    class InstructionDispatcher: public EntityManagement_Interfaces::DatabaseLoggingSource
     {
         public:
             /** Parameters structure for holding <code>InstructionDispatcher</code> configuration data. */
@@ -98,9 +100,9 @@ namespace SyncServer_Core
              */
             ~InstructionDispatcher();
             
-            InstructionDispatcher() = delete;                                         //No default constructor
-            InstructionDispatcher(const InstructionDispatcher&) = delete;             //Copying not allowed (pass/access only by reference/pointer)
-            InstructionDispatcher& operator=(const InstructionDispatcher&) = delete;  //Copying not allowed (pass/access only by reference/pointer)
+            InstructionDispatcher() = delete;
+            InstructionDispatcher(const InstructionDispatcher&) = delete;
+            InstructionDispatcher& operator=(const InstructionDispatcher&) = delete;
             
             /**
              * Registers a new instruction source with the dispatcher.\n
@@ -128,11 +130,14 @@ namespace SyncServer_Core
             void registerInstructionTarget(InstructionTarget<TInstructionTypeEnum> & target)
             {
                 //restricts the template parameter
-                static_assert(std::is_enum<TInstructionTypeEnum>::value, "registerInstructionTarget() > Supplied instruction type for <TInstructionTypeEnum> is not an enum class.");
+                static_assert(std::is_enum<TInstructionTypeEnum>::value,
+                              "registerInstructionTarget() > Supplied instruction type for <TInstructionTypeEnum> is not an enum class.");
                 
                 if(std::find(expectedSetTypes.begin(), expectedSetTypes.end(), target.getType()) == expectedSetTypes.end())
                 {
-                    logDebugMessage("(registerInstructionTarget) > Failed to register target; the instruction set of the target is not expected.");
+                    logMessage(LogSeverity::Error, "(registerInstructionTarget) >"
+                            " Failed to register target; the instruction set of the target is not expected.");
+                    
                     return;
                 }
                 
@@ -142,10 +147,16 @@ namespace SyncServer_Core
                     if(target.registerInstructionSet(targetSet))
                         targetSets.insert({target.getType(), targetSet});
                     else
-                        logDebugMessage("(registerInstructionTarget) > Failed to register a new instruction set with the supplied target.");
+                    {
+                        logMessage(LogSeverity::Error, "(registerInstructionTarget) >"
+                                " Failed to register a new instruction set with the supplied target.");
+                    }
                 }
                 else
-                    logDebugMessage("(registerInstructionTarget) > The supplied target is already registered.");
+                {
+                    logMessage(LogSeverity::Error, "(registerInstructionTarget) >"
+                            " The supplied target is already registered.");
+                }
             }
             
             /**
@@ -165,10 +176,32 @@ namespace SyncServer_Core
                     return UserAccessLevel::INVALID;
             }
             
+            std::string getSourceName() const
+            {
+                return "InstructionDispatcher";
+            }
+            
+            bool registerLoggingHandler(const std::function<void(LogSeverity, const std::string &)> handler)
+            {
+                if(!dbLogHandler)
+                {
+                    dbLogHandler = handler;
+                    return true;
+                }
+                else
+                {
+                    logMessage(LogSeverity::Error, "(registerLoggingHandler) >"
+                            " The database logging handler is already set.");
+                    
+                    return false;
+                }
+            }
+            
         private:
             //Configuration
             std::vector<InstructionSetType> expectedSetTypes;
             Utilities::FileLogger * debugLogger;
+            std::function<void(LogSeverity, const std::string &)> dbLogHandler;//database log handler
             
             //Targets
             boost::unordered_map<InstructionSetType, InstructionSetBasePtr> targetSets;
@@ -187,14 +220,18 @@ namespace SyncServer_Core
             void processInstruction(InstructionSourceID sourceID, InstructionBasePtr instruction, AuthorizationTokenPtr token);
             
             /**
-             * Logs the specified message, if a debugging file logger is assigned to the dispatcher.
+             * Logs the specified message, if the database log handler is set.
              * 
-             * Note: Always logs debugging messages.
+             * Note: If a debugging file logger is assigned, the message is sent to it.
              * 
+             * @param severity the severity associated with the message/event
              * @param message the message to be logged
              */
-            void logDebugMessage(const std::string message)
+            void logMessage(LogSeverity severity, const std::string & message) const
             {
+                if(dbLogHandler)
+                    dbLogHandler(severity, message);
+                
                 if(debugLogger != nullptr)
                     debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "InstructionDispatcher " + message);
             }

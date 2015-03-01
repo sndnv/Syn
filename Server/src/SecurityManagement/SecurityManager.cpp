@@ -60,19 +60,19 @@ SyncServer_Core::SecurityManager::SecurityManager
 
     if(authorizationTokenSignatureSize <= 0)
     {
-        logDebugMessage("() > The authorization token signature size is set to [" 
+        logMessage(LogSeverity::Warning, "() > The authorization token signature size is set to [" 
                 + Convert::toString(authorizationTokenSignatureSize) + "].");
     }
 
     if(authenticationTokenSignatureSize <= 0)
     {
-        logDebugMessage("() > The authentication token signature size is set to [" 
+        logMessage(LogSeverity::Warning, "() > The authentication token signature size is set to [" 
                 + Convert::toString(authenticationTokenSignatureSize) + "].");
     }
 
     if(authenticationTokenValidityDuration <= 0)
     {
-        logDebugMessage("() > The authentication token validity duration is set to [" 
+        logMessage(LogSeverity::Warning, "() > The authentication token validity duration is set to [" 
                 + Convert::toString(authenticationTokenValidityDuration) + "].");
     }
 
@@ -110,14 +110,14 @@ SyncServer_Core::SecurityManager::SecurityManager
 
     if(currentHashingConfig.userPasswordSaltSize <= 0)
     {
-        logDebugMessage("() > The user password salt size is set to [" 
+        logMessage(LogSeverity::Warning, "() > The user password salt size is set to [" 
                 + Convert::toString(currentHashingConfig.userPasswordSaltSize)
                 + "] (current configuration).");
     }
 
     if(currentHashingConfig.devicePasswordSaltSize <= 0)
     {
-        logDebugMessage("() > The device password salt size is set to [" 
+        logMessage(LogSeverity::Warning, "() > The device password salt size is set to [" 
                 + Convert::toString(currentHashingConfig.devicePasswordSaltSize)
                 + "] (current configuration).");
     }
@@ -138,14 +138,14 @@ SyncServer_Core::SecurityManager::SecurityManager
     {
         if(previousHashingConfig.userPasswordSaltSize <= 0)
         {
-            logDebugMessage("() > The user password salt size is set to [" 
+            logMessage(LogSeverity::Warning, "() > The user password salt size is set to [" 
                     + Convert::toString(previousHashingConfig.userPasswordSaltSize)
                     + "] (previous configuration).");
         }
 
         if(previousHashingConfig.devicePasswordSaltSize <= 0)
         {
-            logDebugMessage("() > The device password salt size is set to [" 
+            logMessage(LogSeverity::Warning, "() > The device password salt size is set to [" 
                     + Convert::toString(previousHashingConfig.devicePasswordSaltSize)
                     + "] (previous configuration).");
         }
@@ -165,7 +165,7 @@ SyncServer_Core::SecurityManager::SecurityManager
     
     if(userDelayConfig.delayBase <= 0)
     {
-        logDebugMessage("() > The user authentication delay base is set to [" 
+        logMessage(LogSeverity::Warning, "() > The user authentication delay base is set to [" 
                     + Convert::toString(userDelayConfig.delayBase) + "] seconds.");
     }
     
@@ -176,7 +176,7 @@ SyncServer_Core::SecurityManager::SecurityManager
     
     if(deviceDelayConfig.delayBase <= 0)
     {
-        logDebugMessage("() > The device authentication delay base is set to [" 
+        logMessage(LogSeverity::Warning, "() > The device authentication delay base is set to [" 
                     + Convert::toString(userDelayConfig.delayBase) + "] seconds.");
     }
     
@@ -197,11 +197,12 @@ SyncServer_Core::SecurityManager::~SecurityManager()
     
     if(authenticationTokens.size() > 0)
     {
-        logDebugMessage("(~) > Token(s) found for [" + Convert::toString(authenticationTokens.size()) + "] users.");
+        logMessage(LogSeverity::Debug, "(~) > Token(s) found for ["
+                + Convert::toString(authenticationTokens.size()) + "] users.");
 
         for(auto currentUserTokens : authenticationTokens)
         {
-            logDebugMessage("(~) > [" + Convert::toString(authenticationTokens.size())
+            logMessage(LogSeverity::Debug, "(~) > [" + Convert::toString(authenticationTokens.size())
                     + "] token(s) found for user [" + Convert::toString(currentUserTokens.first) + "].");
             currentUserTokens.second.clear();
         }
@@ -494,13 +495,13 @@ void SyncServer_Core::SecurityManager::updatePasswordHashingParameters
 
     if(newConfiguration.userPasswordSaltSize <= 0)
     {
-        logDebugMessage("(updatePasswordHashingParameters) > The user password salt size will be set to [" 
+        logMessage(LogSeverity::Warning, "(updatePasswordHashingParameters) > The user password salt size will be set to [" 
                 + Convert::toString(newConfiguration.userPasswordSaltSize) + "].");
     }
 
     if(newConfiguration.devicePasswordSaltSize <= 0)
     {
-        logDebugMessage("(updatePasswordHashingParameters) > The device password salt size will be set to [" 
+        logMessage(LogSeverity::Warning, "(updatePasswordHashingParameters) > The device password salt size will be set to [" 
                 + Convert::toString(newConfiguration.devicePasswordSaltSize) + "].");
     }
 
@@ -592,7 +593,7 @@ void SyncServer_Core::SecurityManager::processAuthorizationRequest
 
     if(userData == nullptr)
     {//authorization is not given if no user data is found
-        logDebugMessage("(processAuthorizationRequest) > No data was found for user <"
+        logMessage(LogSeverity::Error, "(processAuthorizationRequest) > No data was found for user <"
                 + Convert::toString(request.getUser()) + ">.");
 
         try
@@ -610,7 +611,7 @@ void SyncServer_Core::SecurityManager::processAuthorizationRequest
     auto userTokens = authenticationTokens.find(request.getUser());
     if(userTokens == authenticationTokens.end())
     {//authorization is not given if the user is not authenticated
-        logDebugMessage("(processAuthorizationRequest) > No authentication tokens were found for user <"
+        logMessage(LogSeverity::Error, "(processAuthorizationRequest) > No authentication tokens were found for user <"
                 + Convert::toString(request.getUser()) + ">.");
 
         try
@@ -641,7 +642,7 @@ void SyncServer_Core::SecurityManager::processAuthorizationRequest
         
         if(!validTokenFound)
         {//authorization is not given if no valid token is found
-            logDebugMessage("(processAuthorizationRequest) > No valid authentication token was found for user <"
+            logMessage(LogSeverity::Error, "(processAuthorizationRequest) > No valid authentication token was found for user <"
                     + Convert::toString(request.getUser()) + ">.");
 
             try
@@ -680,7 +681,7 @@ void SyncServer_Core::SecurityManager::processAuthorizationRequest
     }
     else if(userData->data->getUserAccessLevel() < minAccessLevel)
     {//authorization is not given if the user does not have the minimum required access level
-        logDebugMessage("(processAuthorizationRequest) > Insufficient access level for user <"
+        logMessage(LogSeverity::Error, "(processAuthorizationRequest) > Insufficient access level for user <"
                         + Convert::toString(request.getUser()) + ">.");
 
         try
@@ -730,7 +731,7 @@ void SyncServer_Core::SecurityManager::processAuthorizationRequest
 
     if(!userActionAllowed)
     {//authorization is not given if the user is not explicitly allowed to use the instruction set
-        logDebugMessage("(processAuthorizationRequest) > Instruction not allowed for user <"
+        logMessage(LogSeverity::Error, "(processAuthorizationRequest) > Instruction not allowed for user <"
                         + Convert::toString(request.getUser()) + ">.");
 
         try
@@ -756,7 +757,7 @@ void SyncServer_Core::SecurityManager::processAuthorizationRequest
 
         if(deviceData == nullptr)
         {//authorization is not given if no data is found for the device
-            logDebugMessage("(processAuthorizationRequest) > No data was found for device ["
+            logMessage(LogSeverity::Error, "(processAuthorizationRequest) > No data was found for device ["
                     + Convert::toString(request.getDevice()) + "] belonging to user ["
                     + Convert::toString(request.getUser()) + "].");
 
@@ -779,7 +780,7 @@ void SyncServer_Core::SecurityManager::processAuthorizationRequest
 
         if(deviceData->data->getDeviceOwner() != request.getUser())
         {//authorization is not given if the device does not belong to the user
-            logDebugMessage("(processAuthorizationRequest) > Device ["
+            logMessage(LogSeverity::Error, "(processAuthorizationRequest) > Device ["
                     + Convert::toString(request.getDevice()) + "] does not belong to user [" 
                     + Convert::toString(request.getUser()) + "], as expected.");
             try
@@ -801,7 +802,7 @@ void SyncServer_Core::SecurityManager::processAuthorizationRequest
         
         if(deviceData->data->isDeviceLocked())
         {//authorization is not given if the device is locked
-            logDebugMessage("(processAuthorizationRequest) > Device <"
+            logMessage(LogSeverity::Error, "(processAuthorizationRequest) > Device <"
                             + Convert::toString(request.getDevice()) + "> is locked.");
 
             try
@@ -870,7 +871,7 @@ void SyncServer_Core::SecurityManager::processUserAuthenticationRequest
     
     if(userData == nullptr)
     {//access is not allowed if no user data is found
-        logDebugMessage("(processUserAuthenticationRequest) > No data was found for user <"
+        logMessage(LogSeverity::Error, "(processUserAuthenticationRequest) > No data was found for user <"
                         + request.getUsername() + ">.");
 
         try
@@ -891,7 +892,7 @@ void SyncServer_Core::SecurityManager::processUserAuthenticationRequest
     
     if(userData->data->isUserLocked())
     {//access is not allowed if the user is locked
-        logDebugMessage("(processUserAuthenticationRequest) > User <"
+        logMessage(LogSeverity::Error, "(processUserAuthenticationRequest) > User <"
                         + request.getUsername() + "> is locked.");
 
         try
@@ -923,7 +924,7 @@ void SyncServer_Core::SecurityManager::processUserAuthenticationRequest
             if((lastAttempt + boost::posix_time::seconds(delayTime)) 
                     > boost::posix_time::second_clock::universal_time())
             {//access is not allowed if the required time between attempts has not passed
-                logDebugMessage("(processUserAuthenticationRequest) > User <"
+                logMessage(LogSeverity::Error, "(processUserAuthenticationRequest) > User <"
                         + request.getUsername() + "> is locked for ["
                         + Convert::toString(delayTimeRemaining(lastAttempt, delayTime))
                         + "] more seconds because of [" + Convert::toString(failedAuthentications)
@@ -978,7 +979,7 @@ void SyncServer_Core::SecurityManager::processUserAuthenticationRequest
                 
                 if(userData->data->passwordsMatch(previousConfigPasswordSalt + previousConfigHashedPassword))
                 {
-                    logDebugMessage("(processUserAuthenticationRequest) > User password for <"
+                    logMessage(LogSeverity::Warning, "(processUserAuthenticationRequest) > User password for <"
                                     + request.getUsername() + "> authenticated with previous configuration.");
                     passwordVerificationFailed = false;
                 }
@@ -992,14 +993,14 @@ void SyncServer_Core::SecurityManager::processUserAuthenticationRequest
             userData->data->setLastFailedAuthenticationTimestamp();
             if(userData->data->getFailedAuthenticationAttempts() >= userDelayConfig.maxAttempts)
             {
-                logDebugMessage("(processUserAuthenticationRequest) > User <" + request.getUsername()
+                logMessage(LogSeverity::Info, "(processUserAuthenticationRequest) > User <" + request.getUsername()
                                 + "> locked because of too many failed authentication attempts.");
                 userData->data->setLockedState(true);
             }
             
             databaseManager.Users().updateUser(userData->data);
             
-            logDebugMessage("(processUserAuthenticationRequest) > Invalid password supplied for user <"
+            logMessage(LogSeverity::Error, "(processUserAuthenticationRequest) > Invalid password supplied for user <"
                             + request.getUsername() + ">.");
             
             try
@@ -1022,7 +1023,7 @@ void SyncServer_Core::SecurityManager::processUserAuthenticationRequest
     if(userData->data->getUserAccessLevel() != UserAccessLevel::USER
        && userData->data->getUserAccessLevel() != UserAccessLevel::ADMIN)
     {//access is not allowed if the user a valid & useful access level
-        logDebugMessage("(processUserAuthenticationRequest) > User <" + request.getUsername()
+        logMessage(LogSeverity::Error, "(processUserAuthenticationRequest) > User <" + request.getUsername()
                         + "> does not have the required access level.");
 
         try
@@ -1042,7 +1043,7 @@ void SyncServer_Core::SecurityManager::processUserAuthenticationRequest
     }
     else if(userData->data->getAccessRules().size() == 0)
     {//access is not allowed if the user does not have any access rules
-        logDebugMessage("(processUserAuthenticationRequest) > User <" + request.getUsername()
+        logMessage(LogSeverity::Error, "(processUserAuthenticationRequest) > User <" + request.getUsername()
                         + "> does not have any access permissions.");
 
         try
@@ -1121,7 +1122,7 @@ void SyncServer_Core::SecurityManager::processDeviceAuthenticationRequest
 
     if(deviceData == nullptr)
     {//access is not allowed if no device data is found
-        logDebugMessage("(processDeviceAuthenticationRequest) > No data was found for device ["
+        logMessage(LogSeverity::Error, "(processDeviceAuthenticationRequest) > No data was found for device ["
                         + Convert::toString(request.getDevice()) + "].");
 
         try
@@ -1143,7 +1144,7 @@ void SyncServer_Core::SecurityManager::processDeviceAuthenticationRequest
 
     if(deviceData->data->isDeviceLocked())
     {//access is not allowed if the device is locked
-        logDebugMessage("(processDeviceAuthenticationRequest) > Device <"
+        logMessage(LogSeverity::Error, "(processDeviceAuthenticationRequest) > Device <"
                         + Convert::toString(request.getDevice()) + "> is locked.");
 
         try
@@ -1174,7 +1175,7 @@ void SyncServer_Core::SecurityManager::processDeviceAuthenticationRequest
             if((lastAttempt + boost::posix_time::seconds(delayTime))
                     > boost::posix_time::second_clock::universal_time())
             {//access is not allowed if the required time between attempts has not passed
-                logDebugMessage("(processDeviceAuthenticationRequest) > Device <"
+                logMessage(LogSeverity::Error, "(processDeviceAuthenticationRequest) > Device <"
                         + Convert::toString(request.getDevice()) + "> is locked for ["
                         + Convert::toString(delayTimeRemaining(lastAttempt, delayTime))
                         + "] more seconds because of ["
@@ -1229,7 +1230,7 @@ void SyncServer_Core::SecurityManager::processDeviceAuthenticationRequest
                 
                 if(deviceData->data->passwordsMatch(previousConfigPasswordSalt + previousConfigHashedPassword))
                 {
-                    logDebugMessage("(processDeviceAuthenticationRequest) > Device password for <"
+                    logMessage(LogSeverity::Warning, "(processDeviceAuthenticationRequest) > Device password for <"
                                     + Convert::toString(request.getDevice())
                                     + "> authenticated with previous configuration.");
                     
@@ -1245,7 +1246,7 @@ void SyncServer_Core::SecurityManager::processDeviceAuthenticationRequest
             deviceData->data->setLastFailedAuthenticationTimestamp();
             if(deviceData->data->getFailedAuthenticationAttempts() >= deviceDelayConfig.maxAttempts)
             {
-                logDebugMessage("(processDeviceAuthenticationRequest) > Device <"
+                logMessage(LogSeverity::Info, "(processDeviceAuthenticationRequest) > Device <"
                                 + Convert::toString(request.getDevice())
                                 + "> locked because of too many failed authentication attempts.");
                 
@@ -1254,7 +1255,7 @@ void SyncServer_Core::SecurityManager::processDeviceAuthenticationRequest
             
             databaseManager.Devices().updateDevice(deviceData->data);
             
-            logDebugMessage("(processDeviceAuthenticationRequest) > Invalid password supplied for device <"
+            logMessage(LogSeverity::Error, "(processDeviceAuthenticationRequest) > Invalid password supplied for device <"
                             + Convert::toString(request.getDevice()) + ">.");
 
             try
@@ -1357,7 +1358,7 @@ void SyncServer_Core::SecurityManager::processDerivedCryptoDataGenerationRequest
     }
     catch(const std::invalid_argument & ex)
     {
-        logDebugMessage("(processDerivedCryptoDataGenerationRequest) > "
+        logMessage(LogSeverity::Error, "(processDerivedCryptoDataGenerationRequest) > "
                         "Exception encountered during derived key generation: ["
                         + std::string(ex.what()) + "].");
         
@@ -1400,7 +1401,7 @@ void SyncServer_Core::SecurityManager::processSymmetricCryptoDataGenerationReque
     }
     catch(const std::invalid_argument & ex)
     {
-        logDebugMessage("(processSymmetricCryptoDataGenerationRequest) > "
+        logMessage(LogSeverity::Error, "(processSymmetricCryptoDataGenerationRequest) > "
                         "Exception encountered during symmetric key generation: ["
                         + std::string(ex.what()) + "].");
         
@@ -1557,7 +1558,7 @@ void SyncServer_Core::SecurityManager::evictDevice()
 
             default:
             {
-                logDebugMessage("(evictDevice) > Device eviction failed; "
+                logMessage(LogSeverity::Error, "(evictDevice) > Device eviction failed; "
                                 "unexpected eviction type encountered.");
             } break;
         }
@@ -1566,11 +1567,11 @@ void SyncServer_Core::SecurityManager::evictDevice()
     if(evictionTarget != INVALID_DEVICE_ID)
     {
         deviceDataCache.erase(evictionTarget);
-        logDebugMessage("(evictDevice) > Device [" + Convert::toString(evictionTarget)
+        logMessage(LogSeverity::Debug, "(evictDevice) > Device [" + Convert::toString(evictionTarget)
                         + "] evicted from cache.");
     }
     else
-        logDebugMessage("(evictDevice) > Device eviction failed; no device for eviction was found.");
+        logMessage(LogSeverity::Debug, "(evictDevice) > Device eviction failed; no device for eviction was found.");
 }
 
 void SyncServer_Core::SecurityManager::evictUser()
@@ -1607,7 +1608,7 @@ void SyncServer_Core::SecurityManager::evictUser()
 
             default:
             {
-                logDebugMessage("(evictUser) > User eviction failed; "
+                logMessage(LogSeverity::Error, "(evictUser) > User eviction failed; "
                                 "unexpected eviction type encountered.");
             }; break;
         }
@@ -1617,7 +1618,7 @@ void SyncServer_Core::SecurityManager::evictUser()
     {
         userDataCache.erase(evictionTarget);
         userNameMap.erase(targetName);
-        logDebugMessage("(evictUser) > User [" + Convert::toString(evictionTarget)
+        logMessage(LogSeverity::Debug, "(evictUser) > User [" + Convert::toString(evictionTarget)
                         + "] evicted from cache.");
 
         std::vector<DeviceID> userDevices;
@@ -1630,13 +1631,13 @@ void SyncServer_Core::SecurityManager::evictUser()
         for(const DeviceID currentUserDevice : userDevices)
         {
             deviceDataCache.erase(currentUserDevice);
-            logDebugMessage("(evictUser) > Device [" + Convert::toString(currentUserDevice)
+            logMessage(LogSeverity::Debug, "(evictUser) > Device [" + Convert::toString(currentUserDevice)
                     + "] for user [" + Convert::toString(evictionTarget) 
                     + "] evicted from cache.");
         }
     }
     else
-        logDebugMessage("(evictUser) > User eviction failed; no user for eviction was found.");
+        logMessage(LogSeverity::Debug, "(evictUser) > User eviction failed; no user for eviction was found.");
 }
 
 Seconds SyncServer_Core::SecurityManager::calculateAuthenticationDelay
@@ -1659,7 +1660,7 @@ Seconds SyncServer_Core::SecurityManager::calculateAuthenticationDelay
             }
             catch(const std::overflow_error &)
             {
-                logDebugMessage("(calculateAuthenticationDelay) > An overflow was encountered; "
+                logMessage(LogSeverity::Error, "(calculateAuthenticationDelay) > An overflow was encountered; "
                                 "the delay was set to its maximum possible value.");
                 result = Common_Types::MAX_SECONDS;
             }
@@ -1674,7 +1675,7 @@ Seconds SyncServer_Core::SecurityManager::calculateAuthenticationDelay
             }
             catch(const std::overflow_error &)
             {
-                logDebugMessage("(calculateAuthenticationDelay) > An overflow was encountered; "
+                logMessage(LogSeverity::Error, "(calculateAuthenticationDelay) > An overflow was encountered; "
                                 "the delay was set to its maximum possible value.");
                 result = Common_Types::MAX_SECONDS;
             }

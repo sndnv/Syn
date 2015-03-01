@@ -206,7 +206,7 @@ namespace EntityManagement
              * 
              * @param message the message to be logged
              */
-            void logDebugMessage(const std::string message) const
+            void logDebugMessage(const std::string & message) const
             {
                 if(debugLogger != nullptr)
                     debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "DatabaseLogger " + message);

@@ -17,15 +17,16 @@
 
 #include "InstructionDispatcher.h"
 
-SyncServer_Core::InstructionDispatcher::InstructionDispatcher(InstructionDispatcherParameters parameters, Utilities::FileLogger * logger)
+SyncServer_Core::InstructionDispatcher::InstructionDispatcher
+(InstructionDispatcherParameters parameters, Utilities::FileLogger * logger)
         : expectedSetTypes(parameters.expectedSetTypes), debugLogger(logger)
 {
-    logDebugMessage("() > Dispatcher created.");
+    logMessage(LogSeverity::Debug, "() > Dispatcher created.");
 }
 
 SyncServer_Core::InstructionDispatcher::~InstructionDispatcher()
 {
-    logDebugMessage("(~) > Destruction initiated.");
+    logMessage(LogSeverity::Debug, "(~) > Destruction initiated.");
     expectedSetTypes.clear();
     targetSets.clear();
     sources.clear();
@@ -38,7 +39,9 @@ void SyncServer_Core::InstructionDispatcher::registerInstructionSource(Instructi
 
     if(requiredTypes.size() == 0)
     {
-        logDebugMessage("(registerInstructionSource) > Failed to register source; no instruction set types specified.");
+        logMessage(LogSeverity::Error, "(registerInstructionSource) > Failed to register source;"
+                " no instruction set types specified.");
+        
         return;
     }
 
@@ -46,13 +49,16 @@ void SyncServer_Core::InstructionDispatcher::registerInstructionSource(Instructi
     {
         if(std::find(expectedSetTypes.begin(), expectedSetTypes.end(), currentType) == expectedSetTypes.end())
         {
-            logDebugMessage("(registerInstructionSource) > Failed to register source; one or more of the required instructions are not expected.");
+            logMessage(LogSeverity::Error, "(registerInstructionSource) > Failed to register source;"
+                    " one or more of the required instructions are not expected.");
+            
             return;
         }
     }
 
     InstructionSourceID currentSourceID = ++nextSourceID;
-    auto currentSourceInstructionHandler = [&, currentSourceID](InstructionBasePtr instruction, AuthorizationTokenPtr token)
+    auto currentSourceInstructionHandler = [&, currentSourceID]
+    (InstructionBasePtr instruction, AuthorizationTokenPtr token)
     {
         processInstruction(currentSourceID, instruction, token);
     };
@@ -60,14 +66,18 @@ void SyncServer_Core::InstructionDispatcher::registerInstructionSource(Instructi
     if(source.registerInstructionHandler(currentSourceInstructionHandler))
         sources.insert({currentSourceID, requiredTypes});
     else
-        logDebugMessage("(registerInstructionSource) > Failed to register a new instruction handler with the supplied source.");
+        logMessage(LogSeverity::Error, "(registerInstructionSource) > Failed to register"
+                " a new instruction handler with the supplied source.");
 }
 
-void SyncServer_Core::InstructionDispatcher::processInstruction(InstructionSourceID sourceID, InstructionBasePtr instruction, AuthorizationTokenPtr token)
+void SyncServer_Core::InstructionDispatcher::processInstruction
+(InstructionSourceID sourceID, InstructionBasePtr instruction, AuthorizationTokenPtr token)
 {
     if(!instruction->isValid())
     {
-        logDebugMessage("(processInstruction) > Instruction processing failed; the specified instruction is not valid.");
+        logMessage(LogSeverity::Error, "(processInstruction) > Instruction processing failed;"
+                " the specified instruction is not valid.");
+        
         return;
     }
     
@@ -77,13 +87,20 @@ void SyncServer_Core::InstructionDispatcher::processInstruction(InstructionSourc
         if(std::find((*source).second.begin(), (*source).second.end(), instruction->getParentSet()) != (*source).second.end())
         {
             targetSets[instruction->getParentSet()]->processInstruction(instruction, token);
-            logDebugMessage("(processInstruction) > Instruction from source [" + Convert::toString(sourceID) + "] sent to target [" 
-                            + Convert::toString(instruction->getParentSet()) + "].");
+            logMessage(LogSeverity::Debug, "(processInstruction) > Instruction from source ["
+                    + Convert::toString(sourceID) + "] sent to target [" 
+                    + Convert::toString(instruction->getParentSet()) + "].");
         }
         else
-            logDebugMessage("(processInstruction) > Instruction processing failed; the required instruction set is not allowed for the specified source.");
+        {
+            logMessage(LogSeverity::Error, "(processInstruction) > Instruction processing failed;"
+                    " the required instruction set is not allowed for the specified source.");
+        }
     }
     else
-        logDebugMessage("(processInstruction) > Instruction processing failed; the source of the instruction was not found.");
+    {
+        logMessage(LogSeverity::Error, "(processInstruction) > Instruction processing failed;"
+                " the source of the instruction was not found.");
+    }
 }
 

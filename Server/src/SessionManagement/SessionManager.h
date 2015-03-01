@@ -41,8 +41,10 @@
 
 #include "Types/Types.h"
 #include "Types/Exceptions.h"
+#include "../EntityManagement/Interfaces/DatabaseLoggingSource.h"
 
 //Common
+using Common_Types::LogSeverity;
 using Common_Types::UserID;
 using Common_Types::DeviceID;
 using Common_Types::SessionID;
@@ -92,7 +94,8 @@ namespace SyncServer_Core
      */
     class SessionManager
     : public SecurityManagement_Interfaces::Securable,
-      public InstructionManagement_Interfaces::InstructionTarget<SessionManagerInstructionType>
+      public InstructionManagement_Interfaces::InstructionTarget<SessionManagerInstructionType>,
+      public EntityManagement_Interfaces::DatabaseLoggingSource
     {
         public:
             /** Parameters structure holding <code>SessionManager</code> configuration. */
@@ -147,6 +150,27 @@ namespace SyncServer_Core
             
             InstructionManagement_Types::InstructionSetType getType() const
             { return InstructionManagement_Types::InstructionSetType::SESSION_MANAGER; }
+            
+            std::string getSourceName() const
+            {
+                return "SessionManager";
+            }
+            
+            bool registerLoggingHandler(const std::function<void(LogSeverity, const std::string &)> handler)
+            {
+                if(!dbLogHandler)
+                {
+                    dbLogHandler = handler;
+                    return true;
+                }
+                else
+                {
+                    logMessage(LogSeverity::Error, "(registerLoggingHandler) >"
+                            " The database logging handler is already set.");
+                    
+                    return false;
+                }
+            }
             
             /**
              * Attempts to open a new user session.
@@ -333,6 +357,7 @@ namespace SyncServer_Core
             
             Utilities::ThreadPool threadPool;           //threads for handling request processing
             mutable Utilities::FileLogger * debugLogger;//logger for debugging
+            std::function<void(LogSeverity, const std::string &)> dbLogHandler;//database log handler
             
             //Required Managers
             DatabaseManager & databaseManager;
@@ -409,14 +434,18 @@ namespace SyncServer_Core
             void verifyAuthorizationToken(AuthorizationTokenPtr token);
             
             /**
-             * Logs the specified message, if a debugging file logger is assigned to the manager.
+             * Logs the specified message, if the database log handler is set.
              * 
-             * Note: Always logs debugging messages.
+             * Note: If a debugging file logger is assigned, the message is sent to it.
              * 
+             * @param severity the severity associated with the message/event
              * @param message the message to be logged
              */
-            void logDebugMessage(const std::string message) const
+            void logMessage(LogSeverity severity, const std::string & message) const
             {
+                if(dbLogHandler)
+                    dbLogHandler(severity, message);
+                
                 if(debugLogger != nullptr)
                     debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "SessionManager " + message);
             }

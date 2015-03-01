@@ -45,7 +45,7 @@ SyncServer_Core::SessionManager::~SessionManager()
 
     if(activeSessions.size() > 0)
     {
-        logDebugMessage("(~) > [" + Convert::toString(activeSessions.size()) + "] active sessions found.");
+        logMessage(LogSeverity::Debug, "(~) > [" + Convert::toString(activeSessions.size()) + "] active sessions found.");
 
         userSessions.clear();
         deviceSessions.clear();
@@ -138,8 +138,9 @@ bool SyncServer_Core::SessionManager::registerInstructionSet
         }
         catch(const std::invalid_argument & ex)
         {
-            logDebugMessage("(registerInstructionSet) > Exception encountered: <"
-                            + std::string(ex.what()) + ">");
+            logMessage(LogSeverity::Error, "(registerInstructionSet) > Exception encountered: <"
+                    + std::string(ex.what()) + ">");
+            
             return false;
         }
 
@@ -147,7 +148,7 @@ bool SyncServer_Core::SessionManager::registerInstructionSet
     }
     else
     {
-        logDebugMessage("(registerInstructionSet) > The supplied set is not initialised.");
+        logMessage(LogSeverity::Error, "(registerInstructionSet) > The supplied set is not initialised.");
         return false;
     }
 }
@@ -257,7 +258,7 @@ InternalSessionID SyncServer_Core::SessionManager::openSession
     }
     catch(const std::exception & ex)
     {
-        logDebugMessage("(openSession) > An exception was encountered"
+        logMessage(LogSeverity::Error, "(openSession) > An exception was encountered"
                         " while opening a new user session: [" + std::string(ex.what()) + "].");
         throw;
     }
@@ -368,7 +369,7 @@ InternalSessionID SyncServer_Core::SessionManager::openSession
     }
     catch(const std::exception & ex)
     {
-        logDebugMessage("(openSession) > An exception was encountered"
+        logMessage(LogSeverity::Error, "(openSession) > An exception was encountered"
                         " while opening a new device session: [" + std::string(ex.what()) + "].");
         throw;
     }
@@ -413,7 +414,7 @@ void SyncServer_Core::SessionManager::reauthenticateSession
     }
     catch(const std::exception & ex)
     {
-        logDebugMessage("(reauthenticateSession) > An exception was encountered"
+        logMessage(LogSeverity::Error, "(reauthenticateSession) > An exception was encountered"
                         " while attempting to authenticate user session ["
                         + Convert::toString(session) + "]: [" + std::string(ex.what()) + "].");
         throw;
@@ -472,7 +473,7 @@ void SyncServer_Core::SessionManager::reauthenticateSession
     }
     catch(const std::exception & ex)
     {
-        logDebugMessage("(reauthenticateSession) > An exception was encountered"
+        logMessage(LogSeverity::Error, "(reauthenticateSession) > An exception was encountered"
                         " while attempting to authenticate device session ["
                         + Convert::toString(session) + "]: [" + std::string(ex.what()) + "].");
         throw;
@@ -765,7 +766,7 @@ void SyncServer_Core::SessionManager::expirationHandler()
 
                 if(currentSessionData.second->waitingForReauthentication)
                 {
-                    logDebugMessage("(expirationHandler) > Session ["
+                    logMessage(LogSeverity::Debug, "(expirationHandler) > Session ["
                                     + Convert::toString(currentSessionData.first)
                                     + "] waiting for re-authentication has expired.");
                 }
@@ -785,7 +786,7 @@ void SyncServer_Core::SessionManager::expirationHandler()
                 }
                 else
                 {//marks the session for termination
-                    logDebugMessage("(expirationHandler) > Session ["
+                    logMessage(LogSeverity::Debug, "(expirationHandler) > Session ["
                                     + Convert::toString(currentSessionData.first)
                                     + "] with expired token ["
                                     + Convert::toString(currentSessionData.second->token->getID())
@@ -829,7 +830,7 @@ void SyncServer_Core::SessionManager::expirationHandler()
            && (nextExpirationHandlerInvocation <= bptime::second_clock::universal_time()
                || nextExpirationHandlerInvocation > nextHandlerInvocation))
         {
-            logDebugMessage("(expirationHandler) > Scheduled next handler invocation for ["
+            logMessage(LogSeverity::Debug, "(expirationHandler) > Scheduled next handler invocation for ["
                             + Convert::toString(nextHandlerInvocation) + "].");
             
             nextExpirationHandlerInvocation = nextHandlerInvocation;
@@ -1023,7 +1024,7 @@ void SyncServer_Core::SessionManager::forceSessionExpirationHandler
 
                 if(sessionData->second->waitingForReauthentication)
                 {
-                    logDebugMessage("(forceSessionExpirationHandler) > Session ["
+                    logMessage(LogSeverity::Debug, "(forceSessionExpirationHandler) > Session ["
                             + Convert::toString(sessionData->first)
                             + "] waiting for re-authentication has expired.");
                 }
