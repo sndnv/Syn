@@ -127,6 +127,29 @@ std::string Utilities::Strings::toString(UserAccessLevel var)
         return "UNDEFINED";
 }
 
+std::string Utilities::Strings::toStringFromBytes(const std::string & var)
+{
+    std::string result;
+    CryptoPP::StringSource source(var, true, new CryptoPP::HexEncoder(new CryptoPP::StringSink(result)));
+    return result;
+}
+
+boost::uuids::uuid Utilities::Strings::toUUID(std::string var) { return boost::lexical_cast<boost::uuids::uuid>(var); }
+DBObjectID Utilities::Strings::toDBObjectID(std::string var) { return toUUID(var); }
+DeviceID Utilities::Strings::toDeviceID(std::string var) { return toDBObjectID(var); }
+UserID Utilities::Strings::toUserID(std::string var) { return toDBObjectID(var); }
+SyncID Utilities::Strings::toSyncID(std::string var) { return toDBObjectID(var); }
+LogID Utilities::Strings::toLogID(std::string var) { return toDBObjectID(var); }
+ScheduleID Utilities::Strings::toScheduleID(std::string var) { return toDBObjectID(var); }
+SessionID Utilities::Strings::toSessionID(std::string var) { return toDBObjectID(var); }
+
+std::string Utilities::Strings::toBytesFromString(const std::string & var)
+{
+    std::string result;
+    CryptoPP::StringSource source(var, true, new CryptoPP::HexDecoder(new CryptoPP::StringSink(result)));
+    return result;
+}
+
 CryptoPP::SecByteBlock Utilities::Strings::toSecByteBlock(std::string var)
 {
     if(var.size() == 0 || var.size() % 2 != 0)

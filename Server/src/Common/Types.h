@@ -32,6 +32,9 @@ namespace Common_Types
     typedef std::vector<Byte> ByteVector;
     typedef boost::shared_ptr<ByteVector> ByteVectorPtr;
     
+    typedef std::string ByteData;
+    const ByteData EMPTY_BYTE_DATA;
+    
     typedef unsigned long TransferredDataAmount;
     const TransferredDataAmount INVALID_TRANSFERRED_DATA_AMOUNT = 0;
     

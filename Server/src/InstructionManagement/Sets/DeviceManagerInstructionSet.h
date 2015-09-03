@@ -22,12 +22,14 @@
 #include <string>
 #include <boost/any.hpp>
 
+#include "../../Utilities/Strings/Instructions.h"
 #include "InstructionSet.h"
 #include "../Types/Types.h"
 #include "../../EntityManagement/Types/Types.h"
 #include "../../SecurityManagement/Rules/AuthorizationRules.h"
 #include "../../DatabaseManagement/Types/Types.h"
 #include "../../DatabaseManagement/Containers/DeviceDataContainer.h"
+#include "../../NetworkManagement/Types/Types.h"
 
 using Common_Types::IPAddress;
 using Common_Types::IPPort;
@@ -46,6 +48,7 @@ using SecurityManagement_Rules::UserAuthorizationRule;
 using DatabaseManagement_Containers::DeviceDataContainerPtr;
 using DatabaseManagement_Types::DatabaseSelectConstraints;
 using DatabaseManagement_Types::DataTransferType;
+using NetworkManagement_Types::PeerType;
 
 namespace InstructionManagement_Sets
 {
@@ -75,9 +78,9 @@ namespace InstructionManagement_Sets
         
         struct AdminAddDevice : public Instruction<DeviceManagerAdminInstructionType>
         {
-            AdminAddDevice(const std::string & name, const std::string & password, UserID owner, DataTransferType xferType)
+            AdminAddDevice(const std::string & name, const std::string & password, UserID owner, DataTransferType xferType, PeerType type)
             : Instruction(InstructionSetType::DEVICE_MANAGER_ADMIN, DeviceManagerAdminInstructionType::ADD_DEVICE),
-              deviceName(name), rawPassword(password), ownerID(owner), transferType(xferType)
+              deviceName(name), rawPassword(password), ownerID(owner), transferType(xferType), peerType(type)
             {}
             
             bool isValid() { return (!deviceName.empty() && !rawPassword.empty()
@@ -87,6 +90,7 @@ namespace InstructionManagement_Sets
             const std::string rawPassword;
             UserID ownerID;
             DataTransferType transferType;
+            PeerType peerType;
         };
         
         struct AdminRemoveDevice : public Instruction<DeviceManagerAdminInstructionType>
@@ -205,15 +209,16 @@ namespace InstructionManagement_Sets
         
         struct UserAddDevice : public Instruction<DeviceManagerUserInstructionType>
         {
-            UserAddDevice(const std::string & name, const std::string & password, DataTransferType xferType)
+            UserAddDevice(const std::string & name, const std::string & password, DataTransferType xferType, PeerType type)
             : Instruction(InstructionSetType::DEVICE_MANAGER_USER, DeviceManagerUserInstructionType::ADD_DEVICE),
-              deviceName(name), rawPassword(password), transferType(xferType)
+              deviceName(name), rawPassword(password), transferType(xferType), peerType(type)
             {}
             
             bool isValid() { return (!deviceName.empty() && !rawPassword.empty() && transferType != DataTransferType::INVALID); }
             std::string deviceName;
             const std::string rawPassword;
             DataTransferType transferType;
+            PeerType peerType;
         };
         
         struct UserRemoveDevice : public Instruction<DeviceManagerUserInstructionType>
@@ -305,127 +310,169 @@ namespace InstructionManagement_Sets
         {
             struct AdminGetDevice : public InstructionResult<DeviceManagerAdminInstructionType>
             {
-                AdminGetDevice(DeviceDataContainerPtr input) : result(input) {}
+                AdminGetDevice(DeviceDataContainerPtr input)
+                : InstructionResult(DeviceManagerAdminInstructionType::GET_DEVICE), result(input) {}
+                
                 DeviceDataContainerPtr result;
             };
             
             struct AdminGetDevicesByConstraint : public InstructionResult<DeviceManagerAdminInstructionType>
             {
-                AdminGetDevicesByConstraint(std::vector<DeviceDataContainerPtr> input) : result(input) {}
+                AdminGetDevicesByConstraint(std::vector<DeviceDataContainerPtr> input)
+                : InstructionResult(DeviceManagerAdminInstructionType::GET_DEVICES_BY_CONSTRAINT), result(input) {}
+                
                 std::vector<DeviceDataContainerPtr> result;
             };
             
             struct AdminAddDevice : public InstructionResult<DeviceManagerAdminInstructionType>
             {
-                AdminAddDevice(bool input) : result(input) {}
+                AdminAddDevice(bool input)
+                : InstructionResult(DeviceManagerAdminInstructionType::ADD_DEVICE), result(input) {}
+                
                 bool result;
             };
             
             struct AdminRemoveDevice : public InstructionResult<DeviceManagerAdminInstructionType>
             {
-                AdminRemoveDevice(bool input) : result(input) {}
+                AdminRemoveDevice(bool input)
+                : InstructionResult(DeviceManagerAdminInstructionType::REMOVE_DEVICE), result(input) {}
+                
                 bool result;
             };
             
             struct AdminResetDevicePassword : public InstructionResult<DeviceManagerAdminInstructionType>
             {
-                AdminResetDevicePassword(bool input) : result(input) {}
+                AdminResetDevicePassword(bool input)
+                : InstructionResult(DeviceManagerAdminInstructionType::RESET_DEVICE_PASSWORD), result(input) {}
+                
                 bool result;
             };
             
             struct AdminUpdateConnectionInfo : public InstructionResult<DeviceManagerAdminInstructionType>
             {
-                AdminUpdateConnectionInfo(bool input) : result(input) {}
+                AdminUpdateConnectionInfo(bool input)
+                : InstructionResult(DeviceManagerAdminInstructionType::UPDATE_CONNECTION_INFO), result(input) {}
+                
                 bool result;
             };
             
             struct AdminUpdateGeneralInfo : public InstructionResult<DeviceManagerAdminInstructionType>
             {
-                AdminUpdateGeneralInfo(bool input) : result(input) {}
+                AdminUpdateGeneralInfo(bool input)
+                : InstructionResult(DeviceManagerAdminInstructionType::UPDATE_GENERAL_INFO), result(input) {}
+                
                 bool result;
             };
             
             struct AdminLockDevice : public InstructionResult<DeviceManagerAdminInstructionType>
             {
-                AdminLockDevice(bool input) : result(input) {}
+                AdminLockDevice(bool input)
+                : InstructionResult(DeviceManagerAdminInstructionType::LOCK_DEVICE), result(input) {}
+                
                 bool result;
             };
             
             struct AdminUnlockDevice : public InstructionResult<DeviceManagerAdminInstructionType>
             {
-                AdminUnlockDevice(bool input) : result(input) {}
+                AdminUnlockDevice(bool input)
+                : InstructionResult(DeviceManagerAdminInstructionType::UNLOCK_DEVICE), result(input) {}
+                
                 bool result;
             };
             
             struct AdminResetFailedAuthenticationAttempts : public InstructionResult<DeviceManagerAdminInstructionType>
             {
-                AdminResetFailedAuthenticationAttempts(bool input) : result(input) {}
+                AdminResetFailedAuthenticationAttempts(bool input)
+                : InstructionResult(DeviceManagerAdminInstructionType::RESET_FAILED_AUTHENTICATION_ATTEMPTS), result(input) {}
+                
                 bool result;
             };
             
             struct DebugGetState : public InstructionResult<DeviceManagerAdminInstructionType>
             {
-                DebugGetState(std::string input) : result(input) {}
+                DebugGetState(std::string input)
+                : InstructionResult(DeviceManagerAdminInstructionType::DEBUG_GET_STATE), result(input) {}
+                
                 std::string result;
             };
             
             struct UserGetDevice : public InstructionResult<DeviceManagerUserInstructionType>
             {
-                UserGetDevice(DeviceDataContainerPtr input) : result(input) {}
+                UserGetDevice(DeviceDataContainerPtr input)
+                : InstructionResult(DeviceManagerUserInstructionType::GET_DEVICE), result(input) {}
+                
                 DeviceDataContainerPtr result;
             };
             
             struct UserGetDevices : public InstructionResult<DeviceManagerUserInstructionType>
             {
-                UserGetDevices(std::vector<DeviceDataContainerPtr> input) : result(input) {}
+                UserGetDevices(std::vector<DeviceDataContainerPtr> input)
+                : InstructionResult(DeviceManagerUserInstructionType::GET_DEVICES), result(input) {}
+                
                 std::vector<DeviceDataContainerPtr> result;
             };
             
             struct UserAddDevice : public InstructionResult<DeviceManagerUserInstructionType>
             {
-                UserAddDevice(bool input) : result(input) {}
+                UserAddDevice(bool input)
+                : InstructionResult(DeviceManagerUserInstructionType::ADD_DEVICE), result(input) {}
+                
                 bool result;
             };
             
             struct UserRemoveDevice : public InstructionResult<DeviceManagerUserInstructionType>
             {
-                UserRemoveDevice(bool input) : result(input) {}
+                UserRemoveDevice(bool input)
+                : InstructionResult(DeviceManagerUserInstructionType::REMOVE_DEVICE), result(input) {}
+                
                 bool result;
             };
             
             struct UserResetDevicePassword : public InstructionResult<DeviceManagerUserInstructionType>
             {
-                UserResetDevicePassword(bool input) : result(input) {}
+                UserResetDevicePassword(bool input)
+                : InstructionResult(DeviceManagerUserInstructionType::RESET_DEVICE_PASSWORD), result(input) {}
+                
                 bool result;
             };
             
             struct UserUpdateConnectionInfo : public InstructionResult<DeviceManagerUserInstructionType>
             {
-                UserUpdateConnectionInfo(bool input) : result(input) {}
+                UserUpdateConnectionInfo(bool input)
+                : InstructionResult(DeviceManagerUserInstructionType::UPDATE_CONNECTION_INFO), result(input) {}
+                
                 bool result;
             };
             
             struct UserUpdateGeneralInfo : public InstructionResult<DeviceManagerUserInstructionType>
             {
-                UserUpdateGeneralInfo(bool input) : result(input) {}
+                UserUpdateGeneralInfo(bool input)
+                : InstructionResult(DeviceManagerUserInstructionType::UPDATE_GENERAL_INFO), result(input) {}
+                
                 bool result;
             };
             
             struct UserLockDevice : public InstructionResult<DeviceManagerUserInstructionType>
             {
-                UserLockDevice(bool input) : result(input) {}
+                UserLockDevice(bool input)
+                : InstructionResult(DeviceManagerUserInstructionType::LOCK_DEVICE), result(input) {}
+                
                 bool result;
             };
             
             struct UserUnlockDevice : public InstructionResult<DeviceManagerUserInstructionType>
             {
-                UserUnlockDevice(bool input) : result(input) {}
+                UserUnlockDevice(bool input)
+                : InstructionResult(DeviceManagerUserInstructionType::UNLOCK_DEVICE), result(input) {}
+                
                 bool result;
             };
             
             struct UserResetFailedAuthenticationAttempts : public InstructionResult<DeviceManagerUserInstructionType>
             {
-                UserResetFailedAuthenticationAttempts(bool input) : result(input) {}
+                UserResetFailedAuthenticationAttempts(bool input)
+                : InstructionResult(DeviceManagerUserInstructionType::RESET_FAILED_AUTHENTICATION_ATTEMPTS), result(input) {}
+                
                 bool result;
             };
         }

@@ -35,6 +35,9 @@ using SecurityManagement_Interfaces::Securable;
 using SecurityManagement_Types::SecurableComponentType;
 using SecurityManagement_Types::SaltData;
 using SecurityManagement_Types::IVData;
+using SecurityManagement_Types::ECDHPrivateKey;
+using SecurityManagement_Types::ECDHPublicKey;
+using SecurityManagement_Types::EllipticCurveType;
 
 namespace SecurityManagement_Types
 {
@@ -45,7 +48,7 @@ namespace SecurityManagement_Types
     {
         public:
             /**
-             * Constructs s new user authorization request with the supplied parameters.
+             * Constructs a new user authorization request with the supplied parameters.
              * 
              * @param userID the ID of the user requesting to perform the instruction
              * @param sourceComponent reference to the component making the request (source)
@@ -227,13 +230,15 @@ namespace SecurityManagement_Types
              * 
              * Note: The crypto data is derived from the supplied password.
              * 
-             * @param password the password from which the data is to be derived
              * @param sourceComponent reference to the component making the request (source)
+             * @param password the password from which the data is to be derived
              * 
              * @throw invalid_argument if any of the supplied arguments are invalid
              */
-            DerivedCryptoDataGenerationRequest(const std::string & password, const Securable & sourceComponent)
-            : rawPassword(password), source(sourceComponent.getComponentType()), fromExistingData(false)
+            DerivedCryptoDataGenerationRequest(const Securable & sourceComponent, const std::string & password)
+            : rawPassword(password), source(sourceComponent.getComponentType()), fromExistingData(false),
+              iterationsCount(0), cipher(SymmetricCipherType::INVALID),
+              mode(AuthenticatedSymmetricCipherModeType::INVALID)
             {
                 if(rawPassword.empty())
                     throw std::invalid_argument("DeviceDerivedCryptoDataGenerationRequest::() > Empty password supplied.");
@@ -244,17 +249,43 @@ namespace SecurityManagement_Types
              * 
              * Note: The crypto data is derived from the supplied password, IV and salt.
              * 
+             * @param sourceComponent reference to the component making the request (source)
              * @param password the password from which the data is to be derived
              * @param ivData IV from which to derive the crypto data
              * @param saltData salt from which to derive the key
-             * @param sourceComponent reference to the component making the request (source)
              * 
              * @throw invalid_argument if any of the supplied arguments are invalid
              */
-            DerivedCryptoDataGenerationRequest(const std::string password, const IVData ivData,
-                                               const SaltData saltData, const Securable & sourceComponent)
+            DerivedCryptoDataGenerationRequest(const Securable & sourceComponent, const std::string password,
+                                               const IVData ivData, const SaltData saltData)
             : rawPassword(password), iv(ivData), salt(saltData), source(sourceComponent.getComponentType()),
-              fromExistingData(true)
+              fromExistingData(true), iterationsCount(0), cipher(SymmetricCipherType::INVALID),
+              mode(AuthenticatedSymmetricCipherModeType::INVALID)
+            {
+                if(rawPassword.empty())
+                    throw std::invalid_argument("DeviceDerivedCryptoDataGenerationRequest::() > Empty password supplied.");
+            }
+            
+            /**
+             * Constructs a new crypto data request with the supplied parameters.
+             * 
+             * Note: The crypto key is derived from the supplied password, IV and salt.
+             * 
+             * @param sourceComponent reference to the component making the request (source)
+             * @param password the password from which the data is to be derived
+             * @param ivData IV from which to derive the crypto data
+             * @param saltData salt from which to derive the key
+             * @param iterations number of iterations to be used by the PBKD function
+             * @param cipher the cipher to be used
+             * @param mode the mode to be used
+             * 
+             * @throw invalid_argument if any of the supplied arguments are invalid
+             */
+            DerivedCryptoDataGenerationRequest(const Securable & sourceComponent, const std::string password,
+                                               const IVData ivData, const SaltData saltData, unsigned int iterations,
+                                               SymmetricCipherType cipher, AuthenticatedSymmetricCipherModeType mode)
+            : rawPassword(password), iv(ivData), salt(saltData), source(sourceComponent.getComponentType()),
+              fromExistingData(true), iterationsCount(iterations), cipher(cipher), mode(mode)
             {
                 if(rawPassword.empty())
                     throw std::invalid_argument("DeviceDerivedCryptoDataGenerationRequest::() > Empty password supplied.");
@@ -274,6 +305,22 @@ namespace SecurityManagement_Types
             const SaltData & getSaltData() const { return salt; }
             /** Retrieves the type of the source component.\n\n@return the source component type */
             SecurableComponentType getSource() const { return source; }
+            /** Retrieves the number of iterations for the PBKD function.\n\n@return the iterations count*/
+            unsigned int getIterationsCount() const { return iterationsCount; }
+            
+            /**
+             * Retrieves the supplied cipher, if any
+             * 
+             * @return the cipher or <code>INVALID</code>, if it is not available
+             */
+            SymmetricCipherType getCipher() const { return cipher; }
+            
+            /**
+             * Retrieves the supplied symmetric cipher mode, if any.
+             * 
+             * @return the cipher mode or <code>INVALID</code>, if it is not available
+             */
+            AuthenticatedSymmetricCipherModeType getMode() const { return mode; }
             
             /**
              * Denotes whether the request is for deriving crypto data from existing IV and salt.
@@ -288,6 +335,9 @@ namespace SecurityManagement_Types
             SaltData salt;
             SecurableComponentType source;
             bool fromExistingData;
+            unsigned int iterationsCount;
+            SymmetricCipherType cipher;
+            AuthenticatedSymmetricCipherModeType mode;
     };
     
     /**
@@ -299,10 +349,70 @@ namespace SecurityManagement_Types
             /**
              * Constructs a new crypto data request with the supplied parameters.
              * 
+             * Note: The request is for generating new crypto data with the default
+             * cipher/mode configuration.
+             * 
              * @param sourceComponent reference to the component making the request (source)
              */
-            SymmetricCryptoDataGenerationRequest(const Securable & sourceComponent)
-            : source(sourceComponent.getComponentType())
+            SymmetricCryptoDataGenerationRequest
+            (const Securable & sourceComponent)
+            : SymmetricCryptoDataGenerationRequest
+              (sourceComponent, true, true, SymmetricCipherType::INVALID,
+               AuthenticatedSymmetricCipherModeType::INVALID, nullptr, nullptr)
+            {}
+            
+            /**
+             * Constructs a new crypto data request with the supplied parameters.
+             * 
+             * Note: The request is for generating crypto data for the supplied key/IV
+             * pair with the default cipher/mode configuration.
+             * 
+             * @param sourceComponent reference to the component making the request (source) 
+             * @param key the key to be used
+             * @param iv the IV to be used
+             */
+            SymmetricCryptoDataGenerationRequest
+            (const Securable & sourceComponent, const KeyData & key, const IVData & iv)
+            : SymmetricCryptoDataGenerationRequest
+              (sourceComponent, true, false, SymmetricCipherType::INVALID,
+               AuthenticatedSymmetricCipherModeType::INVALID, &key, &iv)
+            {}
+            
+            /**
+             * Constructs a new crypto data request with the supplied parameters.
+             * 
+             * Note: The request is for generating new crypto data with the specified
+             * cipher/mode configuration.
+             * 
+             * @param sourceComponent reference to the component making the request (source)
+             * @param cipher the cipher to be used
+             * @param mode the mode to be used
+             */
+            SymmetricCryptoDataGenerationRequest
+            (const Securable & sourceComponent, SymmetricCipherType cipher,
+             AuthenticatedSymmetricCipherModeType mode)
+            : SymmetricCryptoDataGenerationRequest
+              (sourceComponent, false, true, cipher, mode, nullptr, nullptr)
+            {}
+            
+            /**
+             * Constructs a new crypto data request with the supplied parameters.
+             * 
+             * Note: The request is for generating crypto data for the supplied key/IV
+             * pair with the specified cipher/mode configuration.
+             * 
+             * @param sourceComponent reference to the component making the request (source)
+             * @param cipher the cipher to be used
+             * @param mode the mode to be used
+             * @param key the key to be used
+             * @param iv the IV to be used
+             */
+            SymmetricCryptoDataGenerationRequest
+            (const Securable & sourceComponent, SymmetricCipherType cipher,
+             AuthenticatedSymmetricCipherModeType mode, const KeyData & key,
+             const IVData & iv)
+            : SymmetricCryptoDataGenerationRequest
+              (sourceComponent, false, false, cipher, mode, &key, &iv)
             {}
             
             ~SymmetricCryptoDataGenerationRequest() {}
@@ -311,11 +421,242 @@ namespace SecurityManagement_Types
             SymmetricCryptoDataGenerationRequest(const SymmetricCryptoDataGenerationRequest&) = delete;
             SymmetricCryptoDataGenerationRequest& operator=(const SymmetricCryptoDataGenerationRequest&) = delete;
             
-            /** Retrieves the type of the source component.\n\n@return the source component type */
+            /**
+             * Retrieves the type of the source component.
+             * 
+             * @return the source component type
+             */
             SecurableComponentType getSource() const { return source; }
             
+            /**
+             * Denotes whether the default crypto generation parameters should be used.
+             * 
+             * @return <code>true</code>, if the default crypto generation params are to be used
+             */
+            bool useDefaultParameters() const { return shouldUseDefaultParameters; }
+            
+            /**
+             * Denotes whether the new crypto data is to be generated or if an
+             * existing key/IV pair is to be used.
+             * 
+             * @return <code>true</code>, if new crypto data is to be generated
+             */
+            bool createNewData() const { return shouldCreateNewData; }
+            
+            /**
+             * Retrieves the supplied cipher, if any
+             * 
+             * @return the cipher or <code>INVALID</code>, if it is not available
+             */
+            SymmetricCipherType getCipher() const { return cipher; }
+            
+            /**
+             * Retrieves the supplied symmetric cipher mode, if any.
+             * 
+             * @return the cipher mode or <code>INVALID</code>, if it is not available
+             */
+            AuthenticatedSymmetricCipherModeType getMode() const { return mode; }
+            
+            /**
+             * Retrieves a pointer to the supplied key, if any.
+             * 
+             * @return the key pointer or <code>nullptr</code>, if it is not available
+             */
+            const KeyData * getKey() const { return key; }
+            
+            /**
+             * Retrieves a pointer to the supplied IV, if any.
+             * 
+             * @return the IV pointer or <code>nullptr</code>, if it is not available
+             */
+            const IVData * getIV() const { return iv; }
+            
         private:
+            SymmetricCryptoDataGenerationRequest
+            (const Securable & sourceComponent, bool useDefault, bool createNew,
+             SymmetricCipherType cipher, AuthenticatedSymmetricCipherModeType mode,
+             const KeyData * key, const IVData * iv)
+            : source(sourceComponent.getComponentType()), shouldUseDefaultParameters(useDefault),
+              shouldCreateNewData(createNew), cipher(cipher), mode(mode), key(key), iv(iv)
+            {}
+            
             SecurableComponentType source;
+            bool shouldUseDefaultParameters;
+            bool shouldCreateNewData;
+            SymmetricCipherType cipher;
+            AuthenticatedSymmetricCipherModeType mode;
+            const KeyData * key;
+            const IVData * iv;
+    };
+    
+    /**
+     * Class representing Elliptic Curve Diffie-Hellman-based symmetric crypto data
+     * generation requests for the <code>SecurityManager</code>.
+     */
+    class ECDHSymmetricCryptoDataGenerationRequest
+    {
+        public:
+            /**
+             * Constructs a new EC DH crypto data request with the supplied parameters.
+             * 
+             * Note: The request is for generating new crypto data with the default
+             * cipher/mode/curve configuration.
+             * 
+             * @param sourceComponent reference to the component making the request (source)
+             * @param pvKey the local private key to be used
+             * @param pbKey the remote public key to be used
+             */
+            ECDHSymmetricCryptoDataGenerationRequest
+            (const Securable & sourceComponent, const ECDHPrivateKey & pvKey,
+             const ECDHPublicKey & pbKey)
+            : ECDHSymmetricCryptoDataGenerationRequest
+              (sourceComponent, true, true, SymmetricCipherType::INVALID,
+               AuthenticatedSymmetricCipherModeType::INVALID, &pvKey, &pbKey, nullptr)
+            {}
+            
+            /**
+             * Constructs a new EC DH crypto data request with the supplied parameters.
+             * 
+             * Note: The request is for generating crypto data with the supplied IV
+             * and the default cipher/mode/curve configuration.
+             * 
+             * @param sourceComponent reference to the component making the request (source)
+             * @param pvKey the local private key to be used
+             * @param pbKey the remote public key to be used
+             * @param iv the IV to be used
+             */
+            ECDHSymmetricCryptoDataGenerationRequest
+            (const Securable & sourceComponent, const ECDHPrivateKey & pvKey,
+             const ECDHPublicKey & pbKey, const IVData & iv)
+            : ECDHSymmetricCryptoDataGenerationRequest
+              (sourceComponent, true, false, SymmetricCipherType::INVALID,
+               AuthenticatedSymmetricCipherModeType::INVALID, &pvKey, &pbKey, &iv)
+            {}
+            
+            /**
+             * Constructs a new EC DH crypto data request with the supplied parameters.
+             * 
+             * Note: The request is for generating new crypto data with the
+             * specified cipher/mode configuration and the default elliptic curve.
+             * 
+             * @param sourceComponent reference to the component making the request (source)
+             * @param cipher the cipher to be used
+             * @param mode the mode to be used
+             * @param pvKey the local private key to be used
+             * @param pbKey the remote public key to be used
+             */
+            ECDHSymmetricCryptoDataGenerationRequest
+            (const Securable & sourceComponent, SymmetricCipherType cipher,
+             AuthenticatedSymmetricCipherModeType mode, const ECDHPrivateKey & pvKey,
+             const ECDHPublicKey & pbKey)
+            : ECDHSymmetricCryptoDataGenerationRequest
+              (sourceComponent, false, true, cipher, mode, &pvKey, &pbKey, nullptr)
+            {}
+            
+            /**
+             * Constructs a new EC DH crypto data request with the supplied parameters.
+             * 
+             * Note 1: The request is for generating crypto data with supplied IV
+             * and the specified cipher/mode configuration.
+             * 
+             * Note 2: The default elliptic curve will be used.
+             * 
+             * @param sourceComponent reference to the component making the request (source)
+             * @param cipher the cipher to be used
+             * @param mode the mode to be used
+             * @param pvKey the local private key to be used
+             * @param pbKey the remote public key to be used
+             * @param iv the IV to be used
+             */
+            ECDHSymmetricCryptoDataGenerationRequest
+            (const Securable & sourceComponent, SymmetricCipherType cipher,
+             AuthenticatedSymmetricCipherModeType mode, const ECDHPrivateKey & pvKey,
+             const ECDHPublicKey & pbKey, const IVData & iv)
+            : ECDHSymmetricCryptoDataGenerationRequest
+              (sourceComponent, false, false, cipher, mode, &pvKey, &pbKey, &iv)
+            {}
+            
+            ~ECDHSymmetricCryptoDataGenerationRequest() {}
+            
+            ECDHSymmetricCryptoDataGenerationRequest() = delete;
+            ECDHSymmetricCryptoDataGenerationRequest(const ECDHSymmetricCryptoDataGenerationRequest&) = delete;
+            ECDHSymmetricCryptoDataGenerationRequest& operator=(const ECDHSymmetricCryptoDataGenerationRequest&) = delete;
+            
+            /**
+             * Retrieves the type of the source component.
+             * 
+             * @return the source component type
+             */
+            SecurableComponentType getSource() const { return source; }
+            
+            /**
+             * Denotes whether the default crypto generation parameters should be used.
+             * 
+             * @return <code>true</code>, if the default crypto generation params are to be used
+             */
+            bool useDefaultParameters() const { return shouldUseDefaultParameters; }
+            
+            /**
+             * Denotes whether the new crypto data is to be generated or if an
+             * existing key/IV pair is to be used.
+             * 
+             * @return <code>true</code>, if new crypto data is to be generated
+             */
+            bool createNewData() const { return shouldCreateNewData; }
+            
+            /**
+             * Retrieves the supplied cipher, if any
+             * 
+             * @return the cipher or <code>INVALID</code>, if it is not available
+             */
+            SymmetricCipherType getCipher() const { return cipher; }
+            
+            /**
+             * Retrieves the supplied symmetric cipher mode, if any.
+             * 
+             * @return the cipher mode or <code>INVALID</code>, if it is not available
+             */
+            AuthenticatedSymmetricCipherModeType getMode() const { return mode; }
+            
+            /**
+             * Retrieves a pointer to the supplied IV, if any.
+             * 
+             * @return the IV pointer or <code>nullptr</code>, if it is not available
+             */
+            const IVData * getIV() const { return iv; }
+            
+            /**
+             * Retrieves a pointer to the supplied PRIVATE key, if any.
+             * 
+             * @return the key pointer or <code>nullptr</code>, if it is not available
+             */
+            const ECDHPrivateKey * getPrivateKey() const { return privateKey; }
+            
+            /**
+             * Retrieves a pointer to the supplied PUBLIC key, if any.
+             * 
+             * @return the key pointer or <code>nullptr</code>, if it is not available
+             */
+            const ECDHPublicKey * getPublicKey() const { return publicKey; }
+            
+        private:
+            ECDHSymmetricCryptoDataGenerationRequest
+            (const Securable & sourceComponent, bool useDefault, bool createNew,
+             SymmetricCipherType cipher, AuthenticatedSymmetricCipherModeType mode,
+             const ECDHPrivateKey * pvKey, const ECDHPublicKey * pbKey, const IVData * iv)
+            : source(sourceComponent.getComponentType()), shouldUseDefaultParameters(useDefault),
+              shouldCreateNewData(createNew), cipher(cipher), mode(mode), iv(iv),
+              privateKey(pvKey), publicKey(pbKey)
+            {}
+            
+            SecurableComponentType source;
+            bool shouldUseDefaultParameters;
+            bool shouldCreateNewData;
+            SymmetricCipherType cipher;
+            AuthenticatedSymmetricCipherModeType mode;
+            const IVData * iv;
+            const ECDHPrivateKey * privateKey;
+            const ECDHPublicKey * publicKey;
     };
 }
 

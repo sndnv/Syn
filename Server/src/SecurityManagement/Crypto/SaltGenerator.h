@@ -42,9 +42,9 @@ namespace SecurityManagement_Crypto
              */
             static const SaltData getRandomSalt(SaltSize size)
             {
-                CryptoPP::AutoSeededRandomPool rnd;
+                CryptoPP::AutoSeededRandomPool rng;
                 SaltData salt(size);
-                rnd.GenerateBlock(salt, size);
+                rng.GenerateBlock(salt, size);
                 
                 return salt;
             }

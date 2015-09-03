@@ -177,14 +177,14 @@ bool EntityManagement::DeviceManager::registerInstructionSet
 }
 
 bool EntityManagement::DeviceManager::addDeviceOperation
-(const std::string & name, const std::string & password, UserID owner, DataTransferType xferType)
+(const std::string & name, const std::string & password, UserID owner, DataTransferType xferType, PeerType peerType)
 {
     std::string nameValidationErrorMessage;
     if(securityManager.isDeviceNameValid(name, nameValidationErrorMessage))
     {
         PasswordData newDevicePassword(securityManager.hashDevicePassword(password));
         DeviceDataContainerPtr newDeviceContainer(
-            new DeviceDataContainer(name, newDevicePassword, owner, xferType));
+            new DeviceDataContainer(name, newDevicePassword, owner, xferType, peerType));
         
         return databaseManager.Devices().addDevice(newDeviceContainer);
     }
@@ -279,7 +279,8 @@ void EntityManagement::DeviceManager::adminAddDeviceHandler
             resultValue = addDeviceOperation(actualInstruction->deviceName,
                                              actualInstruction->rawPassword,
                                              actualInstruction->ownerID,
-                                             actualInstruction->transferType);
+                                             actualInstruction->transferType,
+                                             actualInstruction->peerType);
             
             if(resultValue)
             {
@@ -442,8 +443,8 @@ void EntityManagement::DeviceManager::adminUpdateConnectionInfoHandler
         }
 
 
-        deviceData->setDeviceAddress(actualInstruction->ipAddress);
-        deviceData->setDevicePort(actualInstruction->ipPort);
+        deviceData->setDeviceCommandAddress(actualInstruction->ipAddress);
+        deviceData->setDeviceCommandPort(actualInstruction->ipPort);
         deviceData->setTransferType(actualInstruction->transferType);
         resultValue = databaseManager.Devices().updateDevice(deviceData);
         
@@ -833,7 +834,8 @@ void EntityManagement::DeviceManager::userAddDeviceHandler
             resultValue = addDeviceOperation(actualInstruction->deviceName,
                                              actualInstruction->rawPassword,
                                              actualInstruction->getToken()->getUserID(),
-                                             actualInstruction->transferType);
+                                             actualInstruction->transferType,
+                                             actualInstruction->peerType);
             
             if(resultValue)
             {
@@ -1051,8 +1053,8 @@ void EntityManagement::DeviceManager::userUpdateConnectionInfoHandler
             return;
         }
 
-        deviceData->setDeviceAddress(actualInstruction->ipAddress);
-        deviceData->setDevicePort(actualInstruction->ipPort);
+        deviceData->setDeviceCommandAddress(actualInstruction->ipAddress);
+        deviceData->setDeviceCommandPort(actualInstruction->ipPort);
         deviceData->setTransferType(actualInstruction->transferType);
         resultValue = databaseManager.Devices().updateDevice(deviceData);
         

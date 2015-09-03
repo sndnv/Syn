@@ -22,6 +22,7 @@
 #include <boost/any.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/unordered_map.hpp>
+#include "../../Utilities/Strings/Instructions.h"
 #include "InstructionSet.h"
 #include "../../Common/Types.h"
 #include "../../DatabaseManagement/Types/Types.h"
@@ -540,85 +541,113 @@ namespace InstructionManagement_Sets
             //<editor-fold defaultstate="collapsed" desc="CORE Results">
             struct GetQueuesList : public InstructionResult<DatabaseManagerInstructionType>
             {
-                GetQueuesList(std::vector<DALQueue::DALQueueInformation> input) : result(input) {}
+                GetQueuesList(std::vector<DALQueue::DALQueueInformation> input)
+                : InstructionResult(DatabaseManagerInstructionType::GET_QUEUES_LIST), result(input) {}
+                
                 std::vector<DALQueue::DALQueueInformation> result;
             };
 
             struct GetCachesList : public InstructionResult<DatabaseManagerInstructionType>
             {
-                GetCachesList(std::vector<DALCache::DALCacheInformation> input) : result(input) {}
+                GetCachesList(std::vector<DALCache::DALCacheInformation> input)
+                : InstructionResult(DatabaseManagerInstructionType::GET_CACHES_LIST), result(input) {}
+                
                 std::vector<DALCache::DALCacheInformation> result;
             };
 
             struct GetDALsList : public InstructionResult<DatabaseManagerInstructionType>
             {
-                GetDALsList(std::vector<DALQueue::DALInformation> input) : result(input) {}
+                GetDALsList(std::vector<DALQueue::DALInformation> input)
+                : InstructionResult(DatabaseManagerInstructionType::GET_DALS_LIST), result(input) {}
+                
                 std::vector<DALQueue::DALInformation> result;
             };
 
             struct SetDefaultDALCacheParameters : public InstructionResult<DatabaseManagerInstructionType>
             {
-                SetDefaultDALCacheParameters(bool input) : result(input) {}
+                SetDefaultDALCacheParameters(bool input)
+                : InstructionResult(DatabaseManagerInstructionType::SET_DEFAULT_CACHE_PARAMS), result(input) {}
+                
                 bool result;
             };
             
             struct GetDefaultDALCacheParameters : public InstructionResult<DatabaseManagerInstructionType>
             {
-                GetDefaultDALCacheParameters(DALCache::DALCacheParameters input) : result(input) {}
+                GetDefaultDALCacheParameters(DALCache::DALCacheParameters input)
+                : InstructionResult(DatabaseManagerInstructionType::GET_DEFAULT_CACHE_PARAMS), result(input) {}
+                
                 DALCache::DALCacheParameters result;
             };
             
             struct SetCacheParameters : public InstructionResult<DatabaseManagerInstructionType>
             {
-                SetCacheParameters(bool input) : result(input) {}
+                SetCacheParameters(bool input)
+                : InstructionResult(DatabaseManagerInstructionType::SET_CACHE_PARAMS), result(input) {}
+                
                 bool result;
             };
 
             struct GetCacheParameters : public InstructionResult<DatabaseManagerInstructionType>
             {
-                GetCacheParameters(DALCache::DALCacheParameters input) : result(input) {}
+                GetCacheParameters(DALCache::DALCacheParameters input)
+                : InstructionResult(DatabaseManagerInstructionType::GET_CACHE_PARAMS), result(input) {}
+                
                 DALCache::DALCacheParameters result;
             };
 
             struct SetQueueParameters : public InstructionResult<DatabaseManagerInstructionType>
             {
-                SetQueueParameters(bool input) : result(input) {}
+                SetQueueParameters(bool input)
+                : InstructionResult(DatabaseManagerInstructionType::SET_QUEUE_PARAMS), result(input) {}
+                
                 bool result;
             };
 
             struct GetQueueParameters : public InstructionResult<DatabaseManagerInstructionType>
             {
-                GetQueueParameters(DALQueue::DALQueueParameters input) : result(input) {}
+                GetQueueParameters(DALQueue::DALQueueParameters input)
+                : InstructionResult(DatabaseManagerInstructionType::GET_QUEUE_PARAMS), result(input) {}
+                
                 DALQueue::DALQueueParameters result;
             };
 
             struct SetFunctionTimeout : public InstructionResult<DatabaseManagerInstructionType>
             {
-                SetFunctionTimeout(bool input) : result(input) {}
+                SetFunctionTimeout(bool input)
+                : InstructionResult(DatabaseManagerInstructionType::SET_FUNCTION_TIMEOUT), result(input) {}
+                
                 bool result;
             };
 
             struct GetFunctionTimeout : public InstructionResult<DatabaseManagerInstructionType>
             {
-                GetFunctionTimeout(FunctionCallTimeoutPeriod input) : result(input) {}
+                GetFunctionTimeout(FunctionCallTimeoutPeriod input)
+                : InstructionResult(DatabaseManagerInstructionType::GET_FUNCTION_TIMEOUT), result(input) {}
+                
                 FunctionCallTimeoutPeriod result;
             };
 
             struct AddDAL : public InstructionResult<DatabaseManagerInstructionType>
             {
-                AddDAL(bool input) : result(input) {}
+                AddDAL(bool input)
+                : InstructionResult(DatabaseManagerInstructionType::ADD_DAL), result(input) {}
+                
                 bool result;
             };
 
             struct AddDALWithCacheParameters : public InstructionResult<DatabaseManagerInstructionType>
             {
-                AddDALWithCacheParameters(bool input) : result(input) {}
+                AddDALWithCacheParameters(bool input)
+                : InstructionResult(DatabaseManagerInstructionType::ADD_DAL_WITH_CACHE_PARAMS), result(input) {}
+                
                 bool result;
             };
 
             struct RemoveDAL : public InstructionResult<DatabaseManagerInstructionType>
             {
-                RemoveDAL(bool input) : result(input) {}
+                RemoveDAL(bool input)
+                : InstructionResult(DatabaseManagerInstructionType::REMOVE_DAL), result(input) {}
+                
                 bool result;
             };
             //</editor-fold>
@@ -626,43 +655,57 @@ namespace InstructionManagement_Sets
             //<editor-fold defaultstate="collapsed" desc="FUNCTIONS_STATISTICS Results">
             struct GetSystemInstallTimestamp : public InstructionResult<DatabaseManagerInstructionType>
             {
-                GetSystemInstallTimestamp(Timestamp input) : result(input) {}
+                GetSystemInstallTimestamp(Timestamp input)
+                : InstructionResult(DatabaseManagerInstructionType::GET_SYSTEM_INSTALL_TIMESTAMP), result(input) {}
+                
                 Timestamp result;
             };
 
             struct GetSystemStartTimestamp : public InstructionResult<DatabaseManagerInstructionType>
             {
-                GetSystemStartTimestamp(Timestamp input) : result(input) {}
+                GetSystemStartTimestamp(Timestamp input)
+                : InstructionResult(DatabaseManagerInstructionType::GET_SYSTEM_START_TIMESTAMP), result(input) {}
+                
                 Timestamp result;
             };
 
             struct GetTotalTransferredData : public InstructionResult<DatabaseManagerInstructionType>
             {
-                GetTotalTransferredData(TransferredDataAmount input) : result(input) {}
+                GetTotalTransferredData(TransferredDataAmount input)
+                : InstructionResult(DatabaseManagerInstructionType::GET_TOTAL_TRANSFERRED_DATA), result(input) {}
+                
                 TransferredDataAmount result;
             };
 
             struct GetTotalTransferredFiles : public InstructionResult<DatabaseManagerInstructionType>
             {
-                GetTotalTransferredFiles(TransferredFilesAmount input) : result(input) {}
+                GetTotalTransferredFiles(TransferredFilesAmount input)
+                : InstructionResult(DatabaseManagerInstructionType::GET_TOTAL_NUMBER_TRANSFERRED_FILES), result(input) {}
+                
                 TransferredFilesAmount result;
             };
 
             struct GetTotalFailedTransfers : public InstructionResult<DatabaseManagerInstructionType>
             {
-                GetTotalFailedTransfers(TransferredFilesAmount input) : result(input) {}
+                GetTotalFailedTransfers(TransferredFilesAmount input)
+                : InstructionResult(DatabaseManagerInstructionType::GET_TOTAL_NUMBER_FAILED_TRANSFERS), result(input) {}
+                
                 TransferredFilesAmount result;
             };
 
             struct GetTotalRetriedTransfers : public InstructionResult<DatabaseManagerInstructionType>
             {
-                GetTotalRetriedTransfers(TransferredFilesAmount input) : result(input) {}
+                GetTotalRetriedTransfers(TransferredFilesAmount input)
+                : InstructionResult(DatabaseManagerInstructionType::GET_TOTAL_NUMBER_RETRIED_TRANSFERS), result(input) {}
+                
                 TransferredFilesAmount result;
             };
 
             struct GetAllStats : public InstructionResult<DatabaseManagerInstructionType>
             {
-                GetAllStats(vector<StatisticDataContainerPtr> input) : result(input) {}
+                GetAllStats(vector<StatisticDataContainerPtr> input)
+                : InstructionResult(DatabaseManagerInstructionType::GET_ALL_STATS), result(input) {}
+                
                 std::vector<StatisticDataContainerPtr> result;
             };
             //</editor-fold>
@@ -674,31 +717,41 @@ namespace InstructionManagement_Sets
             //<editor-fold defaultstate="collapsed" desc="FUNCTIONS_SYNC_FILES Results">
             struct AddSync : public InstructionResult<DatabaseManagerInstructionType>
             {
-                AddSync(bool input) : result(input) {}
+                AddSync(bool input)
+                : InstructionResult(DatabaseManagerInstructionType::ADD_SYNC), result(input) {}
+                
                 bool result;
             };
             
             struct UpdateSync : public InstructionResult<DatabaseManagerInstructionType>
             {
-                UpdateSync(bool input) : result(input) {}
+                UpdateSync(bool input)
+                : InstructionResult(DatabaseManagerInstructionType::UPDATE_SYNC), result(input) {}
+                
                 bool result;
             };
             
             struct RemoveSync : public InstructionResult<DatabaseManagerInstructionType>
             {
-                RemoveSync(bool input) : result(input) {}
+                RemoveSync(bool input)
+                : InstructionResult(DatabaseManagerInstructionType::REMOVE_SYNC), result(input) {}
+                
                 bool result;
             };
             
             struct GetSyncsByConstraint : public InstructionResult<DatabaseManagerInstructionType>
             {
-                GetSyncsByConstraint(std::vector<SyncDataContainerPtr> input) : result(input) {}
+                GetSyncsByConstraint(std::vector<SyncDataContainerPtr> input)
+                : InstructionResult(DatabaseManagerInstructionType::GET_SYNCS_BY_CONSTRAINT), result(input) {}
+                
                 std::vector<SyncDataContainerPtr> result;
             };
             
             struct GetSync : public InstructionResult<DatabaseManagerInstructionType>
             {
-                GetSync(SyncDataContainerPtr input) : result(input) {}
+                GetSync(SyncDataContainerPtr input)
+                : InstructionResult(DatabaseManagerInstructionType::GET_SYNC), result(input) {}
+                
                 SyncDataContainerPtr result;
             };
             //</editor-fold>
@@ -706,31 +759,41 @@ namespace InstructionManagement_Sets
             //<editor-fold defaultstate="collapsed" desc="FUNCTIONS_DEVICES Results">
             struct AddDevice : public InstructionResult<DatabaseManagerInstructionType>
             {
-                AddDevice(bool input) : result(input) {}
+                AddDevice(bool input)
+                : InstructionResult(DatabaseManagerInstructionType::ADD_DEVICE), result(input) {}
+                
                 bool result;
             };
             
             struct UpdateDevice : public InstructionResult<DatabaseManagerInstructionType>
             {
-                UpdateDevice(bool input) : result(input) {}
+                UpdateDevice(bool input)
+                : InstructionResult(DatabaseManagerInstructionType::UPDATE_DEVICE), result(input) {}
+                
                 bool result;
             };
             
             struct RemoveDevice : public InstructionResult<DatabaseManagerInstructionType>
             {
-                RemoveDevice(bool input) : result(input) {}
+                RemoveDevice(bool input)
+                : InstructionResult(DatabaseManagerInstructionType::REMOVE_DEVICE), result(input) {}
+                
                 bool result;
             };
             
             struct GetDevicesByConstraint : public InstructionResult<DatabaseManagerInstructionType>
             {
-                GetDevicesByConstraint(std::vector<DeviceDataContainerPtr> input) : result(input) {}
+                GetDevicesByConstraint(std::vector<DeviceDataContainerPtr> input)
+                : InstructionResult(DatabaseManagerInstructionType::GET_DEVICES_BY_CONSTRAINT), result(input) {}
+                
                 std::vector<DeviceDataContainerPtr> result;
             };
             
             struct GetDevice : public InstructionResult<DatabaseManagerInstructionType>
             {
-                GetDevice(DeviceDataContainerPtr input) : result(input) {}
+                GetDevice(DeviceDataContainerPtr input)
+                : InstructionResult(DatabaseManagerInstructionType::GET_DEVICE), result(input) {}
+                
                 DeviceDataContainerPtr result;
             };
             //</editor-fold>
@@ -738,31 +801,41 @@ namespace InstructionManagement_Sets
             //<editor-fold defaultstate="collapsed" desc="FUNCTIONS_SCHEDULES Results">
             struct AddSchedule : public InstructionResult<DatabaseManagerInstructionType>
             {
-                AddSchedule(bool input) : result(input) {}
+                AddSchedule(bool input)
+                : InstructionResult(DatabaseManagerInstructionType::ADD_SCHEDULE), result(input) {}
+                
                 bool result;
             };
             
             struct UpdateSchedule : public InstructionResult<DatabaseManagerInstructionType>
             {
-                UpdateSchedule(bool input) : result(input) {}
+                UpdateSchedule(bool input)
+                : InstructionResult(DatabaseManagerInstructionType::UPDATE_SCHEDULE), result(input) {}
+                
                 bool result;
             };
             
             struct RemoveSchedule : public InstructionResult<DatabaseManagerInstructionType>
             {
-                RemoveSchedule(bool input) : result(input) {}
+                RemoveSchedule(bool input)
+                : InstructionResult(DatabaseManagerInstructionType::REMOVE_SCHEDULE), result(input) {}
+                
                 bool result;
             };
             
             struct GetSchedulesByConstraint : public InstructionResult<DatabaseManagerInstructionType>
             {
-                GetSchedulesByConstraint(std::vector<ScheduleDataContainerPtr> input) : result(input) {}
+                GetSchedulesByConstraint(std::vector<ScheduleDataContainerPtr> input)
+                : InstructionResult(DatabaseManagerInstructionType::GET_SCHEDULES_BY_CONSTRAINT), result(input) {}
+                
                 std::vector<ScheduleDataContainerPtr> result;
             };
             
             struct GetSchedule : public InstructionResult<DatabaseManagerInstructionType>
             {
-                GetSchedule(ScheduleDataContainerPtr input) : result(input) {}
+                GetSchedule(ScheduleDataContainerPtr input)
+                : InstructionResult(DatabaseManagerInstructionType::GET_SCHEDULE), result(input) {}
+                
                 ScheduleDataContainerPtr result;
             };
             //</editor-fold>
@@ -770,31 +843,41 @@ namespace InstructionManagement_Sets
             //<editor-fold defaultstate="collapsed" desc="FUNCTIONS_USERS Results">
             struct AddUser : public InstructionResult<DatabaseManagerInstructionType>
             {
-                AddUser(bool input) : result(input) {}
+                AddUser(bool input)
+                : InstructionResult(DatabaseManagerInstructionType::ADD_USER), result(input) {}
+                
                 bool result;
             };
             
             struct UpdateUser : public InstructionResult<DatabaseManagerInstructionType>
             {
-                UpdateUser(bool input) : result(input) {}
+                UpdateUser(bool input)
+                : InstructionResult(DatabaseManagerInstructionType::UPDATE_USER), result(input) {}
+                
                 bool result;
             };
             
             struct RemoveUser : public InstructionResult<DatabaseManagerInstructionType>
             {
-                RemoveUser(bool input) : result(input) {}
+                RemoveUser(bool input)
+                : InstructionResult(DatabaseManagerInstructionType::REMOVE_USER), result(input) {}
+                
                 bool result;
             };
             
             struct GetUsersByConstraint : public InstructionResult<DatabaseManagerInstructionType>
             {
-                GetUsersByConstraint(std::vector<UserDataContainerPtr> input) : result(input) {}
+                GetUsersByConstraint(std::vector<UserDataContainerPtr> input)
+                : InstructionResult(DatabaseManagerInstructionType::GET_USERS_BY_CONSTRAINT), result(input) {}
+                
                 std::vector<UserDataContainerPtr> result;
             };
             
             struct GetUser : public InstructionResult<DatabaseManagerInstructionType>
             {
-                GetUser(UserDataContainerPtr input) : result(input) {}
+                GetUser(UserDataContainerPtr input)
+                : InstructionResult(DatabaseManagerInstructionType::GET_USER), result(input) {}
+                
                 UserDataContainerPtr result;
             };
             //</editor-fold>
@@ -802,25 +885,33 @@ namespace InstructionManagement_Sets
             //<editor-fold defaultstate="collapsed" desc="FUNCTIONS_LOGS Results">
             struct AddLog : public InstructionResult<DatabaseManagerInstructionType>
             {
-                AddLog(bool input) : result(input) {}
+                AddLog(bool input)
+                : InstructionResult(DatabaseManagerInstructionType::ADD_LOG), result(input) {}
+                
                 bool result;
             };
             
             struct AddLogAsync : public InstructionResult<DatabaseManagerInstructionType>
             {
-                AddLogAsync(bool input) : result(input) {}
+                AddLogAsync(bool input)
+                : InstructionResult(DatabaseManagerInstructionType::ADD_LOG_ASYNC), result(input) {}
+                
                 bool result;
             };
             
             struct GetLogsByConstraint : public InstructionResult<DatabaseManagerInstructionType>
             {
-                GetLogsByConstraint(std::vector<LogDataContainerPtr> input) : result(input) {}
+                GetLogsByConstraint(std::vector<LogDataContainerPtr> input)
+                : InstructionResult(DatabaseManagerInstructionType::GET_LOGS_BY_CONSTRAINT), result(input) {}
+                
                 std::vector<LogDataContainerPtr> result;
             };
             
             struct GetLog : public InstructionResult<DatabaseManagerInstructionType>
             {
-                GetLog(LogDataContainerPtr input) : result(input) {}
+                GetLog(LogDataContainerPtr input)
+                : InstructionResult(DatabaseManagerInstructionType::GET_LOG), result(input) {}
+                
                 LogDataContainerPtr result;
             };
             //</editor-fold>
@@ -828,13 +919,17 @@ namespace InstructionManagement_Sets
             //<editor-fold defaultstate="collapsed" desc="FUNCTIONS_SESSIONS Results">
             struct GetSessionsByConstraint : public InstructionResult<DatabaseManagerInstructionType>
             {
-                GetSessionsByConstraint(std::vector<SessionDataContainerPtr> input) : result(input) {}
+                GetSessionsByConstraint(std::vector<SessionDataContainerPtr> input)
+                : InstructionResult(DatabaseManagerInstructionType::GET_SESSIONS_BY_CONSTRAINT), result(input) {}
+                
                 std::vector<SessionDataContainerPtr> result;
             };
             
             struct GetSession : public InstructionResult<DatabaseManagerInstructionType>
             {
-                GetSession(SessionDataContainerPtr input) : result(input) {}
+                GetSession(SessionDataContainerPtr input)
+                : InstructionResult(DatabaseManagerInstructionType::GET_SESSION), result(input) {}
+                
                 SessionDataContainerPtr result;
             };
             //</editor-fold>

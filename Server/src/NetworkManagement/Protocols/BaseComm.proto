@@ -1,0 +1,86 @@
+package NetworkManagement_Protocols;
+
+message ConnectionSetupRequestSignature {
+    required uint32 signature_size = 1;
+    required bytes signature_data = 2;
+}
+
+message CommandConnectionSetupRequestData {
+    required bytes request_signature = 1;
+    required bytes content_encryption_key_data = 2;
+    required bytes content_encryption_key_iv = 3;
+    required string sym_cipher = 4;
+    required string sym_mode = 5;
+    optional bytes password_data = 6;
+}
+
+message CommandConnectionSetupRequest {
+    required bytes data = 1;
+    required bytes peer_id = 2;
+    optional bytes ecdh_iv = 3;
+}
+
+message CommandConnectionSetupResponse {
+    required bytes request_signature = 1;
+    optional bytes password_data = 2;
+}
+
+message DataConnectionSetupRequest {
+    required bytes request_signature = 1;
+    required bytes peer_id = 2;
+    required uint32 transient_id = 3;
+}
+
+message DataConnectionSetupResponse {
+    required bytes request_signature = 1;
+}
+
+message InitConnectionAdditionalData {
+    required bytes request_signature = 1;
+    required bytes public_key = 2;
+    optional bytes local_peer_id = 3;
+    optional bytes remote_peer_id = 4;
+    required string command_address = 5;
+    required uint32 command_port = 6;
+    required string data_address = 7;
+    required uint32 data_port = 8;
+    required string init_address = 9;
+    required uint32 init_port = 10;
+    required string key_exchange = 11;
+    optional bytes password_data = 12;
+}
+
+message InitConnectionSetupRequest {
+    required bytes pbkd_salt_data = 1;
+    required bytes pbkd_key_iv = 2;
+    required uint32 pbkd_iterations = 3;
+    required string pbkd_sym_cipher = 4;
+    required string pbkd_sym_mode = 5;
+    required uint32 transient_id = 6;
+    required bytes additional_data = 7;
+}
+
+message InitConenctionSetupResponse {
+    required bytes additional_data = 1;
+}
+ 
+message Command {
+    required string command = 1;
+    required uint32 command_id = 2;
+    required bytes data = 3;
+    required bool send_response = 4;
+}
+
+message Response {
+    enum Status {
+        OK = 0;
+        FAILED = 1;
+        EXCEPTION = 2;
+    }
+
+    required string command = 1;
+    required uint32 command_id = 2;
+    required Status status = 3;
+    optional string message = 4;
+    optional bytes data = 5;
+}

@@ -20,6 +20,8 @@
 
 #include <string>
 
+#include <cryptopp/dh.h>
+#include <cryptopp/ecp.h>
 #include <cryptopp/aes.h>
 #include <cryptopp/pwdbased.h>
 #include <cryptopp/osrng.h>
@@ -49,7 +51,6 @@ using SecurityManagement_Types::IVData;
 using SecurityManagement_Types::KeyData;
 
 using SecurityManagement_Types::AuthenticatedSymmetricCipherModeType;
-using SecurityManagement_Types::UnauthenticatedSymmetricCipherModeType;
 using SecurityManagement_Types::SymmetricCipherType;
 using SecurityManagement_Types::PasswordDerivationFunction;
 using SecurityManagement_Types::EllipticCurveType;
@@ -60,13 +61,18 @@ using SecurityManagement_Crypto::SymmetricCryptoDataContainerPtr;
 
 using SecurityManagement_Types::ECDecryptor;
 using SecurityManagement_Types::ECEncryptor;
-using SecurityManagement_Types::RSADecryptor;
-using SecurityManagement_Types::RSAEncryptor;
+using SecurityManagement_Types::RSAPrivateKey;
+using SecurityManagement_Types::RSAPublicKey;
+using SecurityManagement_Types::ECDHPrivateKey;
+using SecurityManagement_Types::ECDHPublicKey;
+using SecurityManagement_Types::ECDH;
 
 using SecurityManagement_Crypto::RSACryptoDataContainer;
 using SecurityManagement_Crypto::ECCryptoDataContainer;
 using SecurityManagement_Crypto::RSACryptoDataContainerPtr;
 using SecurityManagement_Crypto::ECCryptoDataContainerPtr;
+using SecurityManagement_Crypto::ECDHCryptoDataContainerPtr;
+
 
 namespace SecurityManagement_Crypto
 {
@@ -449,6 +455,144 @@ namespace SecurityManagement_Crypto
                 result->updateSalt(salt);
                 return result;
             }
+            
+            /**
+             * Generates symmetric crypto data using the specified parameters.
+             * 
+             * @param cipher the cipher to be used
+             * @param mode the mode to be used
+             * @param passphrase the passphrase to be used
+             * @param salt the salt associated with the passphrase
+             * @param iv the IV associated with the passphrase
+             * @return the generated data
+             */
+            SymmetricCryptoDataContainerPtr getSymmetricCryptoDataFromPassphrase
+            (SymmetricCipherType cipher, AuthenticatedSymmetricCipherModeType mode, 
+             const std::string & passphrase, unsigned int iterations,
+             const SaltData & salt, const IVData & iv) const
+            {
+                KeyData key = getDerivedSymmetricKey(passphrase, iterations, salt);
+                SymmetricCryptoDataContainerPtr result = getSymmetricCryptoData(cipher, mode, key, iv);
+                result->updateSalt(salt);
+                return result;
+            }
+            
+            /**
+             * Generates new symmetric crypto data, based on the Diffie-Hellman
+             * key agreement algorithm, with the default elliptic curve, symmetric cipher and mode.
+             * 
+             * @param localPrivateKey the local peer's private key to be used for the agreement
+             * @param remotePublicKey the remote peer's public key to be used for the agreement
+             * @return the generated data
+             */
+            SymmetricCryptoDataContainerPtr getSymmetricCryptoDataForDHExchange
+            (const ECDHPrivateKey & localPrivateKey, const ECDHPublicKey & remotePublicKey)
+            {
+                return getSymmetricCryptoDataForDHExchange(defaultEllipticCurve, localPrivateKey, remotePublicKey, defaultSymmetricCipher, defaultSymmetricCipherMode);
+            }
+            
+            /**
+             * Generates new symmetric crypto data, based on the Diffie-Hellman
+             * key agreement algorithm, with the default symmetric cipher and mode.
+             * 
+             * @param curve the curve to be used for the key agreement
+             * @param localPrivateKey the local peer's private key to be used for the agreement
+             * @param remotePublicKey the remote peer's public key to be used for the agreement
+             * @return the generated data
+             */
+            SymmetricCryptoDataContainerPtr getSymmetricCryptoDataForDHExchange
+            (EllipticCurveType curve, const ECDHPrivateKey & localPrivateKey, const ECDHPublicKey & remotePublicKey)
+            {
+                return getSymmetricCryptoDataForDHExchange(curve, localPrivateKey, remotePublicKey, defaultSymmetricCipher, defaultSymmetricCipherMode);
+            }
+            
+            /**
+             * Generates new symmetric crypto data, based on the Diffie-Hellman
+             * key agreement algorithm.
+             * 
+             * @param curve the curve to be used for the key agreement
+             * @param localPrivateKey the local peer's private key to be used for the agreement
+             * @param remotePublicKey the remote peer's public key to be used for the agreement
+             * @param cipher the cipher for the symmetric crypto data
+             * @param mode the mode for the symmetric cipher
+             * @return the generated data
+             */
+            SymmetricCryptoDataContainerPtr getSymmetricCryptoDataForDHExchange
+            (EllipticCurveType curve, const ECDHPrivateKey & localPrivateKey, const ECDHPublicKey & remotePublicKey, 
+             SymmetricCipherType cipher, AuthenticatedSymmetricCipherModeType mode)
+            {
+                IVData iv = getIV();
+                return getSymmetricCryptoDataForDHExchange(curve, localPrivateKey, remotePublicKey, iv, cipher, mode);
+            }
+            
+            /**
+             * Generates new symmetric crypto data, based on the Diffie-Hellman
+             * key agreement algorithm, with the default elliptic curve, symmetric cipher and mode.
+             * 
+             * @param localPrivateKey the local peer's private key to be used for the agreement
+             * @param remotePublicKey the remote peer's public key to be used for the agreement
+             * @param iv the IV for the symmetric crypto data
+             * @return the generated data
+             */
+            SymmetricCryptoDataContainerPtr getSymmetricCryptoDataForDHExchange
+            (const ECDHPrivateKey & localPrivateKey, const ECDHPublicKey & remotePublicKey, const IVData & iv)
+            {
+                return getSymmetricCryptoDataForDHExchange(defaultEllipticCurve, localPrivateKey, remotePublicKey, iv, defaultSymmetricCipher, defaultSymmetricCipherMode);
+            }
+            
+            /**
+             * Generates new symmetric crypto data, based on the Diffie-Hellman
+             * key agreement algorithm, with the default symmetric cipher and mode.
+             * 
+             * @param curve the curve to be used for the key agreement
+             * @param localPrivateKey the local peer's private key to be used for the agreement
+             * @param remotePublicKey the remote peer's public key to be used for the agreement
+             * @param iv the IV for the symmetric crypto data
+             * @return the generated data
+             */
+            SymmetricCryptoDataContainerPtr getSymmetricCryptoDataForDHExchange
+            (EllipticCurveType curve, const ECDHPrivateKey & localPrivateKey, const ECDHPublicKey & remotePublicKey, const IVData & iv)
+            {
+                return getSymmetricCryptoDataForDHExchange(curve, localPrivateKey, remotePublicKey, iv, defaultSymmetricCipher, defaultSymmetricCipherMode);
+            }
+            
+            /**
+             * Generates new symmetric crypto data, based on the Diffie-Hellman
+             * key agreement algorithm, with the default elliptic curve.
+             * 
+             * @param localPrivateKey the local peer's private key to be used for the agreement
+             * @param remotePublicKey the remote peer's public key to be used for the agreement
+             * @param iv the IV for the symmetric crypto data
+             * @param cipher the cipher for the symmetric crypto data
+             * @param mode the mode for the symmetric cipher
+             * @return the generated data
+             */
+            SymmetricCryptoDataContainerPtr getSymmetricCryptoDataForDHExchange
+            (const ECDHPrivateKey & localPrivateKey, const ECDHPublicKey & remotePublicKey, 
+             const IVData & iv, SymmetricCipherType cipher, AuthenticatedSymmetricCipherModeType mode)
+            {
+                return getSymmetricCryptoDataForDHExchange(defaultEllipticCurve, localPrivateKey, remotePublicKey, iv, cipher, mode);
+            }
+            
+            /**
+             * Generates new symmetric crypto data, based on the Diffie-Hellman
+             * key agreement algorithm.
+             * 
+             * @param curve the curve to be used for the key agreement
+             * @param localPrivateKey the local peer's private key to be used for the agreement
+             * @param remotePublicKey the remote peer's public key to be used for the agreement
+             * @param iv the IV for the symmetric crypto data
+             * @param cipher the cipher for the symmetric crypto data
+             * @param mode the mode for the symmetric cipher
+             * @return the generated data
+             */
+            SymmetricCryptoDataContainerPtr getSymmetricCryptoDataForDHExchange
+            (EllipticCurveType curve, const ECDHPrivateKey & localPrivateKey, const ECDHPublicKey & remotePublicKey, 
+             const IVData & iv, SymmetricCipherType cipher, AuthenticatedSymmetricCipherModeType mode)
+            {
+                KeyData key = getDiffieHellmanKeyEncryptionKey(curve, localPrivateKey, remotePublicKey);
+                return getSymmetricCryptoData(cipher, mode, key, iv);
+            }
             //</editor-fold>
             
             //<editor-fold defaultstate="collapsed" desc="Asymmetric Crypto">
@@ -466,34 +610,21 @@ namespace SecurityManagement_Crypto
                 if(keySize < minRSAKeySize)
                     throw std::invalid_argument("KeyGenerator::getRSACryptoData() > Insufficiently large key was supplied.");
                 
-                CryptoPP::AutoSeededRandomPool rnd;
+                CryptoPP::AutoSeededRandomPool rng;
                 
-                RSADecryptor * decr = new RSADecryptor();
-                decr->AccessKey().GenerateRandomWithKeySize(rnd, keySize);
-                RSAEncryptor * encr = new RSAEncryptor(*decr);
+                CryptoPP::InvertibleRSAFunction params;
+                params.GenerateRandomWithKeySize(rng, keySize);
+                RSAPrivateKey * privateKey = new RSAPrivateKey(params);
+                RSAPublicKey * publicKey = new RSAPublicKey(params);
                 
-                if(!decr->AccessKey().Validate(rnd, keyValidationLevel))
+                if(!privateKey->Validate(rng, keyValidationLevel))
+                {
+                    delete privateKey;
+                    delete publicKey;
                     throw std::runtime_error("KeyGenerator::getRSACryptoData() > New private key failed validation.");
+                }
                 
-                return RSACryptoDataContainerPtr(new RSACryptoDataContainer(decr, encr));
-            }
-            
-            /**
-             * Generates RSA crypto data with the specified private key.
-             * 
-             * @param privateKey the private key to be used
-             * @return the generated data
-             */
-            RSACryptoDataContainerPtr getRSACryptoData(const CryptoPP::RSA::PrivateKey & privateKey) const
-            {
-                CryptoPP::AutoSeededRandomPool rnd;
-                if(!privateKey.Validate(rnd, keyValidationLevel))
-                    throw std::invalid_argument("KeyGenerator::getRSACryptoData() > Existing private key failed validation.");
-                
-                RSADecryptor * decr = new RSADecryptor(privateKey);
-                RSAEncryptor * encr = new RSAEncryptor(*decr);
-                
-                return RSACryptoDataContainerPtr(new RSACryptoDataContainer(decr, encr));
+                return RSACryptoDataContainerPtr(new RSACryptoDataContainer(privateKey, publicKey));
             }
             
             /**
@@ -501,9 +632,9 @@ namespace SecurityManagement_Crypto
              * 
              * @return the generated data
              */
-            ECCryptoDataContainerPtr getECCryptoData() const
+            ECDHCryptoDataContainerPtr getECDHCryptoData() const
             {
-                return getECCryptoData(defaultEllipticCurve);
+                return getECDHCryptoData(defaultEllipticCurve);
             }
             
             /**
@@ -512,53 +643,28 @@ namespace SecurityManagement_Crypto
              * @param curveType the curve to be used
              * @return the generated data
              */
-            ECCryptoDataContainerPtr getECCryptoData(EllipticCurveType curve) const
+            ECDHCryptoDataContainerPtr getECDHCryptoData(EllipticCurveType curve) const
             {
-                CryptoPP::AutoSeededRandomPool rnd;
+                CryptoPP::AutoSeededRandomPool rng;
                 
-                ECDecryptor * decr;
+                ECDH * ecdh = createECDHObject(curve);
+                ECDHPrivateKey * privateKey = new ECDHPrivateKey(ecdh->PrivateKeyLength());
+                ECDHPublicKey * publicKey = new ECDHPublicKey(ecdh->PublicKeyLength());
                 
-                switch(curve)
+                try
                 {
-                    case EllipticCurveType::P192R1: decr = new ECDecryptor(rnd, CryptoPP::ASN1::secp192r1()); break;
-                    case EllipticCurveType::P224R1: decr = new ECDecryptor(rnd, CryptoPP::ASN1::secp224r1()); break;
-                    case EllipticCurveType::P256R1: decr = new ECDecryptor(rnd, CryptoPP::ASN1::secp256r1()); break;
-                    case EllipticCurveType::P384R1: decr = new ECDecryptor(rnd, CryptoPP::ASN1::secp384r1()); break;
-                    case EllipticCurveType::P521R1: decr = new ECDecryptor(rnd, CryptoPP::ASN1::secp521r1()); break;
-                    case EllipticCurveType::BP_P160R1: decr = new ECDecryptor(rnd, CryptoPP::ASN1::brainpoolP160r1()); break;
-                    case EllipticCurveType::BP_P192R1: decr = new ECDecryptor(rnd, CryptoPP::ASN1::brainpoolP192r1()); break;
-                    case EllipticCurveType::BP_P224R1: decr = new ECDecryptor(rnd, CryptoPP::ASN1::brainpoolP224r1()); break;
-                    case EllipticCurveType::BP_P256R1: decr = new ECDecryptor(rnd, CryptoPP::ASN1::brainpoolP256r1()); break;
-                    case EllipticCurveType::BP_P320R1: decr = new ECDecryptor(rnd, CryptoPP::ASN1::brainpoolP320r1()); break;
-                    case EllipticCurveType::BP_P384R1: decr = new ECDecryptor(rnd, CryptoPP::ASN1::brainpoolP384r1()); break;
-                    case EllipticCurveType::BP_P512R1: decr = new ECDecryptor(rnd, CryptoPP::ASN1::brainpoolP512r1()); break;
-                    default: throw std::runtime_error("KeyGenerator::getECCryptoData() > Unexpected elliptic curve type encountered.");
+                    ecdh->GenerateKeyPair(rng, *privateKey, *publicKey);
+                }
+                catch(...)
+                {
+                    delete ecdh;
+                    delete privateKey;
+                    delete publicKey;
+                    throw;
                 }
                 
-                ECEncryptor * encr = new ECEncryptor(*decr);
-                
-                if(!decr->AccessKey().Validate(rnd, keyValidationLevel))
-                    throw std::runtime_error("KeyGenerator::getECCryptoData() > New private key failed validation.");
-                
-                return ECCryptoDataContainerPtr(new ECCryptoDataContainer(decr, encr));
-            }
-            
-            /**
-             * Generates elliptic curve crypto data with the specified private key.
-             * 
-             * @param privateKey the private key to be used
-             * @return the generated data
-             */
-            ECCryptoDataContainerPtr getECCryptoData(const CryptoPP::PrivateKey & privateKey) const
-            {
-                CryptoPP::AutoSeededRandomPool rnd;
-                if(!privateKey.Validate(rnd, keyValidationLevel))
-                    throw std::invalid_argument("KeyGenerator::getECCryptoData() > Existing private key failed validation.");
-                
-                ECDecryptor * decr = new ECDecryptor(privateKey);
-                ECEncryptor * encr = new ECEncryptor(*decr);
-                
-                return ECCryptoDataContainerPtr(new ECCryptoDataContainer(decr, encr));
+                delete ecdh;
+                return ECDHCryptoDataContainerPtr(new ECDHCryptoDataContainer(privateKey, publicKey));
             }
             //</editor-fold>
             
@@ -573,7 +679,7 @@ namespace SecurityManagement_Crypto
             KeyData getDerivedSymmetricKey(const std::string & passphrase, const SaltData & salt) const
             {
                 if(derivedKeyMinSaltSize > salt.size())
-                    throw std::invalid_argument("KeyGenerator::deriveKey() > Insufficiently large salt was supplied.");
+                    throw std::invalid_argument("KeyGenerator::getDerivedSymmetricKey() > Insufficiently large salt was supplied.");
                 
                 KeyData key(derivedKeySize);
                 derivedKeyGenerator->DeriveKey(
@@ -582,6 +688,34 @@ namespace SecurityManagement_Crypto
                                                 reinterpret_cast<const CryptoPPByte *>(passphrase.c_str()), passphrase.length(),
                                                 salt, salt.size(),
                                                 derivedKeyIterations
+                                              );
+                
+                return key;
+            }
+            
+            /**
+             * Generates a symmetric key using the specified passphrase, iterations and salt.
+             * 
+             * @param passphrase the passphrase to be used
+             * @param iterations the number of iterations to be used when generating the key
+             * @param salt the salt associated with the passphrase
+             * @return the generated key
+             */
+            KeyData getDerivedSymmetricKey(const std::string & passphrase, unsigned int iterations, const SaltData & salt) const
+            {
+                if(derivedKeyMinSaltSize > salt.size())
+                    throw std::invalid_argument("KeyGenerator::getDerivedSymmetricKey() > Insufficiently large salt was supplied.");
+                
+                if(iterations < derivedKeyIterations && iterations != 0)
+                    throw std::invalid_argument("KeyGenerator::getDerivedSymmetricKey() > Insufficient number of iterations supplied.");
+                
+                KeyData key(derivedKeySize);
+                derivedKeyGenerator->DeriveKey(
+                                                key, key.size(), 
+                                                0 /* purpose byte; unused */,
+                                                reinterpret_cast<const CryptoPPByte *>(passphrase.c_str()), passphrase.length(),
+                                                salt, salt.size(),
+                                                (iterations != 0) ? iterations : derivedKeyIterations
                                               );
                 
                 return key;
@@ -603,7 +737,7 @@ namespace SecurityManagement_Crypto
                 else if(keySize < defaultSymmetricKeySize)
                     logDebugMessage("(getSymmetricKey) > The supplied symmetric key size is smaller than the default size.");
                 
-                CryptoPP::AutoSeededRandomPool rnd;
+                CryptoPP::AutoSeededRandomPool rng;
                 
                 KeySize maxKeySize;
                 std::string algorithmName;
@@ -623,7 +757,7 @@ namespace SecurityManagement_Crypto
                 }
                 
                 KeyData key(keySize);
-                rnd.GenerateBlock(key, key.size());
+                rng.GenerateBlock(key, key.size());
                 
                 return key;
             }
@@ -651,11 +785,78 @@ namespace SecurityManagement_Crypto
                                                 " for the specified cipher <" + std::string(TCipher::StaticAlgorithmName()) + ">.");
                 }
                 
-                CryptoPP::AutoSeededRandomPool rnd;
+                CryptoPP::AutoSeededRandomPool rng;
                 KeyData key(keySize);
-                rnd.GenerateBlock(key, key.size());
+                rng.GenerateBlock(key, key.size());
                 
                 return key;
+            }
+            
+            /**
+             * Generates a new symmetric key encryption key, based on the Diffie-Hellman
+             * key agreement algorithm, using the default elliptic curve.
+             * 
+             * Note: The size of the resulting key is set to the default symmetric
+             * key size of the generator,
+             * 
+             * @param localPrivateKey the local peer's private key
+             * @param remotePublicKey the remote peer's public key
+             * @return the generated data
+             * 
+             * @throws runtime_error if a key could not be generated
+             */
+            KeyData getDiffieHellmanKeyEncryptionKey
+            (const ECDHPrivateKey & localPrivateKey, const ECDHPublicKey & remotePublicKey)
+            {
+                return getDiffieHellmanKeyEncryptionKey(defaultEllipticCurve, localPrivateKey, remotePublicKey);
+            }
+            
+            /**
+             * Generates a new symmetric key encryption key, based on the Diffie-Hellman
+             * key agreement algorithm.
+             * 
+             * Note: The size of the resulting key is set to the default symmetric
+             * key size of the generator,
+             * 
+             * @param localPrivateKey the local peer's private key
+             * @param remotePublicKey the remote peer's public key
+             * @return the generated data
+             * 
+             * @throws runtime_error if a key could not be generated
+             */
+            KeyData getDiffieHellmanKeyEncryptionKey
+            (EllipticCurveType curve, const ECDHPrivateKey & localPrivateKey, const ECDHPublicKey & remotePublicKey)
+            {
+                ECDH * ecdh = createECDHObject(curve);
+                
+                if(ecdh->PrivateKeyLength() != localPrivateKey.SizeInBytes()
+                        || ecdh->PublicKeyLength() != remotePublicKey.SizeInBytes())
+                {
+                    delete ecdh;
+                    throw std::runtime_error("KeyGenerator::getDiffieHellmanKeyEncryptionKey() > Unexpected key sizes encountered.");
+                }
+                
+                KeyData sharedSecret(ecdh->AgreedValueLength());
+                
+                if(ecdh->Agree(sharedSecret, localPrivateKey, remotePublicKey, true))
+                {
+                    if(sharedSecret.SizeInBytes() >= defaultSymmetricKeySize)
+                    {
+                        KeyData keyEncryptionKey(sharedSecret.BytePtr(), defaultSymmetricKeySize);
+                        delete ecdh;
+                        return keyEncryptionKey;
+                    }
+                    else
+                    {
+                        delete ecdh;
+                        throw std::runtime_error("KeyGenerator::getDiffieHellmanKeyEncryptionKey() > Failed to create shared secret of sufficient size.");
+                    }
+                }
+                else
+                {
+                    delete ecdh;
+                    throw std::runtime_error("KeyGenerator::getDiffieHellmanKeyEncryptionKey() > Failed to reach shared secret.");
+                }
             }
             
             /**
@@ -666,12 +867,162 @@ namespace SecurityManagement_Crypto
              */
             IVData getIV(IVSize size = 0) const
             {
-                CryptoPP::AutoSeededRandomPool rnd;
-                IVData iv((size == 0) ? defaultIVSize : size);
-                rnd.GenerateBlock(iv, iv.size());
+                CryptoPP::AutoSeededRandomPool rng;
+                return KeyGenerator::getIV((size == 0) ? defaultIVSize : size, rng);
+            }
+            
+            /**
+             * Generates a new initialization vector.
+             * 
+             * @param size the size of the IV (in bytes)
+             * @param rng reference to a random number generator
+             * @return the generated IV
+             */
+            static const IVData getIV(IVSize size, CryptoPP::AutoSeededRandomPool & rng)
+            {
+                IVData iv(size);
+                rng.GenerateBlock(iv, iv.size());
                 return iv;
             }
             //</editor-fold>
+            
+            /**
+             * Retrieves the default symmetric cipher used by the key generator.
+             * 
+             * @return the default symmetric cipher
+             */
+            SymmetricCipherType getDefaultSymmetricCipher() const
+            {
+                return defaultSymmetricCipher;
+            }
+            
+            /**
+             * Retrieves the default symmetric cipher mode used by the key generator.
+             * 
+             * @return the default symmetric cipher mode
+             */
+            AuthenticatedSymmetricCipherModeType getDefaultSymmetricCipherMode() const
+            {
+                return defaultSymmetricCipherMode;
+            }
+            
+            /**
+             * Retrieves the default asymmetric key validation level.
+             * 
+             * Note:
+             * 
+             * //Taken from CryptoPP's documentation:
+             * //0 - using this object won't cause a crash or exception (rng is ignored) 
+             * //1 - this object will probably function (encrypt, sign, etc.) correctly (but may not check for weak keys and such)
+             * //2 - make sure this object will function correctly, and do reasonable security checks
+             8 //3 - do checks that may take a long time
+             * 
+             * @return the default asymmetric key validation level
+             */
+            unsigned int getDefaultKeyValidationLevel() const
+            {
+                return keyValidationLevel;
+            }
+            
+            /**
+             * Retrieves the default elliptic curve used by the generator.
+             * 
+             * @return the default elliptic curve
+             */
+            EllipticCurveType getDefaultEllipticCurve() const
+            {
+                return defaultEllipticCurve;
+            }
+            
+            /**
+             * Retrieves the default IV size used by the generator.
+             * 
+             * @return the default IV size
+             */
+            IVSize getDefaultIVSize() const
+            {
+                return defaultIVSize;
+            }
+            
+            /**
+             * Retrieves the minimum symmetric key size allowed by the generator.
+             * 
+             * @return the min symmetric key size
+             */
+            KeySize getMinSymmetricKeySize() const
+            {
+                return minSymmetricKeySize;
+            }
+            
+            /**
+             * Retrieves the default symmetric key size used by the generator.
+             * 
+             * @return the default symmetric key size
+             */
+            KeySize getDefaultSymmetricKeySize() const
+            {
+                return defaultSymmetricKeySize;
+            }
+            
+            /**
+             * Retrieves the minimum RSA key size allowed by the generator.
+             * 
+             * @return the min RSA key size
+             */
+            KeySize getMinRSAKeySize() const
+            {
+                return minRSAKeySize;
+            }
+            
+            /**
+             * Retrieves the default RSA key size used by the generator.
+             * 
+             * @return the default RSA key size
+             */
+            KeySize getDefaultRSAKeySize() const
+            {
+                return defaultRSAKeySize;
+            }
+            
+            /**
+             * Retrieves the derived symmetric key size used by the generator.
+             * 
+             * @return the derived key size
+             */
+            KeySize getDerivedKeySize() const
+            {
+                return derivedKeySize;
+            }
+            
+            /**
+             * Retrieves the minimum allowed salt size for derived keys.
+             * 
+             * @return the min salt size for derived keys
+             */
+            SaltSize getDerivedKeyMinSaltSize() const
+            {
+                return derivedKeyMinSaltSize;
+            }
+            
+            /**
+             * Retrieves the default salt size for derived keys.
+             * 
+             * @return the default salt size
+             */
+            SaltSize getDerivedKeyDefaultSaltSize() const
+            {
+                return derivedKeyDefaultSaltSize;
+            }
+            
+            /**
+             * Retrieves the default iterations count for derived keys.
+             * 
+             * @return the default iterations count
+             */
+            unsigned int getDerivedKeyDefaultIterationsCount() const
+            {
+                return derivedKeyIterations;
+            }
             
         private:
             //Debugging
@@ -697,6 +1048,57 @@ namespace SecurityManagement_Crypto
             KeySize derivedKeySize;                     //derived key size (in bytes)
             SaltSize derivedKeyMinSaltSize;             //minimum salt size (in bytes) for the derived keys
             SaltSize derivedKeyDefaultSaltSize;         //default salt size (in bytes) for the derived keys
+            
+            /**
+             * Creates a new ECDH domain object using the specified elliptic curve.
+             * 
+             * Note: The caller assumes responsibility for deleting the object.
+             * 
+             * @param curve the curve to be used
+             * @return a pointer to the new object
+             * 
+             * @throws invalid_argument if the specified curve is not available
+             * @throws runtime_error if any of the validations fail
+             */
+            ECDH * createECDHObject(EllipticCurveType curve) const
+            {
+                ECDH * ecdh;
+                
+                switch(curve)
+                {
+                    case EllipticCurveType::P192R1: ecdh = new ECDH(CryptoPP::ASN1::secp192r1()); break;
+                    case EllipticCurveType::P224R1: ecdh = new ECDH(CryptoPP::ASN1::secp224r1()); break;
+                    case EllipticCurveType::P256R1: ecdh = new ECDH(CryptoPP::ASN1::secp256r1()); break;
+                    case EllipticCurveType::P384R1: ecdh = new ECDH(CryptoPP::ASN1::secp384r1()); break;
+                    case EllipticCurveType::P521R1: ecdh = new ECDH(CryptoPP::ASN1::secp521r1()); break;
+                    case EllipticCurveType::BP_P160R1: ecdh = new ECDH(CryptoPP::ASN1::brainpoolP160r1()); break;
+                    case EllipticCurveType::BP_P192R1: ecdh = new ECDH(CryptoPP::ASN1::brainpoolP192r1()); break;
+                    case EllipticCurveType::BP_P224R1: ecdh = new ECDH(CryptoPP::ASN1::brainpoolP224r1()); break;
+                    case EllipticCurveType::BP_P256R1: ecdh = new ECDH(CryptoPP::ASN1::brainpoolP256r1()); break;
+                    case EllipticCurveType::BP_P320R1: ecdh = new ECDH(CryptoPP::ASN1::brainpoolP320r1()); break;
+                    case EllipticCurveType::BP_P384R1: ecdh = new ECDH(CryptoPP::ASN1::brainpoolP384r1()); break;
+                    case EllipticCurveType::BP_P512R1: ecdh = new ECDH(CryptoPP::ASN1::brainpoolP512r1()); break;
+                    default: 
+                    {
+                        throw std::invalid_argument("KeyGenerator::createECDHObject() > Unexpected elliptic curve type encountered.");
+                    }
+                }
+                
+                CryptoPP::AutoSeededRandomPool rng;
+                if(!ecdh->AccessMaterial().Validate(rng, keyValidationLevel))
+                {
+                    delete ecdh;
+                    throw std::runtime_error("KeyGenerator::createECDHObject() > ECDH material validation failed.");
+                }
+                
+                if(!ecdh->AccessGroupParameters().Validate(rng, keyValidationLevel))
+                {
+                    delete ecdh;
+                    throw std::runtime_error("KeyGenerator::createECDHObject() > ECDH group parameters validation failed.");
+                }
+                
+                return ecdh;
+            }
             
             /**
              * Logs the specified message, if a debugging file logger is assigned to the generator.

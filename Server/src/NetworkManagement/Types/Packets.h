@@ -24,7 +24,7 @@
 #include "../../Common/Types.h"
 
 using Common_Types::Byte;
-using Common_Types::ByteVector;
+using Common_Types::ByteData;
 using NetworkManagement_Types::PacketSize;
 
 namespace NetworkManagement_Types
@@ -62,7 +62,7 @@ namespace NetworkManagement_Types
              * @return the newly built and validated object
              * @throws <code>std::invalid_argument</code>, if the supplied data cannot be converted to a valid object
              */
-            static ConnectionRequest fromBytes(const ByteVector & data)
+            static ConnectionRequest fromBytes(const ByteData & data)
             {
                 ConnectionRequest result;
                 
@@ -80,6 +80,7 @@ namespace NetworkManagement_Types
                 {
                     case 'C': result.connectionType = ConnectionType::COMMAND; break;
                     case 'D': result.connectionType = ConnectionType::DATA; break;
+                    case 'I': result.connectionType = ConnectionType::INIT; break;
                     default: throw std::invalid_argument("ConnectionRequest::fromBytes() > Unexpected connectionType encountered.");
                 }
                 
@@ -95,12 +96,12 @@ namespace NetworkManagement_Types
              * @return the byte representation of the request
              * @throws <code>std::invalid_argument</code>, if the conversion cannot be done
              */
-            ByteVector toBytes() const
+            ByteData toBytes() const
             {
                 if(!isValid())
                     throw std::invalid_argument("ConnectionRequest::toBytes() > Cannot convert invalid object.");
                 
-                ByteVector result;
+                ByteData result;
                 
                 switch(senderPeerType)
                 {
@@ -113,8 +114,11 @@ namespace NetworkManagement_Types
                 {
                     case ConnectionType::COMMAND:           result.push_back('C'); break;
                     case ConnectionType::DATA:              result.push_back('D'); break;
+                    case ConnectionType::INIT:              result.push_back('I'); break;
                     default: throw std::invalid_argument("ConnectionRequest::toBytes() > Cannot convert invalid connectionType.");
                 }
+                
+                assert(result.size() == ConnectionRequest::BYTE_LENGTH);
                 
                 return result;
             }
@@ -129,7 +133,9 @@ namespace NetworkManagement_Types
                 if(senderPeerType != PeerType::CLIENT && senderPeerType != PeerType::SERVER)
                     return false;
                 
-                if(connectionType != ConnectionType::COMMAND && connectionType != ConnectionType::DATA)
+                if(connectionType != ConnectionType::COMMAND
+                   && connectionType != ConnectionType::DATA
+                   && connectionType != ConnectionType::INIT)
                     return false;
                                 
                 return true;
@@ -167,7 +173,7 @@ namespace NetworkManagement_Types
              * @return the newly built object
              * @throws <code>std::invalid_argument</code>, if the supplied data cannot be converted
              */
-            static HeaderPacket fromNetworkBytes(const ByteVector & data)
+            static HeaderPacket fromNetworkBytes(const ByteData & data)
             {
                 if(HeaderPacket::BYTE_LENGTH != data.size())
                     throw std::invalid_argument("HeaderPacket::fromNetworkBytes() > Unexpected data length encountered.");
@@ -192,18 +198,20 @@ namespace NetworkManagement_Types
              * @return the byte representation of the request
              * @throws <code>std::invalid_argument</code>, if the conversion cannot be done
              */
-            ByteVector toNetworkBytes()
+            ByteData toNetworkBytes()
             {
                 auto nPayloadSize = htonl(payloadSize);
                 
                 if(sizeof nPayloadSize != HeaderPacket::BYTE_LENGTH)
                     throw std::invalid_argument("HeaderPacket::toNetworkBytes() > The converted payload size does not have the expected byte length.");
                 
-                ByteVector result(HeaderPacket::BYTE_LENGTH);
+                ByteData result(HeaderPacket::BYTE_LENGTH, '\0');
                 Byte* rawResult = static_cast<Byte*>(static_cast<void*>(&nPayloadSize));
                 
                 for(std::size_t i = 0; i < (sizeof nPayloadSize); i++)
                     result[i] = rawResult[i];
+                
+                assert(result.size() == HeaderPacket::BYTE_LENGTH);
                 
                 return result;
             }
@@ -216,10 +224,9 @@ namespace NetworkManagement_Types
              * @param target the container to be used for storing the result
              * @throws <code>std::invalid_argument</code>, if the conversion cannot be done
              */
-            void toNetworkBytes(ByteVector & target)
+            void toNetworkBytes(ByteData & target)
             {
-                if(target.size() != HeaderPacket::BYTE_LENGTH)
-                    throw std::invalid_argument("HeaderPacket::toNetworkBytes() > The target container does not have the expected storage capacity.");
+                target.resize(HeaderPacket::BYTE_LENGTH);
                 
                 auto nPayloadSize = htonl(payloadSize);
                 
@@ -230,6 +237,8 @@ namespace NetworkManagement_Types
                 
                 for(std::size_t i = 0; i < (sizeof nPayloadSize); i++)
                     target[i] = rawResult[i];
+                
+                assert(target.size() == HeaderPacket::BYTE_LENGTH);
             }
     };
 }

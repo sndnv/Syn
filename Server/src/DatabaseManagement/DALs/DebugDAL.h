@@ -35,6 +35,8 @@
 #include "../../Utilities/Tools.h"
 #include "../../Utilities/Strings/Common.h"
 #include "../../Utilities/Strings/Database.h"
+#include "../../Utilities/Strings/Security.h"
+#include "../../Utilities/Strings/Network.h"
 #include "../../Utilities/FileLogger.h"
 #include "../Interfaces/DatabaseAbstractionLayer.h"
 #include "../Types/Types.h"
@@ -234,9 +236,17 @@ namespace DatabaseManagement_DALs
 
                 UserID ownerID = boost::lexical_cast<UserID>(*currentToken);
                 currentToken++;
-                IPAddress address = *currentToken;
+                IPAddress cAddress = *currentToken;
                 currentToken++;
-                IPPort port = boost::lexical_cast<IPPort>(*currentToken);
+                IPPort cPort = boost::lexical_cast<IPPort>(*currentToken);
+                currentToken++;
+                IPAddress dAddress = *currentToken;
+                currentToken++;
+                IPPort dPort = boost::lexical_cast<IPPort>(*currentToken);
+                currentToken++;
+                IPAddress iAddress = *currentToken;
+                currentToken++;
+                IPPort iPort = boost::lexical_cast<IPPort>(*currentToken);
                 currentToken++;
                 DataTransferType xferType = Convert::toDataTransferType(*currentToken);
                 currentToken++;
@@ -255,12 +265,18 @@ namespace DatabaseManagement_DALs
                 boost::posix_time::ptime timestampLastFailedAuth = Convert::toTimestamp(*currentToken);
                 currentToken++;
                 unsigned int failedAttempts = boost::lexical_cast<unsigned int>(*currentToken);
+                currentToken++;
+                std::string publicKey = Convert::toBytesFromString(*currentToken);
+                currentToken++;
+                KeyExchangeType exchangeType = Convert::toKeyExchangeType(*currentToken);
+                currentToken++;
+                PeerType deviceType = Convert::toPeerType(*currentToken);
 
                 return DeviceDataContainerPtr(
                         new DeviceDataContainer(id, providedID, deviceName, password, ownerID, 
-                                                address, port, xferType, deviceInfo, locked,
-                                                timestampLastSuccessfulAuth, timestampLastFailedAuth,
-                                                failedAttempts));
+                                                cAddress, cPort, dAddress, dPort, iAddress, iPort,
+                                                xferType, deviceInfo, locked, timestampLastSuccessfulAuth,
+                                                timestampLastFailedAuth, failedAttempts, publicKey, exchangeType, deviceType));
             }
 
             static LogDataContainerPtr toLog(std::string value, DBObjectID id)
@@ -511,6 +527,7 @@ namespace DatabaseManagement_DALs
                 rules.push_back(UserAuthorizationRule(InstructionManagement_Types::InstructionSetType::DEVICE_MANAGER_ADMIN));
                 rules.push_back(UserAuthorizationRule(InstructionManagement_Types::InstructionSetType::DEVICE_MANAGER_USER));
                 rules.push_back(UserAuthorizationRule(InstructionManagement_Types::InstructionSetType::DATABASE_LOGGER));
+                rules.push_back(UserAuthorizationRule(InstructionManagement_Types::InstructionSetType::NETWORK_MANAGER_CONNECTION_LIFE_CYCLE));
 
                 return UserDataContainerPtr(new UserDataContainer(id, username, password, level, pwReset, locked, create, login, timestampLastFailedAuth, failedAttempts, rules));
             }
@@ -559,12 +576,18 @@ namespace DatabaseManagement_DALs
 
             static std::string toString(DeviceDataContainerPtr container)
             {
-                return container->toString() + "," + Convert::toString(container->getDeviceOwner()) + "," + container->getDeviceAddress() + "," + Convert::toString(container->getDevicePort())
+                return container->toString() + "," + Convert::toString(container->getDeviceOwner())
+                       + "," + container->getDeviceCommandAddress() + "," + Convert::toString(container->getDeviceCommandPort())
+                       + "," + container->getDeviceDataAddress() + "," + Convert::toString(container->getDeviceDataPort())
+                       + "," + container->getDeviceInitAddress() + "," + Convert::toString(container->getDeviceInitPort())
                        + "," + Convert::toString(container->getTransferType()) + "," + container->getDeviceProvidedID() + "," + container->getDeviceName()
                        + "," + Convert::toString(container->getPasswordData()) + "," + container->getDeviceInfo() + "," + Convert::toString(container->isDeviceLocked()) 
                        + "," + Convert::toString(container->getLastSuccessfulAuthenticationTimestamp())
                        + "," + Convert::toString(container->getLastFailedAuthenticationTimestamp())
-                       + "," + Convert::toString(container->getFailedAuthenticationAttempts());
+                       + "," + Convert::toString(container->getFailedAuthenticationAttempts())
+                       + "," + Convert::toStringFromBytes(container->getRawPublicKey())
+                       + "," + Convert::toString(container->getExpectedKeyExhange())
+                       + "," + Convert::toString(container->getDeviceType());
             }
 
             static std::string toString(LogDataContainerPtr container)

@@ -24,6 +24,7 @@
 #include <atomic>
 #include <boost/any.hpp>
 #include <boost/asio.hpp>
+#include <boost/variant.hpp>
 #include <boost/signals2.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/thread/mutex.hpp>
@@ -37,7 +38,9 @@
 #include "../../Common/Types.h"
 
 using Common_Types::Byte;
-using Common_Types::ByteVector;
+using Common_Types::IPAddress;
+using Common_Types::IPPort;
+using Common_Types::ByteData;
 
 using NetworkManagement_Types::PeerType;
 using NetworkManagement_Types::SocketPtr;
@@ -49,7 +52,7 @@ using NetworkManagement_Types::ConnectionState;
 using NetworkManagement_Types::ConnectionRequest;
 using NetworkManagement_Types::ConnectionEventID;
 using NetworkManagement_Types::ConnectionSubstate;
-using NetworkManagement_Types::RawNetworkSessionID;
+using NetworkManagement_Types::RawConnectionID;
 using NetworkManagement_Types::ConnectionInitiation;
 using NetworkManagement_Types::OperationTimeoutLength;
 using Common_Types::TransferredDataAmount;
@@ -80,7 +83,7 @@ namespace NetworkManagement_Connections
                 ConnectionInitiation initiation;
                 
                 /** The internal connection ID. */
-                RawNetworkSessionID connectionID;
+                RawConnectionID connectionID;
                 
                 /** Pointer to a valid socket object. */
                 SocketPtr socket;
@@ -148,16 +151,7 @@ namespace NetworkManagement_Connections
              * 
              * @param data the data to be sent
              */
-            void sendData(const ByteVector & data);
-            
-            /**
-             * Sends the supplied data to the associated remote peer.
-             * 
-             * Note: Not implemented.
-             * 
-             * @param data the data to be sent
-             */
-            void sendData(const boost::asio::streambuf & data); //TODO
+            void sendData(const ByteData & data);
             
             //Event Management
             /**
@@ -200,7 +194,7 @@ namespace NetworkManagement_Connections
             
             //Connection Info
             /** Retrieves the internal ID associated with this connection.\n\n@return the connection ID */
-            RawNetworkSessionID getID()                 const { return connectionID; }
+            RawConnectionID getID()                     const { return connectionID; }
             /** Retrieves the local peer type.\n\n@return the local peer type */
             PeerType getLocalPeerType()                 const { return localPeerType; }
             /** Retrieves the connection type.\n\n@return the connection type */
@@ -219,6 +213,14 @@ namespace NetworkManagement_Connections
             bool isActive()                             const { return (state == ConnectionState::ESTABLISHED); }
             /** Retrieves the number of currently pending handlers.\n\n@return the number of handlers */
             unsigned int getPendingHandlersNumber()     const { return pendingHandlers; }
+            /** Retrieves the remote IP address associated with the connection.\n\n@return the remote IP address */
+            IPAddress getRemoteAddress()                const { return socket->remote_endpoint().address().to_string(); }
+            /** Retrieves the local IP address associated with the connection.\n\n@return the local IP address */
+            IPAddress getLocalAddress()                 const { return socket->local_endpoint().address().to_string(); }
+            /** Retrieves the remote IP port associated with the connection.\n\n@return the remote IP port */
+            IPPort getRemotePort()                      const { return socket->remote_endpoint().port(); }
+            /** Retrieves the local IP port associated with the connection.\n\n@return the local IP port */
+            IPPort getLocalPort()                       const { return socket->local_endpoint().port(); }
             
             //Signals
             /**
@@ -230,7 +232,7 @@ namespace NetworkManagement_Connections
              * @return the resulting signal connection object
              */
             boost::signals2::connection onConnectEventAttach
-            (std::function<void(RawNetworkSessionID)> function)
+            (std::function<void(RawConnectionID)> function)
             {
                 return onConnect.connect(function);
             }
@@ -244,7 +246,7 @@ namespace NetworkManagement_Connections
              * @return the resulting signal connection object
              */
             boost::signals2::connection onDisconnectEventAttach
-            (std::function<void(RawNetworkSessionID)> function)
+            (std::function<void(RawConnectionID)> function)
             {
                 return onDisconnect.connect(function);
             }
@@ -258,7 +260,7 @@ namespace NetworkManagement_Connections
              * @return the resulting signal connection object
              */
             boost::signals2::connection onDataReceivedEventAttach
-            (std::function<void(ByteVector, PacketSize)> function)
+            (std::function<void(ByteData, PacketSize)> function)
             {
                 return onDataReceived.connect(function);
             }
@@ -290,7 +292,7 @@ namespace NetworkManagement_Connections
              * @return the resulting signal connection object
              */
             boost::signals2::connection canBeDestroyedEventAttach
-            (std::function<void(RawNetworkSessionID, ConnectionInitiation)> function)
+            (std::function<void(RawConnectionID, ConnectionInitiation)> function)
             {
                 return canBeDestroyed.connect(function);
             }
@@ -306,7 +308,7 @@ namespace NetworkManagement_Connections
             //Data - Writing
             boost::mutex writeDataMutex;                //pending operations data mutex
             unsigned int pendingWriteOperations = 0;    //number of currently pending write operations
-            std::queue<const ByteVector *>  pendingWritesData; //the data for all currently pending write operations
+            std::queue<const ByteData *>  pendingWritesData; //the data for all currently pending write operations
             TransferredDataAmount sent = 0;             //send data (in bytes); Note: header transmission is not included
             
             //Utils
@@ -316,7 +318,7 @@ namespace NetworkManagement_Connections
             
             //Connection
             SocketPtr socket;                           //socket pointer
-            RawNetworkSessionID connectionID;           //internal connection ID
+            RawConnectionID connectionID;               //internal connection ID
             PeerType localPeerType;                     //local peer type
             ConnectionRequest connectionRequest;        //connection request data
             ConnectionType connectionType;              //connection type
@@ -355,7 +357,7 @@ namespace NetworkManagement_Connections
              * 
              * @param data the data to be sent
              */
-            void queueNextWrite(const ByteVector & data);
+            void queueNextWrite(const ByteData & data);
             
             /**
              * Read handler for all incoming data.
@@ -382,12 +384,12 @@ namespace NetworkManagement_Connections
             std::queue<ConnectionEventID> events;           //pending events queue
             boost::unordered_map<ConnectionEventID, boost::tuples::tuple<EventType, boost::any, boost::any> *> eventsData;
             
-            boost::signals2::signal<void (RawNetworkSessionID)> onConnect;      //life cycle event
-            boost::signals2::signal<void (RawNetworkSessionID)> onDisconnect;   //life cycle event
-            boost::signals2::signal<void (ByteVector, PacketSize)> onDataReceived; //data event
-            boost::signals2::signal<void (bool)> onWriteResultReceived;                   //data event
+            boost::signals2::signal<void (RawConnectionID)> onConnect;              //life cycle event
+            boost::signals2::signal<void (RawConnectionID)> onDisconnect;           //life cycle event
+            boost::signals2::signal<void (ByteData, PacketSize)> onDataReceived;    //data event
+            boost::signals2::signal<void (bool)> onWriteResultReceived;             //data event
             //NOTE: this is used internally and the object can be assumed invalid, after a single handler finishes executing
-            boost::signals2::signal<void (RawNetworkSessionID, ConnectionInitiation)> canBeDestroyed; //life cycle event
+            boost::signals2::signal<void (RawConnectionID, ConnectionInitiation)> canBeDestroyed; //life cycle event
             
             //<editor-fold defaultstate="collapsed" desc="Event Functions">
             /**
@@ -439,7 +441,7 @@ namespace NetworkManagement_Connections
              * @param data the bytes returned by the last read operation
              * @param remainingData the number of bytes remaining to be read
              */
-            void onDataReceivedEvent(ByteVector data, PacketSize remainingData)
+            void onDataReceivedEvent(ByteData data, PacketSize remainingData)
             {
                 {
                     boost::lock_guard<boost::mutex> eventsLock(eventsMutex);

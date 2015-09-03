@@ -25,11 +25,20 @@
 
 namespace NetworkManagement_Types
 {
-    typedef unsigned long RawNetworkSessionID;
-    const RawNetworkSessionID INVALID_RAW_NETWORK_SESSION_ID = 0;
+    typedef unsigned long RawConnectionID;
+    const RawConnectionID INVALID_RAW_CONNECTION_ID = 0;
     
-    typedef unsigned long DataSessionID;
-    const DataSessionID INVALID_DATA_SESSION_ID = 0;
+    typedef unsigned long long ConnectionID;
+    const RawConnectionID INVALID_CONNECTION_ID = 0;
+    
+    typedef unsigned long TransientConnectionID;
+    const TransientConnectionID INVALID_TRANSIENT_CONNECTION_ID = 0;
+    
+    typedef unsigned int ConnectionManagerID;
+    const ConnectionManagerID INVALID_CONNECTION_MANAGER_ID = 0;
+    
+    typedef unsigned int CommandID;
+    const CommandID INVALID_COMMAND_ID = 0;
     
     typedef std::size_t BufferSize;
     const BufferSize INVALID_BUFFER_SIZE = 0;
@@ -38,16 +47,25 @@ namespace NetworkManagement_Types
     
     typedef unsigned int ConnectionEventID;
     
+    typedef unsigned long StatCounter;
+    
     typedef boost::shared_ptr<boost::asio::ip::tcp::socket> SocketPtr;
     
     enum class PeerType { INVALID, CLIENT, SERVER };
-    enum class ConnectionType { INVALID, COMMAND, DATA };
+    enum class ConnectionType { INVALID, COMMAND, DATA, INIT };
     enum class ConnectionState { INVALID, ESTABLISHED, CLOSED };
     enum class ConnectionSubstate { NONE, READING, WRITING, FAILED, DROPPED, WAITING };
     enum class ConnectionInitiation { INVALID, LOCAL, REMOTE };
+    enum class ConnectionSetupState
+    {
+        INVALID,
+        INITIATED,
+        CONNECTION_REQUEST_SENT, CONNECTION_REQUEST_SENT_CONFIRMED, CONNECTION_REQUEST_RECEIVED,
+        CONNECTION_RESPONSE_SENT, CONNECTION_RESPONSE_SENT_CONFIRMED, CONNECTION_RESPONSE_RECEIVED,
+        FAILED, COMPLETED
+    };
     
     typedef std::size_t PacketSize;
-    
 }
 
 #endif	/* NETWORK_MANAGEMENT_TYPES_H */

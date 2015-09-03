@@ -1343,7 +1343,10 @@ void SyncServer_Core::SecurityManager::processDerivedCryptoDataGenerationRequest
         {
             data = keyGenerator.getSymmetricCryptoDataFromPassphrase
                    (
+                       request.getCipher(),
+                       request.getMode(),
                        request.getRawPassword(),
+                       request.getIterationsCount(),
                        request.getSaltData(),
                        request.getIVData()
                    );
@@ -1395,13 +1398,116 @@ void SyncServer_Core::SecurityManager::processSymmetricCryptoDataGenerationReque
 
     try
     {
-        SymmetricCryptoDataContainerPtr data(keyGenerator.getSymmetricCryptoData());
+        SymmetricCryptoDataContainerPtr data;
+        
+        if(request.createNewData())
+        {
+            if(request.useDefaultParameters())
+            {
+                data = keyGenerator.getSymmetricCryptoData();
+            }
+            else
+            {
+                data = keyGenerator.getSymmetricCryptoData
+                        (request.getCipher(), request.getMode());
+            }
+        }
+        else
+        {
+            if(request.useDefaultParameters())
+            {
+                data = keyGenerator.getSymmetricCryptoData
+                        (*request.getKey(), *request.getIV());
+            }
+            else
+            {
+                data = keyGenerator.getSymmetricCryptoData
+                        (request.getCipher(), request.getMode(),
+                         *request.getKey(), *request.getIV());
+            }
+        }
+        
         promise->set_value(data);
         ++successfulRequestsNumber;
     }
     catch(const std::invalid_argument & ex)
     {
         logMessage(LogSeverity::Error, "(processSymmetricCryptoDataGenerationRequest) > "
+                        "Exception encountered during symmetric key generation: ["
+                        + std::string(ex.what()) + "].");
+        
+        promise->set_exception(boost::current_exception());
+    }
+}
+
+void SyncServer_Core::SecurityManager::processECDHSymmetricCryptoDataGenerationRequest
+(const ECDHSymmetricCryptoDataGenerationRequest & request, SymmetricCryptoDataContainerPromisePtr promise)
+{
+    {
+        boost::lock_guard<boost::mutex> dataLock(authDataMutex);
+        ++totalRequestsNumber;
+
+        auto sourceComponent = components.find(request.getSource());
+        if(sourceComponent == components.end())
+        {
+            try
+            {
+                boost::throw_exception
+                (
+                    std::logic_error("SecurityManager::processECDHSymmetricCryptoDataGenerationRequest() > "
+                        "Source [" + Convert::toString(request.getSource())
+                        + "] component not found.")
+                );
+            }
+            catch(const std::logic_error &)
+            {
+                promise->set_exception(boost::current_exception());
+                throw;
+            }
+        }
+    }
+
+    try
+    {
+        SymmetricCryptoDataContainerPtr data;
+        
+        if(request.createNewData())
+        {
+            if(request.useDefaultParameters())
+            {
+                data = keyGenerator.getSymmetricCryptoDataForDHExchange
+                        (*request.getPrivateKey(), *request.getPublicKey());
+            }
+            else
+            {
+                data = keyGenerator.getSymmetricCryptoDataForDHExchange
+                        (keyGenerator.getDefaultEllipticCurve(),
+                         *request.getPrivateKey(), *request.getPublicKey(),
+                         request.getCipher(), request.getMode());
+            }
+        }
+        else
+        {
+            if(request.useDefaultParameters())
+            {
+                data = keyGenerator.getSymmetricCryptoDataForDHExchange
+                        (*request.getPrivateKey(), *request.getPublicKey(),
+                        *request.getIV());
+            }
+            else
+            {
+                data = keyGenerator.getSymmetricCryptoDataForDHExchange
+                        (*request.getPrivateKey(), *request.getPublicKey(),
+                         *request.getIV(), request.getCipher(), request.getMode());
+            }
+        }
+        
+        promise->set_value(data);
+        ++successfulRequestsNumber;
+    }
+    catch(const std::invalid_argument & ex)
+    {
+        logMessage(LogSeverity::Error, "(processECDHSymmetricCryptoDataGenerationRequest) > "
                         "Exception encountered during symmetric key generation: ["
                         + std::string(ex.what()) + "].");
         

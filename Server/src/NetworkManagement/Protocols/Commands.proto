@@ -1,0 +1,11 @@
+package NetworkManagement_Protocols;
+
+message LifeCycleCommand_OpenDataConnection {
+    required uint32 transient_id = 1;
+    required bytes content_encryption_key_data = 2;
+    required bytes content_encryption_key_iv = 3;
+    required string sym_cipher = 4;
+    required string sym_mode = 5;
+    required bool encrypt = 6;
+    required bool compress = 7;
+}

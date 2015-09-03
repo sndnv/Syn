@@ -20,6 +20,7 @@
 
 #include <vector>
 #include <string>
+#include "../../Utilities/Strings/Instructions.h"
 #include "InstructionSet.h"
 #include "../Types/Types.h"
 #include "../../Common/Types.h"
@@ -123,37 +124,49 @@ namespace InstructionManagement_Sets
         {
             struct GetSession : public InstructionResult<SessionManagerInstructionType>
             {
-                GetSession(SessionDataContainerPtr input) : result(input) {}
+                GetSession(SessionDataContainerPtr input)
+                : InstructionResult(SessionManagerInstructionType::GET_SESSION), result(input) {}
+                
                 SessionDataContainerPtr result;
             };
             
             struct GetSessionsByConstraint : public InstructionResult<SessionManagerInstructionType>
             {
-                GetSessionsByConstraint(std::vector<SessionDataContainerPtr> input) : result(input) {}
+                GetSessionsByConstraint(std::vector<SessionDataContainerPtr> input)
+                : InstructionResult(SessionManagerInstructionType::GET_SESSIONS_BY_CONSTRAINT), result(input) {}
+                
                 std::vector<SessionDataContainerPtr> result;
             };
             
             struct ForceSessionExpiration : public InstructionResult<SessionManagerInstructionType>
             {
-                ForceSessionExpiration(bool input) : result(input) {}
+                ForceSessionExpiration(bool input)
+                : InstructionResult(SessionManagerInstructionType::FORCE_SESSION_EXPIRATION), result(input) {}
+                
                 bool result;
             };
             
             struct ForceSessionReauthentication : public InstructionResult<SessionManagerInstructionType>
             {
-                ForceSessionReauthentication(bool input) : result(input) {}
+                ForceSessionReauthentication(bool input)
+                : InstructionResult(SessionManagerInstructionType::FORCE_SESSION_REAUTHENTICATION), result(input) {}
+                
                 bool result;
             };
             
             struct ForceExpirationProcess : public InstructionResult<SessionManagerInstructionType>
             {
-                ForceExpirationProcess(bool input) : result(input) {}
+                ForceExpirationProcess(bool input)
+                : InstructionResult(SessionManagerInstructionType::FORCE_EXPIRATION_PROCESS), result(input) {}
+                
                 bool result;
             };
             
             struct DebugGetState : public InstructionResult<SessionManagerInstructionType>
             {
-                DebugGetState(std::string input) : result(input) {}
+                DebugGetState(std::string input)
+                : InstructionResult(SessionManagerInstructionType::DEBUG_GET_STATE), result(input) {}
+                
                 std::string result;
             };
         }

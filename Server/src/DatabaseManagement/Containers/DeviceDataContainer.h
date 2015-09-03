@@ -26,6 +26,7 @@
 #include "../Types/Types.h"
 #include "../../Common/Types.h"
 #include "../../SecurityManagement/Types/Types.h"
+#include "../../NetworkManagement/Types/Types.h"
 
 using DatabaseManagement_Types::DataTransferType;
 using Common_Types::UserID;
@@ -39,6 +40,8 @@ using Common_Types::INVALID_IP_PORT;
 using SecurityManagement_Types::SaltSize;
 using SecurityManagement_Types::SaltData;
 using SecurityManagement_Types::PasswordData;
+using SecurityManagement_Types::KeyExchangeType;
+using NetworkManagement_Types::PeerType;
 
 namespace DatabaseManagement_Containers
 {
@@ -54,16 +57,21 @@ namespace DatabaseManagement_Containers
              * @param pass device password
              * @param owner device owner
              * @param transferType default transfer type
+             * @param type device type
              */
             DeviceDataContainer(std::string name, PasswordData pass, UserID owner,
-                                DataTransferType transferType) 
+                                DataTransferType transferType, PeerType type) 
             : DataContainer(boost::uuids::random_generator()(), DatabaseObjectType::DEVICE),
-              deviceOwner(owner), ipAddress(INVALID_IP_ADDRESS), ipPort(INVALID_IP_PORT),
-              xferType(transferType), deviceProvidedID("UNDEFINED"), deviceName(name),
+              deviceOwner(owner), commandIPAddress(INVALID_IP_ADDRESS),
+              commandIPPort(INVALID_IP_PORT), dataIPAddress(INVALID_IP_ADDRESS),
+              dataIPPort(INVALID_IP_PORT), initIPAddress(INVALID_IP_ADDRESS),
+              initIPPort(INVALID_IP_PORT), xferType(transferType),
+              deviceProvidedID("UNDEFINED"), deviceName(name),
               password(pass), deviceInfo("UNDEFINED"), isLocked(false),
               timestampLastSuccessfulAuthentication(INVALID_DATE_TIME),
               timestampLastFailedAuthentication(INVALID_DATE_TIME),
-              failedAuthenticationAttempts(0)
+              failedAuthenticationAttempts(0), rawPublicKey("UNDEFINED"),
+              expectedKeyExchange(KeyExchangeType::INVALID), deviceType(type)
             {}
             
             /**
@@ -71,32 +79,44 @@ namespace DatabaseManagement_Containers
              * 
              * Note: Used when supplying data from the database.
              * 
-             * @param id device ID
-             * @param providedID ID provided by the device itself
-             * @param name device name
-             * @param pass device password
-             * @param owner device owner
-             * @param address device IP address
-             * @param port device IP port
-             * @param transferType default transfer type
-             * @param info device info
-             * @param locked denotes whether the device is locked or not
-             * @param lastSuccessfulAuthTime 
-             * @param lastFailedAuthTime 
-             * @param failedAuthAttempts 
+             * @param id
+             * @param providedID
+             * @param name
+             * @param pass
+             * @param owner
+             * @param commandAddress
+             * @param commandPort
+             * @param dataAddress
+             * @param dataPort
+             * @param transferType
+             * @param info
+             * @param locked
+             * @param lastSuccessfulAuthTime
+             * @param lastFailedAuthTime
+             * @param failedAuthAttempts
+             * @param publicKey
+             * @param keyExchangeType
+             * @param type
              */
             DeviceDataContainer(DeviceID id, std::string providedID, std::string name,
-                                PasswordData pass, UserID owner, IPAddress address,
-                                IPPort port, DataTransferType transferType,
-                                std::string info, bool locked, Timestamp lastSuccessfulAuthTime,
-                                Timestamp lastFailedAuthTime, unsigned int failedAuthAttempts)
+                                PasswordData pass, UserID owner, IPAddress commandAddress,
+                                IPPort commandPort, IPAddress dataAddress, IPPort dataPort,
+                                IPAddress initAddress, IPPort initPort,
+                                DataTransferType transferType, std::string info, bool locked,
+                                Timestamp lastSuccessfulAuthTime, Timestamp lastFailedAuthTime,
+                                unsigned int failedAuthAttempts, std::string publicKey,
+                                KeyExchangeType keyExchangeType, PeerType type)
             : DataContainer(id, DatabaseObjectType::DEVICE), deviceOwner(owner),
-              ipAddress(address), ipPort(port), xferType(transferType),
+              commandIPAddress(commandAddress), commandIPPort(commandPort),
+              dataIPAddress(dataAddress), dataIPPort(dataPort), initIPAddress(initAddress),
+              initIPPort(initPort), xferType(transferType),
               deviceProvidedID(providedID), deviceName(name),
               password(pass), deviceInfo(info), isLocked(locked),
               timestampLastSuccessfulAuthentication(lastSuccessfulAuthTime),
               timestampLastFailedAuthentication(lastFailedAuthTime),
-              failedAuthenticationAttempts(failedAuthAttempts)
+              failedAuthenticationAttempts(failedAuthAttempts),
+              rawPublicKey(publicKey), expectedKeyExchange(keyExchangeType),
+              deviceType(type)
             {}
             
             DeviceDataContainer() = delete;
@@ -104,15 +124,22 @@ namespace DatabaseManagement_Containers
             ~DeviceDataContainer() = default;
             DeviceDataContainer& operator=(const DeviceDataContainer&) = default;
             
-            DeviceID getDeviceID()             const { return containerID; }
-            UserID getDeviceOwner()            const { return deviceOwner; }
-            IPAddress getDeviceAddress()       const { return ipAddress; }
-            IPPort getDevicePort()             const { return ipPort; }
-            DataTransferType getTransferType() const { return xferType; }
-            std::string getDeviceProvidedID()  const { return deviceProvidedID; }
-            std::string getDeviceName()        const { return deviceName; }
-            std::string getDeviceInfo()        const { return deviceInfo; }
-            bool isDeviceLocked()              const { return isLocked; }
+            DeviceID getDeviceID()              const { return containerID; }
+            UserID getDeviceOwner()             const { return deviceOwner; }
+            IPAddress getDeviceCommandAddress() const { return commandIPAddress; }
+            IPPort getDeviceCommandPort()       const { return commandIPPort; }
+            IPAddress getDeviceDataAddress()    const { return dataIPAddress; }
+            IPPort getDeviceDataPort()          const { return dataIPPort; }
+            IPAddress getDeviceInitAddress()    const { return initIPAddress; }
+            IPPort getDeviceInitPort()          const { return initIPPort; }
+            DataTransferType getTransferType()  const { return xferType; }
+            std::string getDeviceProvidedID()   const { return deviceProvidedID; }
+            std::string getDeviceName()         const { return deviceName; }
+            std::string getDeviceInfo()         const { return deviceInfo; }
+            bool isDeviceLocked()               const { return isLocked; }
+            std::string getRawPublicKey()       const { return rawPublicKey; }
+            KeyExchangeType getExpectedKeyExhange()                 const { return expectedKeyExchange; }
+            PeerType getDeviceType()                                const { return deviceType; }
             Timestamp getLastSuccessfulAuthenticationTimestamp()    const { return timestampLastSuccessfulAuthentication; }
             Timestamp getLastFailedAuthenticationTimestamp()        const { return timestampLastFailedAuthentication; }
             unsigned int getFailedAuthenticationAttempts()          const { return failedAuthenticationAttempts; }
@@ -125,13 +152,23 @@ namespace DatabaseManagement_Containers
             }
             
             void resetPassword(const PasswordData & newPassword)    { if(newPassword.size() > 0) { password = newPassword; modified = true; } }
-            void setDeviceAddress(const IPAddress newAddress)       { ipAddress = newAddress; modified = true; }
-            void setDevicePort(const IPPort newPort)                { ipPort = newPort; modified = true; }
+            void setDeviceCommandAddress(const IPAddress newAddress){ commandIPAddress = newAddress; modified = true; }
+            void setDeviceCommandPort(const IPPort newPort)         { commandIPPort = newPort; modified = true; }
+            void setDeviceDataAddress(const IPAddress newAddress)   { dataIPAddress = newAddress; modified = true; }
+            void setDeviceDataPort(const IPPort newPort)            { dataIPPort = newPort; modified = true; }
+            void setDeviceInitAddress(const IPAddress newAddress)   { initIPAddress = newAddress; modified = true; }
+            void setDeviceInitPort(const IPPort newPort)            { initIPPort = newPort; modified = true; }
             void setTransferType(const DataTransferType newType)    { xferType = newType; modified = true; }
             void setDeviceProvidedID(const std::string newID)       { if(!newID.empty()) { deviceProvidedID = newID; modified = true; } }
             void setDeviceName(const std::string newName)           { if(!newName.empty()) { deviceName = newName; modified = true; } }
             void setDeviceInfo(const std::string newInfo)           { if(!newInfo.empty()) { deviceInfo = newInfo; modified = true; } }
             void setLockedState(const bool locked)                  { isLocked = locked; modified = true; }
+            
+            void resetRawPublicKey(const std::string & publicKey, KeyExchangeType exchangeType)
+            {
+                rawPublicKey = publicKey;
+                expectedKeyExchange = exchangeType;
+            }
             
             void setLastSuccessfulAuthenticationTimestamp()
             {
@@ -156,8 +193,12 @@ namespace DatabaseManagement_Containers
             
         private:
             UserID deviceOwner;
-            IPAddress ipAddress;
-            IPPort ipPort;
+            IPAddress commandIPAddress;
+            IPPort commandIPPort;
+            IPAddress dataIPAddress;
+            IPPort dataIPPort;
+            IPAddress initIPAddress;
+            IPPort initIPPort;
             DataTransferType xferType;
             std::string deviceProvidedID;
             std::string deviceName;
@@ -167,6 +208,9 @@ namespace DatabaseManagement_Containers
             Timestamp timestampLastSuccessfulAuthentication;
             Timestamp timestampLastFailedAuthentication;
             unsigned int failedAuthenticationAttempts;
+            std::string rawPublicKey;
+            KeyExchangeType expectedKeyExchange;
+            PeerType deviceType;
     };
     
     typedef boost::shared_ptr<DatabaseManagement_Containers::DeviceDataContainer> DeviceDataContainerPtr;

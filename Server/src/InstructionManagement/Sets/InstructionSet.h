@@ -25,6 +25,7 @@
 #include "../Types/Types.h"
 #include "../../Common/Types.h"
 #include "../../SecurityManagement/Types/SecurityTokens.h"
+#include "../../Utilities/Strings/Instructions.h"
 
 namespace InstructionManagement_Sets
 {
@@ -89,6 +90,25 @@ namespace InstructionManagement_Sets
     };
     
     /**
+     * Base class for all instruction results.
+     */
+    class InstructionResultBase
+    {
+        public:
+            virtual ~InstructionResultBase() {}
+            
+            /** Retrieves the name of the instruction result type.\n\n@return the name of the instruction result type */
+            std::string getInstructionResultTypeName() const { return instructionResultTypeName; }
+            
+        protected:
+            InstructionResultBase(std::string typeName)
+            : instructionResultTypeName(typeName) {}
+            
+            std::string instructionResultTypeName;
+    };
+    typedef boost::shared_ptr<InstructionResultBase> InstructionResultBasePtr;
+    
+    /**
      * Base class template for instruction results.
      * 
      * Note: Provides no functionality.
@@ -97,11 +117,17 @@ namespace InstructionManagement_Sets
      * that will be processed
      */
     template <typename TInstructionTypeEnum>
-    struct InstructionResult
+    struct InstructionResult : public InstructionResultBase
     {
         //restricts the template parameter
         static_assert(std::is_enum<TInstructionTypeEnum>::value, "InstructionResult > Supplied instruction type for <TInstructionTypeEnum> is not an enum class.");
-        virtual ~InstructionResult() {}
+        
+        public:
+            virtual ~InstructionResult() {}
+            
+        protected:
+            InstructionResult(TInstructionTypeEnum instructionType)
+            : InstructionResultBase(Utilities::Strings::toString(instructionType)) {}
     };
     
     /**
@@ -114,12 +140,17 @@ namespace InstructionManagement_Sets
             
             /** Retrieves the type of the parent instruction set.\n\n@return the instruction set type */
             InstructionManagement_Types::InstructionSetType getParentSet() const { return parentSet; }
+            /** Retrieves the name of the instruction type.\n\n@return the name of the instruction type */
+            std::string getInstructionTypeName() const { return instructionTypeName; }
             /** Validates the instruction.\n\n@return <code>true</code>, if the instruction and its arguments (if any) are valid */
             virtual bool isValid() = 0;
             
         protected:
-            InstructionBase(InstructionManagement_Types::InstructionSetType setType) : parentSet(setType) {}
+            InstructionBase(InstructionManagement_Types::InstructionSetType setType, std::string typeName)
+            : parentSet(setType), instructionTypeName(typeName) {}
+            
             InstructionManagement_Types::InstructionSetType parentSet;
+            std::string instructionTypeName;
     };
     typedef boost::shared_ptr<InstructionBase> InstructionBasePtr;
     
@@ -149,7 +180,9 @@ namespace InstructionManagement_Sets
             SecurityManagement_Types::AuthorizationTokenPtr getToken() const { return authorizationToken; }
             
         protected:
-            Instruction(InstructionManagement_Types::InstructionSetType setType, TInstructionTypeEnum instructionType) : InstructionBase(setType), type(instructionType) {}
+            Instruction(InstructionManagement_Types::InstructionSetType setType, TInstructionTypeEnum instructionType)
+            : InstructionBase(setType, Utilities::Strings::toString(instructionType)), type(instructionType) {}
+            
             InstructionResultPromise<TInstructionTypeEnum> promise;
             TInstructionTypeEnum type;
             

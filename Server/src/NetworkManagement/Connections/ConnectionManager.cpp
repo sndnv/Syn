@@ -106,7 +106,7 @@ void NetworkManagement_Connections::ConnectionManager::createLocalConnection
     if(stopManager)
         return;
     
-    RawNetworkSessionID connectionID = getNewSessionID();
+    RawConnectionID connectionID = getNewConnectionID();
     ++initiatedOutgoingConnections;
     
     if(!error)
@@ -117,7 +117,7 @@ void NetworkManagement_Connections::ConnectionManager::createLocalConnection
                                                          connectionID,
                                                          localSocket,
                                                          defaultReadBufferSize};
-        
+                                                         
         ConnectionRequest requestParams{localPeerType, managerType};
         ConnectionPtr newConnection(new Connection(connectionParams, requestParams, nullptr, debugLogger));
         
@@ -126,12 +126,12 @@ void NetworkManagement_Connections::ConnectionManager::createLocalConnection
         
         newConnection->canBeDestroyedEventAttach(boost::bind(&NetworkManagement_Connections::ConnectionManager::destroyConnection,
                                                              this, _1, _2));
-
+        
         {
             boost::lock_guard<boost::mutex> connectionDataLock(outgoingConnectionDataMutex);
-            outgoingConnections.insert(std::pair<RawNetworkSessionID, ConnectionPtr>(connectionID, newConnection));
+            outgoingConnections.insert(std::pair<RawConnectionID, ConnectionPtr>(connectionID, newConnection));
         }
-        
+                                                             
         newConnection->enableLifecycleEvents();
     }
     else
@@ -149,7 +149,7 @@ void NetworkManagement_Connections::ConnectionManager::createRemoteConnection(So
     if(stopManager)
         return;
     
-    RawNetworkSessionID connectionID = getNewSessionID();
+    RawConnectionID connectionID = getNewConnectionID();
     ++acceptedIncomingConnections;
     
     Connection::ConnectionParamters connectionParams{managerType,
@@ -169,7 +169,7 @@ void NetworkManagement_Connections::ConnectionManager::createRemoteConnection(So
     
     {
         boost::lock_guard<boost::mutex> connectionDataLock(incomingConnectionDataMutex);
-        incomingConnections.insert(std::pair<RawNetworkSessionID, ConnectionPtr>(connectionID, newConnection));
+        incomingConnections.insert(std::pair<RawConnectionID, ConnectionPtr>(connectionID, newConnection));
     }
     
     if(connectionRequestTimeout > 0)
@@ -182,7 +182,7 @@ void NetworkManagement_Connections::ConnectionManager::createRemoteConnection(So
             auto connectionTimerData = std::pair<ConnectionPtr, boost::asio::deadline_timer *>
                     (newConnection, newTimer);
             
-            timerData.insert(std::pair<RawNetworkSessionID, std::pair<ConnectionPtr, boost::asio::deadline_timer *>>
+            timerData.insert(std::pair<RawConnectionID, std::pair<ConnectionPtr, boost::asio::deadline_timer *>>
                     (connectionID, connectionTimerData));
         }
         
@@ -196,7 +196,7 @@ void NetworkManagement_Connections::ConnectionManager::createRemoteConnection(So
 }
 
 void NetworkManagement_Connections::ConnectionManager::timeoutConnection
-(const boost::system::error_code & timeoutError, RawNetworkSessionID connectionID)
+(const boost::system::error_code & timeoutError, RawConnectionID connectionID)
 {
     if(stopManager)
         return;
@@ -227,7 +227,7 @@ void NetworkManagement_Connections::ConnectionManager::timeoutConnection
 }
 
 void NetworkManagement_Connections::ConnectionManager::destroyConnection
-(RawNetworkSessionID connectionID, ConnectionInitiation initiation)
+(RawConnectionID connectionID, ConnectionInitiation initiation)
 {
     if(stopManager)
         return;
@@ -286,7 +286,7 @@ void NetworkManagement_Connections::ConnectionManager::destroyConnection
 }
 
 void NetworkManagement_Connections::ConnectionManager::onConnectHandler
-(RawNetworkSessionID connectionID, ConnectionInitiation initiation)
+(RawConnectionID connectionID, ConnectionInitiation initiation)
 {
     if(stopManager)
         return;
@@ -379,7 +379,6 @@ void NetworkManagement_Connections::ConnectionManager::queueConnectionForDestruc
     newDataLockCondition.notify_all();
 }
 
-//TODO - one connection was closed but stuck in the map; thread failed to dispose of it (why? / maybe handlers > 0)
 void NetworkManagement_Connections::ConnectionManager::disconnectedConnectionsThreadHandler()
 {
     debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "ConnectionManager / "

@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef NETWORKCOMMANDMANAGER_H
-#define	NETWORKCOMMANDMANAGER_H
+#ifndef CONNECTIONMANAGER_H
+#define	CONNECTIONMANAGER_H
 
 #include <string>
 #include <atomic>
@@ -40,8 +40,8 @@ using NetworkManagement_Types::BufferSize;
 using NetworkManagement_Types::ConnectionRequest;
 using NetworkManagement_Types::ConnectionInitiation;
 using NetworkManagement_Types::OperationTimeoutLength;
-using NetworkManagement_Types::RawNetworkSessionID;
-using NetworkManagement_Types::INVALID_RAW_NETWORK_SESSION_ID;
+using NetworkManagement_Types::RawConnectionID;
+using NetworkManagement_Types::INVALID_RAW_CONNECTION_ID;
 using NetworkManagement_Connections::Connection;
 using NetworkManagement_Connections::ConnectionPtr;
 using Common_Types::IPPort;
@@ -54,7 +54,7 @@ namespace NetworkManagement_Connections
     /**
      * Class representing basic TCP connection management.\n\n
      * 
-     * * New connections to remote peers are create via <code>initiateNewConnection(IPAddress, IPPort)</code>;\n
+     * * New connections to remote peers are created via <code>initiateNewConnection(IPAddress, IPPort)</code>;\n
      * * New connections from remote peers are created automatically;\n
      * 
      * * <code>onConnectionCreated</code> event is fired when either a local or a remote connection has been
@@ -154,22 +154,22 @@ namespace NetworkManagement_Connections
             /** Retrieves the number of currently active outgoing connections.\n\n@return the number of outgoing connections */
             unsigned long getOutgoingConnectionsCount()             const { return outgoingConnections.size(); }
             /** Retrieves the internal ID of the last connection.\n\n@return the last connection ID */
-            RawNetworkSessionID getLastConnectionID()               const { return newSessionID; }
+            RawConnectionID getLastConnectionID()                   const { return newConnectionID; }
             /** Retrieves the number of closed connections waiting to be destroyed.\n\n@return the number of connections pending destruction */
             unsigned long getPendingDestroyedConnectionsCount()     const { return disconnectedConnections.size(); }
             /** Retrieves the total number of outgoing connections that have been made.\n\n@return the number of outgoing connections */
-            RawNetworkSessionID getTotalOutgoingConnectionsCount()  const { return initiatedOutgoingConnections; }
+            unsigned long long getTotalOutgoingConnectionsCount()   const { return initiatedOutgoingConnections; }
             /** Retrieves the total number of incoming connections that have been made.\n\n@return the number of incoming connections */
-            RawNetworkSessionID getTotalIncomingConnectionsCount()  const { return acceptedIncomingConnections; }
+            unsigned long long getTotalIncomingConnectionsCount()   const { return acceptedIncomingConnections; }
             
         private:
-            boost::mutex sessionIDMutex;
-            RawNetworkSessionID newSessionID = INVALID_RAW_NETWORK_SESSION_ID;
+            boost::mutex connectionIDMutex;
+            RawConnectionID newConnectionID = INVALID_RAW_CONNECTION_ID;
             Utilities::FileLogger * debugLogger; //debugging logger
             
             //Statistics
-            RawNetworkSessionID initiatedOutgoingConnections = 0;   //number of initiated outgoing connections
-            RawNetworkSessionID acceptedIncomingConnections = 0;    //number of accepted incoming connections
+            unsigned long long initiatedOutgoingConnections = 0;   //number of initiated outgoing connections
+            unsigned long long acceptedIncomingConnections = 0;    //number of accepted incoming connections
             
             //Configuration
             ConnectionType managerType;         //manager and child connections type
@@ -189,13 +189,13 @@ namespace NetworkManagement_Connections
             
             //Deadline timers data
             boost::mutex deadlineTimerMutex;
-            boost::unordered_map<RawNetworkSessionID, std::pair<ConnectionPtr, boost::asio::deadline_timer *>> timerData;
+            boost::unordered_map<RawConnectionID, std::pair<ConnectionPtr, boost::asio::deadline_timer *>> timerData;
             
             //Incoming & outgoing connections containers
             boost::mutex incomingConnectionDataMutex;
-            boost::unordered_map<RawNetworkSessionID, ConnectionPtr> incomingConnections;
+            boost::unordered_map<RawConnectionID, ConnectionPtr> incomingConnections;
             boost::mutex outgoingConnectionDataMutex;
-            boost::unordered_map<RawNetworkSessionID, ConnectionPtr> outgoingConnections;
+            boost::unordered_map<RawConnectionID, ConnectionPtr> outgoingConnections;
             
             std::vector<ConnectionPtr> disconnectedConnections; //connections waiting for destruction
             
@@ -246,7 +246,7 @@ namespace NetworkManagement_Connections
              * @param connectionID
              * @param initiation
              */
-            void destroyConnection(RawNetworkSessionID connectionID, ConnectionInitiation initiation);
+            void destroyConnection(RawConnectionID connectionID, ConnectionInitiation initiation);
             
             /**
              * Connection timeout handler.
@@ -257,7 +257,7 @@ namespace NetworkManagement_Connections
              * @param timeoutError error encountered during the timeout operation, if any
              * @param connectionID the ID of the connection associated with the timeout
              */
-            void timeoutConnection(const boost::system::error_code & timeoutError, RawNetworkSessionID connectionID);
+            void timeoutConnection(const boost::system::error_code & timeoutError, RawConnectionID connectionID);
             
             /**
              * Handler for <code>onConnect</code> events from new <code>Connection</code> objects.
@@ -265,7 +265,7 @@ namespace NetworkManagement_Connections
              * @param connectionID the ID of the connection
              * @param initiation the connection initiation side
              */
-            void onConnectHandler(RawNetworkSessionID connectionID, ConnectionInitiation initiation);
+            void onConnectHandler(RawConnectionID connectionID, ConnectionInitiation initiation);
             
             /**
              * IO Service thread handler.
@@ -291,13 +291,15 @@ namespace NetworkManagement_Connections
              * 
              * @return the new ID
              */
-            RawNetworkSessionID getNewSessionID()
+            RawConnectionID getNewConnectionID()
             {
-                boost::lock_guard<boost::mutex> sessionIDLock(sessionIDMutex);
-                return ++newSessionID;
+                boost::lock_guard<boost::mutex> sessionIDLock(connectionIDMutex);
+                return ++newConnectionID;
             }
     };
+    
+    typedef boost::shared_ptr<NetworkManagement_Connections::ConnectionManager> ConnectionManagerPtr;
 }
 
-#endif	/* NETWORKCOMMANDMANAGER_H */
+#endif	/* CONNECTIONMANAGER_H */
 

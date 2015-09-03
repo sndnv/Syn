@@ -18,6 +18,7 @@
 #ifndef INSTRUCTION_MANAGEMENT_TYPES_H
 #define	INSTRUCTION_MANAGEMENT_TYPES_H
 
+//Note: 'Utilities/Strings/Instructions.cpp' needs to be updated when changes to enums are made.
 namespace InstructionManagement_Types
 {
     typedef unsigned int InstructionSourceID;
@@ -26,7 +27,8 @@ namespace InstructionManagement_Types
     enum class InstructionSetType
     {
         INVALID,
-        CONNECTION_MANAGER, //Networking
+        CONNECTION_MANAGER, NETWORK_MANAGER_ADMIN, NETWORK_MANAGER_USER, NETWORK_MANAGER_STATE, //Networking
+        NETWORK_MANAGER_CONNECTION_LIFE_CYCLE, NETWORK_MANAGER_CONNECTION_BRIDGING , //Networking
         DATABASE_MANAGER, DAL, DAL_CACHE, DAL_QUEUE, DAL_MIGRATOR, DAL_DISTRIBUTED_CACHE, //Database Management
         STORAGE_MANAGER, //Storage
         SESSION_MANAGER, //Sessions
@@ -143,7 +145,9 @@ namespace InstructionManagement_Types
         
         /* FUNCTIONS_SESSIONS */
         GET_SESSIONS_BY_CONSTRAINT,
-        GET_SESSION
+        GET_SESSION,
+        
+        INVALID
     };
     
     enum class SessionManagerInstructionType
@@ -153,7 +157,8 @@ namespace InstructionManagement_Types
         FORCE_SESSION_EXPIRATION,
         FORCE_SESSION_REAUTHENTICATION,
         FORCE_EXPIRATION_PROCESS,
-        DEBUG_GET_STATE
+        DEBUG_GET_STATE,
+        INVALID
     };
     
     enum class UserManagerAdminInstructionType
@@ -171,13 +176,15 @@ namespace InstructionManagement_Types
         ADD_AUTHORIZATION_RULE,
         REMOVE_AUTHORIZATION_RULE,
         CLEAR_AUTHORIZATION_RULES,
-        DEBUG_GET_STATE
+        DEBUG_GET_STATE,
+        INVALID
     };
     
     enum class UserManagerSelfInstructionType
     {
         GET_USER,
-        RESET_PASSWORD
+        RESET_PASSWORD,
+        INVALID
     };
     
     enum class DeviceManagerAdminInstructionType
@@ -192,7 +199,8 @@ namespace InstructionManagement_Types
         LOCK_DEVICE,
         UNLOCK_DEVICE,
         RESET_FAILED_AUTHENTICATION_ATTEMPTS,
-        DEBUG_GET_STATE
+        DEBUG_GET_STATE,
+        INVALID
     };
     
     enum class DeviceManagerUserInstructionType
@@ -206,7 +214,8 @@ namespace InstructionManagement_Types
         UPDATE_GENERAL_INFO,
         LOCK_DEVICE,
         UNLOCK_DEVICE,
-        RESET_FAILED_AUTHENTICATION_ATTEMPTS
+        RESET_FAILED_AUTHENTICATION_ATTEMPTS,
+        INVALID
     };
     
     enum class DatabaseLoggerInstructionType
@@ -215,7 +224,51 @@ namespace InstructionManagement_Types
         GET_LOGS_BY_CONSTRAINT,
         UPDATE_SOURCE_LOGGING_LEVEL,
         UPDATE_DEFAULT_LOGGING_LEVEL,
-        DEBUG_GET_STATE
+        DEBUG_GET_STATE,
+        INVALID
+    };
+    
+    enum class NetworkManagerAdminInstructionType
+    {
+        START_CONNECTION_MANAGER,
+        STOP_CONNECTION_MANAGER,
+        RESTART_CONNECTION_MANAGER,
+        INVALID
+    };
+    
+    enum class NetworkManagerUserInstructionType
+    {
+        SEND_INSTRUCTION,
+        SEND_DATA,
+        INVALID
+    };
+    
+    enum class NetworkManagerStateInstructionType
+    {
+        GET_CONNECTION,
+        GET_CONNECTIONS_BY_TYPE,
+        GET_CONNECTIONS_BY_STATE,
+        DEBUG_GET_STATE,
+        INVALID
+    };
+    
+    enum class NetworkManagerConnectionLifeCycleInstructionType
+    {
+        TERMINATE,
+        KEEP_ALIVE,
+        RELOAD_KEYS,
+        REAUTHENTICATE,
+        OPEN_INIT_CONNECTION,
+        OPEN_DATA_CONNECTION,
+        INVALID
+    };
+    
+    enum class NetworkManagerConnectionBridgingInstructionType
+    {
+        OPEN_BRIDGE,
+        CLOSE_BRIDGE,
+        FORWARD_PAYLOAD,
+        INVALID
     };
 }
 

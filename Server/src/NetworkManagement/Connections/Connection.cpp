@@ -111,7 +111,7 @@ void NetworkManagement_Connections::Connection::disconnect()
     canBeDestroyedEvent();
 }
 
-void NetworkManagement_Connections::Connection::sendData(const ByteVector & data)
+void NetworkManagement_Connections::Connection::sendData(const ByteData & data)
 {
     if(closeConnection)
         return;
@@ -122,11 +122,6 @@ void NetworkManagement_Connections::Connection::sendData(const ByteVector & data
         pendingWritesData.push(&data);
     else
         queueNextWrite(data);
-}
-
-void NetworkManagement_Connections::Connection::sendData(const boost::asio::streambuf & data)
-{
-    //TODO 
 }
 
 void NetworkManagement_Connections::Connection::enableLifecycleEvents()
@@ -260,7 +255,7 @@ void NetworkManagement_Connections::Connection::enableDataEvents()
             {
                 case EventType::DATA_RECEIVED:
                 {
-                    onDataReceived(boost::any_cast<ByteVector>(currentEvent->get<1>()),
+                    onDataReceived(boost::any_cast<ByteData>(currentEvent->get<1>()),
                                    boost::any_cast<PacketSize>(currentEvent->get<2>()));
                 } break;
                 
@@ -306,9 +301,9 @@ void NetworkManagement_Connections::Connection::initialReadRequestHandler
             boost::asio::streambuf::const_buffers_type rawRequest = readBuffer->data(); //retrieves the incoming data
             
             ConnectionRequest request =
-                    ConnectionRequest::fromBytes(ByteVector(boost::asio::buffers_begin(rawRequest),
-                                                            (boost::asio::buffers_begin(rawRequest)
-                                                             + ConnectionRequest::BYTE_LENGTH)));
+                    ConnectionRequest::fromBytes(ByteData(boost::asio::buffers_begin(rawRequest),
+                                                          (boost::asio::buffers_begin(rawRequest)
+                                                           + ConnectionRequest::BYTE_LENGTH)));
             
             debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "Connection / "
                 + Convert::toString(connectionType) + " (Initial Read Request Handler) ["
@@ -406,7 +401,7 @@ void NetworkManagement_Connections::Connection::queueNextRead(BufferSize readSiz
             readStrand.wrap(boost::bind(&NetworkManagement_Connections::Connection::readHandler, this, _1, _2)));
 }
 
-void NetworkManagement_Connections::Connection::queueNextWrite(const ByteVector & data)
+void NetworkManagement_Connections::Connection::queueNextWrite(const ByteData & data)
 {
     if(closeConnection)
         return;
@@ -414,7 +409,7 @@ void NetworkManagement_Connections::Connection::queueNextWrite(const ByteVector 
     lastSubstate = ConnectionSubstate::WRITING;
 
     //creates the header packet and puts it with the data in a new buffer sequence
-    ByteVector headerData(HeaderPacket::BYTE_LENGTH);
+    ByteData headerData;
     HeaderPacket{data.size()}.toNetworkBytes(headerData);
     std::vector<boost::asio::const_buffer> sendBuffer;
     sendBuffer.push_back(boost::asio::buffer(headerData, HeaderPacket::BYTE_LENGTH));
@@ -440,7 +435,7 @@ void NetworkManagement_Connections::Connection::readHandler
         
         readBuffer->commit(bytesRead); //makes the incoming data available
         boost::asio::streambuf::const_buffers_type rawData = readBuffer->data(); //retrieves the incoming data
-        ByteVector data(boost::asio::buffers_begin(rawData), boost::asio::buffers_begin(rawData) + bytesRead);
+        ByteData data(boost::asio::buffers_begin(rawData), boost::asio::buffers_begin(rawData) + bytesRead);
         readBuffer->consume(bytesRead); //removes the incoming data from the buffer
         
         //TODO - optimise?

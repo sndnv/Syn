@@ -18,11 +18,16 @@
 #ifndef SECURITY_MANAGEMENT_TYPES_H
 #define	SECURITY_MANAGEMENT_TYPES_H
 
+#include <string>
 #include <limits>
 #include <vector>
 #include <cryptopp/config.h>
 #include <cryptopp/eccrypto.h>
 #include <cryptopp/rsa.h>
+#include <cryptopp/pssr.h>
+#include <cryptopp/dh.h>
+
+#include "../../Common/Types.h"
 
 namespace SecurityManagement_Types
 {
@@ -43,10 +48,19 @@ namespace SecurityManagement_Types
     typedef CryptoPP::SecByteBlock HashData;
     typedef CryptoPP::SecByteBlock RandomData;
     typedef CryptoPP::SecByteBlock PasswordData; // == SaltData+HashData
+    typedef Common_Types::ByteData PlaintextData;
+    typedef Common_Types::ByteData CiphertextData;
+    typedef Common_Types::ByteData SignedData;
+    typedef Common_Types::ByteData MixedData; //for storing cipher- and plaintext data
     
+    const PlaintextData EMPTY_PLAINTEXT_DATA = "";
+    const CiphertextData EMPTY_CIPHERTEXT_DATA = "";
+    const SignedData EMPTY_SIGNED_DATA = "";
+    
+    enum class KeyExchangeType { INVALID, RSA, EC_DH };
+    enum class AsymmetricCipherType { INVALID, RSA };
     enum class SymmetricCipherType { INVALID, AES, TWOFISH, SERPENT };
     enum class AuthenticatedSymmetricCipherModeType { INVALID, GCM, CCM, EAX };
-    enum class UnauthenticatedSymmetricCipherModeType { INVALID, CBC, PCBC, CFB, OFB, CTR }; //TODO - support?
     enum class PasswordDerivationFunction { INVALID, PBKDF2_SHA256, PBKDF2_SHA512, PBKDF2_SHA3_256, PBKDF2_SHA3_512 };
     enum class EllipticCurveType { INVALID, P192R1, P224R1, P256R1, P384R1, P521R1, BP_P160R1, BP_P192R1, BP_P224R1, BP_P256R1, BP_P320R1, BP_P384R1, BP_P512R1 };
     
@@ -69,12 +83,24 @@ namespace SecurityManagement_Types
         RIPEMD_160, RIPEMD_256, RIPEMD_320      //RIPEMD
     };
     
+    typedef CryptoPP::RSA::PrivateKey RSAPrivateKey;
+    typedef CryptoPP::RSA::PublicKey RSAPublicKey;
+    typedef CryptoPP::DL_PrivateKey_EC<CryptoPP::ECP> ECPrivateKey;
+    typedef CryptoPP::DL_PublicKey_EC<CryptoPP::ECP> ECPublicKey;
+    
+    //ECDH
+    typedef CryptoPP::ECDH<CryptoPP::ECP>::Domain ECDH;
+    typedef CryptoPP::SecByteBlock ECDHPrivateKey;
+    typedef CryptoPP::SecByteBlock ECDHPublicKey;
+    
     //                      prime curves , COFACTOR_OPTION                             , DHAES_MODE
     typedef CryptoPP::ECIES<CryptoPP::ECP, CryptoPP::IncompatibleCofactorMultiplication, true>::Decryptor ECDecryptor;
     typedef CryptoPP::ECIES<CryptoPP::ECP, CryptoPP::IncompatibleCofactorMultiplication, true>::Encryptor ECEncryptor;
     
     typedef CryptoPP::RSAES_OAEP_SHA_Decryptor RSADecryptor;
     typedef CryptoPP::RSAES_OAEP_SHA_Encryptor RSAEncryptor;
+    typedef CryptoPP::RSASS<CryptoPP::PSSR, CryptoPP::SHA256>::Signer RSASigner;
+    typedef CryptoPP::RSASS<CryptoPP::PSSR, CryptoPP::SHA256>::Verifier RSAVerifier;
     
     enum class SecurableComponentType
     {
@@ -107,6 +133,15 @@ namespace SecurityManagement_Types
         CONSTANT, //1
         LINEAR,   //N
         QUADRATIC //N^2
+    };
+    
+    /** Structure for holding local peer authentication data. */
+    struct LocalPeerAuthenticationEntry
+    {
+        /** Device ID as register on remote server. */
+        Common_Types::DeviceID id;
+        /** Plaintext password, as expected on remote server. */
+        std::string plaintextPassword;
     };
 }
 

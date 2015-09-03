@@ -22,6 +22,7 @@
 #include <string>
 #include <boost/any.hpp>
 
+#include "../../Utilities/Strings/Instructions.h"
 #include "InstructionSet.h"
 #include "../Types/Types.h"
 #include "../../EntityManagement/Types/Types.h"
@@ -235,97 +236,129 @@ namespace InstructionManagement_Sets
         {
             struct AdminGetUser : public InstructionResult<UserManagerAdminInstructionType>
             {
-                AdminGetUser(UserDataContainerPtr input) : result(input) {}
+                AdminGetUser(UserDataContainerPtr input)
+                : InstructionResult(UserManagerAdminInstructionType::GET_USER), result(input) {}
+                
                 UserDataContainerPtr result;
             };
             
             struct AdminGetUsersByConstraint : public InstructionResult<UserManagerAdminInstructionType>
             {
-                AdminGetUsersByConstraint(std::vector<UserDataContainerPtr> input) : result(input) {}
+                AdminGetUsersByConstraint(std::vector<UserDataContainerPtr> input)
+                : InstructionResult(UserManagerAdminInstructionType::GET_USERS_BY_CONSTRAINT), result(input) {}
+                
                 std::vector<UserDataContainerPtr> result;
             };
             
             struct AdminAddUser : public InstructionResult<UserManagerAdminInstructionType>
             {
-                AdminAddUser(bool input) : result(input) {}
+                AdminAddUser(bool input)
+                : InstructionResult(UserManagerAdminInstructionType::ADD_USER), result(input) {}
+                
                 bool result;
             };
             
             struct AdminRemoveUser : public InstructionResult<UserManagerAdminInstructionType>
             {
-                AdminRemoveUser(bool input) : result(input) {}
+                AdminRemoveUser(bool input)
+                : InstructionResult(UserManagerAdminInstructionType::REMOVE_USER), result(input) {}
+                
                 bool result;
             };
             
             struct AdminResetPassword : public InstructionResult<UserManagerAdminInstructionType>
             {
-                AdminResetPassword(bool input) : result(input) {}
+                AdminResetPassword(bool input)
+                : InstructionResult(UserManagerAdminInstructionType::RESET_PASSWORD), result(input) {}
+                
                 bool result;
             };
             
             struct AdminForcePasswordReset : public InstructionResult<UserManagerAdminInstructionType>
             {
-                AdminForcePasswordReset(bool input) : result(input) {}
+                AdminForcePasswordReset(bool input)
+                : InstructionResult(UserManagerAdminInstructionType::FORCE_PASSWORD_RESET), result(input) {}
+                
                 bool result;
             };
             
             struct AdminLockUser : public InstructionResult<UserManagerAdminInstructionType>
             {
-                AdminLockUser(bool input) : result(input) {}
+                AdminLockUser(bool input)
+                : InstructionResult(UserManagerAdminInstructionType::LOCK_USER), result(input) {}
+                
                 bool result;
             };
             
             struct AdminUnlockUser : public InstructionResult<UserManagerAdminInstructionType>
             {
-                AdminUnlockUser(bool input) : result(input) {}
+                AdminUnlockUser(bool input)
+                : InstructionResult(UserManagerAdminInstructionType::UNLOCK_USER), result(input) {}
+                
                 bool result;
             };
             
             struct AdminUpdateAccessLevel : public InstructionResult<UserManagerAdminInstructionType>
             {
-                AdminUpdateAccessLevel(bool input) : result(input) {}
+                AdminUpdateAccessLevel(bool input)
+                : InstructionResult(UserManagerAdminInstructionType::UPDATE_ACCESS_LEVEL), result(input) {}
+                
                 bool result;
             };
             
             struct AdminResetFailedAuthenticationAttempts : public InstructionResult<UserManagerAdminInstructionType>
             {
-                AdminResetFailedAuthenticationAttempts(bool input) : result(input) {}
+                AdminResetFailedAuthenticationAttempts(bool input)
+                : InstructionResult(UserManagerAdminInstructionType::RESET_FAILED_AUTHENTICATION_ATTEMPTS), result(input) {}
+                
                 bool result;
             };
             
             struct AdminAddAuthorizationRule : public InstructionResult<UserManagerAdminInstructionType>
             {
-                AdminAddAuthorizationRule(bool input) : result(input) {}
+                AdminAddAuthorizationRule(bool input)
+                : InstructionResult(UserManagerAdminInstructionType::ADD_AUTHORIZATION_RULE), result(input) {}
+                
                 bool result;
             };
             
             struct AdminRemoveAuthorizationRule : public InstructionResult<UserManagerAdminInstructionType>
             {
-                AdminRemoveAuthorizationRule(bool input) : result(input) {}
+                AdminRemoveAuthorizationRule(bool input)
+                : InstructionResult(UserManagerAdminInstructionType::REMOVE_AUTHORIZATION_RULE), result(input) {}
+                
                 bool result;
             };
             
             struct AdminClearAuthorizationRules : public InstructionResult<UserManagerAdminInstructionType>
             {
-                AdminClearAuthorizationRules(bool input) : result(input) {}
+                AdminClearAuthorizationRules(bool input)
+                : InstructionResult(UserManagerAdminInstructionType::CLEAR_AUTHORIZATION_RULES), result(input) {}
+                
                 bool result;
             };
             
             struct SelfResetPassword : public InstructionResult<UserManagerSelfInstructionType>
             {
-                SelfResetPassword(bool input) : result(input) {}
+                SelfResetPassword(bool input)
+                : InstructionResult(UserManagerSelfInstructionType::GET_USER), result(input) {}
+                
                 bool result;
             };
             
             struct SelfGetUser : public InstructionResult<UserManagerSelfInstructionType>
             {
-                SelfGetUser(UserDataContainerPtr input) : result(input) {}
+                SelfGetUser(UserDataContainerPtr input)
+                : InstructionResult(UserManagerSelfInstructionType::RESET_PASSWORD), result(input) {}
+                
                 UserDataContainerPtr result;
             };
             
             struct DebugGetState : public InstructionResult<UserManagerAdminInstructionType>
             {
-                DebugGetState(std::string input) : result(input) {}
+                DebugGetState(std::string input)
+                : InstructionResult(UserManagerAdminInstructionType::DEBUG_GET_STATE), result(input) {}
+                
                 std::string result;
             };
         }

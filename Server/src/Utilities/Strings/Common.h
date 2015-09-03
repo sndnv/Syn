@@ -29,12 +29,21 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include "../../Common/Types.h"
 #include <cryptopp/secblock.h>
+#include <cryptopp/hex.h>
+#include <cryptopp/filters.h>
 
 using Common_Types::Byte;
 using Common_Types::ByteVector;
 using Common_Types::UserAccessLevel;
 using Common_Types::SessionType;
 using Common_Types::LogSeverity;
+using Common_Types::DeviceID;
+using Common_Types::UserID;
+using Common_Types::SyncID;
+using Common_Types::DBObjectID;
+using Common_Types::LogID;
+using Common_Types::ScheduleID;
+using Common_Types::SessionID;
 
 namespace Utilities
 {
@@ -66,7 +75,17 @@ namespace Utilities
         std::string toString(UserAccessLevel var);
         std::string toString(SessionType var);
         std::string toString(LogSeverity var);
+        std::string toStringFromBytes(const std::string & var);
         
+        boost::uuids::uuid toUUID(std::string var);
+        DBObjectID toDBObjectID(std::string var);
+        DeviceID toDeviceID(std::string var);
+        UserID toUserID(std::string var);
+        SyncID toSyncID(std::string var);
+        LogID toLogID(std::string var);
+        ScheduleID toScheduleID(std::string var);
+        SessionID toSessionID(std::string var);
+        std::string toBytesFromString(const std::string & var);
         CryptoPP::SecByteBlock toSecByteBlock(std::string var);
         boost::posix_time::ptime toTimestamp(std::string var);
         UserAccessLevel toUserAccessLevel(std::string var);

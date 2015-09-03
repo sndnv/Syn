@@ -29,6 +29,7 @@ using NetworkManagement_Types::ConnectionSubstate;
 using NetworkManagement_Types::ConnectionType;
 using NetworkManagement_Types::PeerType;
 using NetworkManagement_Types::ConnectionInitiation;
+using NetworkManagement_Types::ConnectionSetupState;
 
 namespace Utilities
 {
@@ -46,6 +47,8 @@ namespace Utilities
             static const boost::unordered_map<std::string, ConnectionSubstate> stringToConnectionSubstate;
             static const boost::unordered_map<ConnectionInitiation, std::string> connectionInitiationToString;
             static const boost::unordered_map<std::string, ConnectionInitiation> stringToConnectionInitiation;
+            static const boost::unordered_map<ConnectionSetupState, std::string> connectionSetupStateToString;
+            static const boost::unordered_map<std::string, ConnectionSetupState> stringToConnectionSetupState;
         };
         
         std::string toString(PeerType var);
@@ -53,12 +56,14 @@ namespace Utilities
         std::string toString(ConnectionState var);
         std::string toString(ConnectionSubstate var);
         std::string toString(ConnectionInitiation var);
+        std::string toString(ConnectionSetupState var);
         
         PeerType toPeerType(std::string var);
         ConnectionType toConnectionType(std::string var);
         ConnectionState toConnectionState(std::string var);
         ConnectionSubstate toConnectionSubstate(std::string var);
         ConnectionInitiation toConnectionInitiation(std::string var);
+        ConnectionSetupState toConnectionSetupState(std::string var);
     }
 }
 

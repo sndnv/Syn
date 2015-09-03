@@ -83,7 +83,7 @@ using SecurityManagement_Types::UserAuthenticationRequest;
 using SecurityManagement_Types::DeviceAuthenticationRequest;
 using SecurityManagement_Types::DerivedCryptoDataGenerationRequest;
 using SecurityManagement_Types::SymmetricCryptoDataGenerationRequest;
-
+using SecurityManagement_Types::ECDHSymmetricCryptoDataGenerationRequest;
 
 //Exceptions
 using SecurityManagement_Types::UserLockedException;
@@ -413,6 +413,23 @@ namespace SyncServer_Core
             }
             
             /**
+             * Posts the supplied ECDH symmetric crypto data generation request for asynchronous processing.
+             * 
+             * Note: The caller must ensure the request is not destroyed until processing is finished.
+             * 
+             * @param request reference to the request to be processed
+             * @return a smart pointer to the promise that will have the result of the operation
+             */
+            SymmetricCryptoDataContainerPromisePtr postRequest(const ECDHSymmetricCryptoDataGenerationRequest & request)
+            {
+                SymmetricCryptoDataContainerPromisePtr newPromise(new SymmetricCryptoDataContainerPromise());
+                threadPool.assignTask(boost::bind(&SyncServer_Core::SecurityManager::processECDHSymmetricCryptoDataGenerationRequest,
+                                                  this, boost::ref(request), newPromise));
+                
+                return newPromise;
+            }
+            
+            /**
              * Registers the supplied <code>Securable</code> component with the manager.
              * 
              * @param component the component to be registered
@@ -624,6 +641,34 @@ namespace SyncServer_Core
              */
             void removeAuthenticationToken(TokenID tokenID, UserID userID);
             
+            /**
+             * Retrieves the default symmetric cipher used by the manager.
+             * 
+             * @return the default symmetric cipher
+             */
+            SymmetricCipherType getDefaultSymmetricCipher() const { return keyGenerator.getDefaultSymmetricCipher(); }
+            
+            /**
+             * Retrieves the default symmetric cipher mode used by the manager.
+             * 
+             * @return the default symmetric cipher mode
+             */
+            AuthenticatedSymmetricCipherModeType getDefaultSymmetricCipherMode() const { return keyGenerator.getDefaultSymmetricCipherMode(); }
+            
+            /**
+             * Retrieves the default asymmetric key validation level used by the manager.
+             * 
+             * @return the default asymmetric key validation level
+             */
+            unsigned int getDefaultKeyValidationLevel() const { return keyGenerator.getDefaultKeyValidationLevel(); }
+            
+            /**
+             * Retrieves the default derived key iterations count used by the manager.
+             * 
+             * @return the default derived key iterations count
+             */
+            unsigned int getDefaultDerivedKeyIterationsCount() const { return keyGenerator.getDerivedKeyDefaultIterationsCount(); }
+            
         private:
             /** Data structure holding user cache data. */
             struct UserData
@@ -789,6 +834,20 @@ namespace SyncServer_Core
              */
             void processSymmetricCryptoDataGenerationRequest
             (const SymmetricCryptoDataGenerationRequest & request, SymmetricCryptoDataContainerPromisePtr promise);
+            
+            /**
+             * Elliptic Curve Diffie-Hellman-based symmetric crypto data generation request handler.
+             * 
+             * Exceptions that can be thrown by the promise/future:<br>
+             * - <code>invalid_argument</code><br>
+             * 
+             * @param request reference to the request to be processed
+             * @param promise a smart pointer to the promise that will have the result of the operation
+             * 
+             * @throw logic_error if the source component cannot be found
+             */
+            void processECDHSymmetricCryptoDataGenerationRequest
+            (const ECDHSymmetricCryptoDataGenerationRequest & request, SymmetricCryptoDataContainerPromisePtr promise);
             
             /**
              * Attempts to retrieve the data for the specified device.

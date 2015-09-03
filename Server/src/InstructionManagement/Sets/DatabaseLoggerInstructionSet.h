@@ -22,6 +22,7 @@
 #include <string>
 #include <boost/any.hpp>
 
+#include "../../Utilities/Strings/Instructions.h"
 #include "InstructionSet.h"
 #include "../Types/Types.h"
 #include "../../EntityManagement/Types/Types.h"
@@ -102,31 +103,41 @@ namespace InstructionManagement_Sets
         {
             struct GetLog : public InstructionResult<DatabaseLoggerInstructionType>
             {
-                GetLog(LogDataContainerPtr input) : result(input) {}
+                GetLog(LogDataContainerPtr input)
+                : InstructionResult(DatabaseLoggerInstructionType::GET_LOG), result(input) {}
+                
                 LogDataContainerPtr result;
             };
             
             struct GetLogsByConstraint : public InstructionResult<DatabaseLoggerInstructionType>
             {
-                GetLogsByConstraint(std::vector<LogDataContainerPtr> input) : result(input) {}
+                GetLogsByConstraint(std::vector<LogDataContainerPtr> input)
+                : InstructionResult(DatabaseLoggerInstructionType::GET_LOGS_BY_CONSTRAINT), result(input) {}
+                
                 std::vector<LogDataContainerPtr> result;
             };
             
             struct UpdateSourceLoggingLevel : public InstructionResult<DatabaseLoggerInstructionType>
             {
-                UpdateSourceLoggingLevel(bool input) : result(input) {}
+                UpdateSourceLoggingLevel(bool input)
+                : InstructionResult(DatabaseLoggerInstructionType::UPDATE_SOURCE_LOGGING_LEVEL), result(input) {}
+                
                 bool result;
             };
             
             struct UpdateDefaultLoggingLevel : public InstructionResult<DatabaseLoggerInstructionType>
             {
-                UpdateDefaultLoggingLevel(bool input) : result(input) {}
+                UpdateDefaultLoggingLevel(bool input)
+                : InstructionResult(DatabaseLoggerInstructionType::UPDATE_DEFAULT_LOGGING_LEVEL), result(input) {}
+                
                 bool result;
             };
             
             struct DebugGetState : public InstructionResult<DatabaseLoggerInstructionType>
             {
-                DebugGetState(std::string input) : result(input) {}
+                DebugGetState(std::string input)
+                : InstructionResult(DatabaseLoggerInstructionType::DEBUG_GET_STATE), result(input) {}
+                
                 std::string result;
             };
         }

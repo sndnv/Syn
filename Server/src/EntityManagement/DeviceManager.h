@@ -34,6 +34,7 @@
 #include "../DatabaseManagement/DatabaseManager.h"
 #include "../DatabaseManagement/Containers/DeviceDataContainer.h"
 #include "../InstructionManagement/Sets/DeviceManagerInstructionSet.h"
+#include "../NetworkManagement/Types/Types.h"
 
 #include "Interfaces/DatabaseLoggingSource.h"
 
@@ -53,6 +54,7 @@ using DatabaseManagement_Containers::DeviceDataContainer;
 using DatabaseManagement_Containers::DeviceDataContainerPtr;
 using InstructionManagement_Types::DeviceManagerAdminInstructionType;
 using InstructionManagement_Types::DeviceManagerUserInstructionType;
+using NetworkManagement_Types::PeerType;
 
 namespace EntityManagement
 {
@@ -218,12 +220,14 @@ namespace EntityManagement
              * @param password raw device password
              * @param owner user ID of the device's owner
              * @param xferType data transfer type for the device
+             * @param peerType the peer type for the device
              * 
              * @return <code>true</code> if the operation completed successfully
              * 
              * @throw runtime_error if the specified device name is not valid
              */
-            bool addDeviceOperation(const std::string & name, const std::string & password, UserID owner, DataTransferType xferType);
+            bool addDeviceOperation
+            (const std::string & name, const std::string & password, UserID owner, DataTransferType xferType, PeerType peerType);
             
             //Instruction Handlers (admin)
             void adminGetDeviceHandler(InstructionPtr<DeviceManagerAdminInstructionType> instruction);

@@ -37,6 +37,7 @@ const boost::unordered_map<ConnectionType, std::string> Maps::connectionTypeToSt
 {
     {ConnectionType::COMMAND,           "COMMAND"},
     {ConnectionType::DATA,              "DATA"},
+    {ConnectionType::INIT,              "INIT"},
     {ConnectionType::INVALID,           "INVALID"}
 };
 
@@ -44,6 +45,7 @@ const boost::unordered_map<std::string, ConnectionType> Maps::stringToConnection
 {
     {"COMMAND",             ConnectionType::COMMAND},
     {"DATA",                ConnectionType::DATA},
+    {"INIT",                ConnectionType::INIT},
     {"INVALID",             ConnectionType::INVALID}
 };
 
@@ -94,6 +96,30 @@ const boost::unordered_map<std::string, ConnectionInitiation> Maps::stringToConn
     {"LOCAL",   ConnectionInitiation::LOCAL},
     {"REMOTE",  ConnectionInitiation::REMOTE},
     {"INVALID", ConnectionInitiation::INVALID}
+};
+
+const boost::unordered_map<ConnectionSetupState, std::string> Maps::connectionSetupStateToString
+{
+    {ConnectionSetupState::COMPLETED,                       "COMPLETED"},
+    {ConnectionSetupState::CONNECTION_REQUEST_RECEIVED,     "COMPLETED"},
+    {ConnectionSetupState::CONNECTION_REQUEST_SENT,         "COMPLETED"},
+    {ConnectionSetupState::CONNECTION_RESPONSE_RECEIVED,    "COMPLETED"},
+    {ConnectionSetupState::CONNECTION_RESPONSE_SENT,        "COMPLETED"},
+    {ConnectionSetupState::FAILED,                          "COMPLETED"},
+    {ConnectionSetupState::INITIATED,                       "COMPLETED"},
+    {ConnectionSetupState::INVALID,                         "INVALID"}
+};
+
+const boost::unordered_map<std::string, ConnectionSetupState> Maps::stringToConnectionSetupState
+{
+    {"COMPLETED",                       ConnectionSetupState::COMPLETED},
+    {"CONNECTION_REQUEST_RECEIVED",     ConnectionSetupState::CONNECTION_REQUEST_RECEIVED},
+    {"CONNECTION_REQUEST_SENT",         ConnectionSetupState::CONNECTION_REQUEST_SENT},
+    {"CONNECTION_RESPONSE_RECEIVED",    ConnectionSetupState::CONNECTION_RESPONSE_RECEIVED},
+    {"CONNECTION_RESPONSE_SENT",        ConnectionSetupState::CONNECTION_RESPONSE_SENT},
+    {"FAILED",                          ConnectionSetupState::FAILED},
+    {"INITIATED",                       ConnectionSetupState::INITIATED},
+    {"INVALID",                         ConnectionSetupState::INVALID}
 };
 
 std::string Utilities::Strings::toString(PeerType var)
@@ -174,4 +200,20 @@ ConnectionInitiation Utilities::Strings::toConnectionInitiation(std::string var)
         return Maps::stringToConnectionInitiation.at(var);
     else
         return ConnectionInitiation::INVALID;
+}
+
+std::string Utilities::Strings::toString(ConnectionSetupState var)
+{
+    if(Maps::connectionSetupStateToString.find(var) != Maps::connectionSetupStateToString.end())
+        return Maps::connectionSetupStateToString.at(var);
+    else
+        return "INVALID";
+}
+
+ConnectionSetupState Utilities::Strings::toConnectionSetupState(std::string var)
+{
+    if(Maps::stringToConnectionSetupState.find(var) != Maps::stringToConnectionSetupState.end())
+        return Maps::stringToConnectionSetupState.at(var);
+    else
+        return ConnectionSetupState::INVALID;
 }
