@@ -65,7 +65,7 @@
 #include "../InstructionManagement/Sets/NetworkManagerInstructionSet.h"
 
 //Protocols
-#include "../../external/protobuf/BaseComm.pb.h"
+#include "../../../external/protobuf/BaseComm.pb.h"
 
 //Exceptions
 using SecurityManagement_Types::InvalidAuthorizationTokenException;

@@ -20,7 +20,7 @@
 
 #include <string>
 #include "../../SecurityManagement/Types/Types.h"
-#include "../../../external/protobuf/BaseComm.pb.h"
+#include "../../../../external/protobuf/BaseComm.pb.h"
 
 using NetworkManagement_Protocols::ConnectionSetupRequestSignature;
 using SecurityManagement_Types::PlaintextData;

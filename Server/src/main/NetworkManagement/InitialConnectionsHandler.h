@@ -48,7 +48,7 @@
 #include "../EntityManagement/Interfaces/DatabaseLoggingSource.h"
 
 //Protocols
-#include "../../external/protobuf/BaseComm.pb.h"
+#include "../../../external/protobuf/BaseComm.pb.h"
 #include "Protocols/Utilities.h"
 
 //Networking
