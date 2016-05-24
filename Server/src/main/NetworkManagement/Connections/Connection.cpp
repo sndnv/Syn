@@ -18,9 +18,9 @@
 #include "Connection.h"
 
 NetworkManagement_Connections::Connection::Connection
-(ConnectionParamters connectionParams, boost::asio::streambuf * externalReadBuffer, Utilities::FileLogger * debugLogger)
+(boost::shared_ptr<boost::asio::io_service> service, ConnectionParamters connectionParams, boost::asio::streambuf * externalReadBuffer, Utilities::FileLogger * debugLogger)
 : debugLogger(debugLogger), writeStrand(connectionParams.socket->get_io_service()),
-  readStrand(connectionParams.socket->get_io_service()), socket(connectionParams.socket),
+  readStrand(connectionParams.socket->get_io_service()), networkService(service), socket(connectionParams.socket),
   connectionID(connectionParams.connectionID), localPeerType(connectionParams.localPeerType),
   connectionType(connectionParams.expectedConnection), state(ConnectionState::INVALID),
   lastSubstate(ConnectionSubstate::NONE), initiation(connectionParams.initiation)
@@ -41,10 +41,10 @@ NetworkManagement_Connections::Connection::Connection
 }
 
 NetworkManagement_Connections::Connection::Connection
-(ConnectionParamters connectionParams, ConnectionRequest requestParams,
+(boost::shared_ptr<boost::asio::io_service> service, ConnectionParamters connectionParams, ConnectionRequest requestParams,
  boost::asio::streambuf * externalReadBuffer, Utilities::FileLogger * debugLogger)
 : debugLogger(debugLogger), writeStrand(connectionParams.socket->get_io_service()),
-  readStrand(connectionParams.socket->get_io_service()), socket(connectionParams.socket),
+  readStrand(connectionParams.socket->get_io_service()), networkService(service), socket(connectionParams.socket),
   connectionID(connectionParams.connectionID), localPeerType(connectionParams.localPeerType),
   connectionType(connectionParams.expectedConnection), state(ConnectionState::INVALID),
   lastSubstate(ConnectionSubstate::NONE), initiation(connectionParams.initiation)
@@ -78,12 +78,6 @@ NetworkManagement_Connections::Connection::~Connection()
     for(auto currentEventData : eventsData)
         delete currentEventData.second;
     eventsData.clear();
-
-    onConnect.disconnect_all_slots();
-    onDisconnect.disconnect_all_slots();
-    onDataReceived.disconnect_all_slots();
-    onWriteResultReceived.disconnect_all_slots();
-    canBeDestroyed.disconnect_all_slots();
     
     if(!isExternalReadBufferUsed)
         delete readBuffer;
@@ -99,16 +93,33 @@ void NetworkManagement_Connections::Connection::disconnect()
     if(closeConnection)
         return;
     
-    //TODO - move to aborting the connection on the server side
     closeConnection = true;
     state = ConnectionState::CLOSED;
-    socket->shutdown(boost::asio::ip::tcp::socket::shutdown_both);
-    socket->close();
+    boost::system::error_code errorCode;
+    socket->shutdown(boost::asio::ip::tcp::socket::shutdown_both, errorCode);
+    
+    if(errorCode)
+    {
+        debugLogger->logMessage(Utilities::FileLogSeverity::Error, "Connection / " + Convert::toString(connectionType)
+            + " (Disconnect) [" + Convert::toString(connectionID) + "] > Error encountered during socket shutdown: [" + errorCode.message() + "]");
+    }
+    else
+    {
+        debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "Connection / " + Convert::toString(connectionType)
+            + " (Disconnect) [" + Convert::toString(connectionID) + "] > Socket shutdown completed.");
+    }
+    
+    onDisconnectEvent();
+    canBeDestroyedEvent();
+    
+    onConnect.disconnect_all_slots();
+    onDisconnect.disconnect_all_slots();
+    onDataReceived.disconnect_all_slots();
+    onWriteResultReceived.disconnect_all_slots();
+    canBeDestroyed.disconnect_all_slots();
     
     debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "Connection / " + Convert::toString(connectionType)
         + " (Disconnect) [" + Convert::toString(connectionID) + "] > Disconnected.");
-    onDisconnectEvent();
-    canBeDestroyedEvent();
 }
 
 void NetworkManagement_Connections::Connection::sendData(const ByteData & data)
@@ -438,7 +449,6 @@ void NetworkManagement_Connections::Connection::readHandler
         ByteData data(boost::asio::buffers_begin(rawData), boost::asio::buffers_begin(rawData) + bytesRead);
         readBuffer->consume(bytesRead); //removes the incoming data from the buffer
         
-        //TODO - optimise?
         if(isHeaderExpected)
         {//the incoming data should represent a header
             HeaderPacket header = HeaderPacket::fromNetworkBytes(data);

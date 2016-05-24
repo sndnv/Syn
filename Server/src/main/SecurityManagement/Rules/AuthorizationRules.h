@@ -41,7 +41,7 @@ namespace SecurityManagement_Rules
              * 
              * @param setType the instruction set which the user is authorized to access
              */
-            UserAuthorizationRule(InstructionSetType setType)
+            explicit UserAuthorizationRule(InstructionSetType setType)
             : set(setType) {}
             
             /** Retrieves the instruction set type associated with the rule.\n\n@return the instruction set type */

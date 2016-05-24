@@ -141,12 +141,12 @@ namespace NetworkManagement_Handlers
             DataConnectionsHandler(const DataConnectionsHandler&) = delete;
             DataConnectionsHandler& operator=(const DataConnectionsHandler&) = delete;
 
-            std::string getSourceName() const
+            std::string getSourceName() const override
             {
                 return "DataConnectionsHandler";
             }
             
-            bool registerLoggingHandler(const std::function<void(LogSeverity, const std::string &)> handler)
+            bool registerLoggingHandler(const std::function<void(LogSeverity, const std::string &)> handler) override
             {
                 if(!dbLogHandler)
                 {

@@ -49,7 +49,7 @@ namespace SecurityManagement_Crypto
              * 
              * @param symCryptoData the data to be used for encryption/decryption
              */
-            SymmetricCryptoHandler(SymmetricCryptoDataContainerPtr symCryptoData)
+            explicit SymmetricCryptoHandler(SymmetricCryptoDataContainerPtr symCryptoData)
             : cryptoData(symCryptoData)
             {}
             
@@ -174,7 +174,7 @@ namespace SecurityManagement_Crypto
              * 
              * @throw logic_error if no keys were supplied
              */
-            AsymmetricCryptoHandler(RSACryptoDataContainerPtr rsaCryptoData)
+            explicit AsymmetricCryptoHandler(RSACryptoDataContainerPtr rsaCryptoData)
             : cryptoData(rsaCryptoData)
             {
                 privateKeyAvailable = rsaCryptoData->isPrivateKeySet();

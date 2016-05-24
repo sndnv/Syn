@@ -92,7 +92,7 @@ namespace SyncServer_Core
     /**
      * Class for managing session-related activities.
      */
-    class SessionManager
+    class SessionManager final
     : public SecurityManagement_Interfaces::Securable,
       public InstructionManagement_Interfaces::InstructionTarget<SessionManagerInstructionType>,
       public EntityManagement_Interfaces::DatabaseLoggingSource
@@ -139,24 +139,24 @@ namespace SyncServer_Core
             SessionManager(const SessionManager&) = delete;
             SessionManager& operator=(const SessionManager&) = delete;
             
-            void postAuthorizationToken(const AuthorizationTokenPtr token);
+            void postAuthorizationToken(const AuthorizationTokenPtr token) override;
             
-            SecurityManagement_Types::SecurableComponentType getComponentType() const
+            SecurityManagement_Types::SecurableComponentType getComponentType() const override
             {
                 return SecurityManagement_Types::SecurableComponentType::SESSION_MANAGER;
             }
             
-            bool registerInstructionSet(InstructionManagement_Sets::InstructionSetPtr<SessionManagerInstructionType> set) const;
+            bool registerInstructionSet(InstructionManagement_Sets::InstructionSetPtr<SessionManagerInstructionType> set) const override;
             
-            InstructionManagement_Types::InstructionSetType getType() const
+            InstructionManagement_Types::InstructionSetType getType() const override
             { return InstructionManagement_Types::InstructionSetType::SESSION_MANAGER; }
             
-            std::string getSourceName() const
+            std::string getSourceName() const override
             {
                 return "SessionManager";
             }
             
-            bool registerLoggingHandler(const std::function<void(LogSeverity, const std::string &)> handler)
+            bool registerLoggingHandler(const std::function<void(LogSeverity, const std::string &)> handler) override
             {
                 if(!dbLogHandler)
                 {

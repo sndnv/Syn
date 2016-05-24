@@ -58,16 +58,14 @@ SyncServer_Core::SecurityManager::SecurityManager
     if(deviceEviction != CacheEvictionType::LRU && deviceEviction != CacheEvictionType::MRU)
         throw std::invalid_argument("SecurityManager::() > Invalid device cache eviction type encountered.");
 
-    if(authorizationTokenSignatureSize <= 0)
+    if(authorizationTokenSignatureSize == 0)
     {
-        logMessage(LogSeverity::Warning, "() > The authorization token signature size is set to [" 
-                + Convert::toString(authorizationTokenSignatureSize) + "].");
+        logMessage(LogSeverity::Warning, "() > The authorization token signature size is set to 0.");
     }
 
-    if(authenticationTokenSignatureSize <= 0)
+    if(authenticationTokenSignatureSize == 0)
     {
-        logMessage(LogSeverity::Warning, "() > The authentication token signature size is set to [" 
-                + Convert::toString(authenticationTokenSignatureSize) + "].");
+        logMessage(LogSeverity::Warning, "() > The authentication token signature size is set to 0.");
     }
 
     if(authenticationTokenValidityDuration <= 0)
@@ -108,18 +106,14 @@ SyncServer_Core::SecurityManager::SecurityManager
             throw std::invalid_argument("SecurityManager::() > Invalid device password rule encountered.");
     }
 
-    if(currentHashingConfig.userPasswordSaltSize <= 0)
+    if(currentHashingConfig.userPasswordSaltSize == 0)
     {
-        logMessage(LogSeverity::Warning, "() > The user password salt size is set to [" 
-                + Convert::toString(currentHashingConfig.userPasswordSaltSize)
-                + "] (current configuration).");
+        logMessage(LogSeverity::Warning, "() > The user password salt size is set to 0 (current configuration).");
     }
 
-    if(currentHashingConfig.devicePasswordSaltSize <= 0)
+    if(currentHashingConfig.devicePasswordSaltSize == 0)
     {
-        logMessage(LogSeverity::Warning, "() > The device password salt size is set to [" 
-                + Convert::toString(currentHashingConfig.devicePasswordSaltSize)
-                + "] (current configuration).");
+        logMessage(LogSeverity::Warning, "() > The device password salt size is set to 0 (current configuration).");
     }
 
     if(currentHashingConfig.userPasswordHashAlgorithm == HashAlgorithmType::INVALID)
@@ -136,18 +130,14 @@ SyncServer_Core::SecurityManager::SecurityManager
     
     if(!previousHashingConfig.isEmpty)
     {
-        if(previousHashingConfig.userPasswordSaltSize <= 0)
+        if(previousHashingConfig.userPasswordSaltSize == 0)
         {
-            logMessage(LogSeverity::Warning, "() > The user password salt size is set to [" 
-                    + Convert::toString(previousHashingConfig.userPasswordSaltSize)
-                    + "] (previous configuration).");
+            logMessage(LogSeverity::Warning, "() > The user password salt size is set to 0 (previous configuration).");
         }
 
-        if(previousHashingConfig.devicePasswordSaltSize <= 0)
+        if(previousHashingConfig.devicePasswordSaltSize == 0)
         {
-            logMessage(LogSeverity::Warning, "() > The device password salt size is set to [" 
-                    + Convert::toString(previousHashingConfig.devicePasswordSaltSize)
-                    + "] (previous configuration).");
+            logMessage(LogSeverity::Warning, "() > The device password salt size is set to 0 (previous configuration).");
         }
 
         if(previousHashingConfig.userPasswordHashAlgorithm == HashAlgorithmType::INVALID)
@@ -493,16 +483,14 @@ void SyncServer_Core::SecurityManager::updatePasswordHashingParameters
                "An empty parameters container was provided.");
     }
 
-    if(newConfiguration.userPasswordSaltSize <= 0)
+    if(newConfiguration.userPasswordSaltSize == 0)
     {
-        logMessage(LogSeverity::Warning, "(updatePasswordHashingParameters) > The user password salt size will be set to [" 
-                + Convert::toString(newConfiguration.userPasswordSaltSize) + "].");
+        logMessage(LogSeverity::Warning, "(updatePasswordHashingParameters) > The user password salt size will be set to 0.");
     }
 
-    if(newConfiguration.devicePasswordSaltSize <= 0)
+    if(newConfiguration.devicePasswordSaltSize == 0)
     {
-        logMessage(LogSeverity::Warning, "(updatePasswordHashingParameters) > The device password salt size will be set to [" 
-                + Convert::toString(newConfiguration.devicePasswordSaltSize) + "].");
+        logMessage(LogSeverity::Warning, "(updatePasswordHashingParameters) > The device password salt size will be set to 0.");
     }
 
     if(newConfiguration.userPasswordHashAlgorithm == HashAlgorithmType::INVALID)
@@ -1505,7 +1493,7 @@ void SyncServer_Core::SecurityManager::processECDHSymmetricCryptoDataGenerationR
         promise->set_value(data);
         ++successfulRequestsNumber;
     }
-    catch(const std::invalid_argument & ex)
+    catch(const std::exception & ex)
     {
         logMessage(LogSeverity::Error, "(processECDHSymmetricCryptoDataGenerationRequest) > "
                         "Exception encountered during symmetric key generation: ["
@@ -1738,7 +1726,7 @@ void SyncServer_Core::SecurityManager::evictUser()
         {
             deviceDataCache.erase(currentUserDevice);
             logMessage(LogSeverity::Debug, "(evictUser) > Device [" + Convert::toString(currentUserDevice)
-                    + "] for user [" + Convert::toString(evictionTarget) 
+                    + "] for user [" + Convert::toString(evictionTarget)
                     + "] evicted from cache.");
         }
     }

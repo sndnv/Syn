@@ -47,12 +47,12 @@ namespace InstructionManagement_Sets
     {
         struct GetLog : public Instruction<DatabaseLoggerInstructionType>
         {
-            GetLog(LogID id)
+            explicit GetLog(LogID id)
             : Instruction(InstructionSetType::DATABASE_LOGGER, DatabaseLoggerInstructionType::GET_LOG),
               logID(id)
             {}
             
-            bool isValid() { return (logID != INVALID_LOG_ID); }
+            bool isValid() override { return (logID != INVALID_LOG_ID); }
             LogID logID;
         };
         
@@ -62,7 +62,7 @@ namespace InstructionManagement_Sets
             : Instruction(InstructionSetType::DATABASE_LOGGER, DatabaseLoggerInstructionType::GET_LOGS_BY_CONSTRAINT),
               constraintType(type), constraintValue(value)
             {}
-            bool isValid() { return true; }
+            bool isValid() override { return true; }
             DatabaseSelectConstraints::LOGS constraintType;
             boost::any constraintValue;
         };
@@ -74,19 +74,19 @@ namespace InstructionManagement_Sets
               sourceID(id), newLogSeverity(severity)
             {}
             
-            bool isValid() { return (sourceID != INVALID_DATABASE_LOGGING_SOURCE_ID && newLogSeverity != LogSeverity::INVALID); }
+            bool isValid() override { return (sourceID != INVALID_DATABASE_LOGGING_SOURCE_ID && newLogSeverity != LogSeverity::INVALID); }
             DatabaseLoggingSourceID sourceID;
             LogSeverity newLogSeverity;
         };
         
         struct UpdateDefaultLoggingLevel : public Instruction<DatabaseLoggerInstructionType>
         {
-            UpdateDefaultLoggingLevel(LogSeverity severity)
+            explicit UpdateDefaultLoggingLevel(LogSeverity severity)
             : Instruction(InstructionSetType::DATABASE_LOGGER, DatabaseLoggerInstructionType::UPDATE_DEFAULT_LOGGING_LEVEL),
               newLogSeverity(severity)
             {}
             
-            bool isValid() { return (newLogSeverity != LogSeverity::INVALID); }
+            bool isValid() override { return (newLogSeverity != LogSeverity::INVALID); }
             LogSeverity newLogSeverity;
         };
         
@@ -96,14 +96,14 @@ namespace InstructionManagement_Sets
             : Instruction(InstructionSetType::DATABASE_LOGGER, DatabaseLoggerInstructionType::DEBUG_GET_STATE)
             {}
             
-            bool isValid() { return true; }
+            bool isValid() override { return true; }
         };
         
         namespace Results
         {
             struct GetLog : public InstructionResult<DatabaseLoggerInstructionType>
             {
-                GetLog(LogDataContainerPtr input)
+                explicit GetLog(LogDataContainerPtr input)
                 : InstructionResult(DatabaseLoggerInstructionType::GET_LOG), result(input) {}
                 
                 LogDataContainerPtr result;
@@ -111,7 +111,7 @@ namespace InstructionManagement_Sets
             
             struct GetLogsByConstraint : public InstructionResult<DatabaseLoggerInstructionType>
             {
-                GetLogsByConstraint(std::vector<LogDataContainerPtr> input)
+                explicit GetLogsByConstraint(std::vector<LogDataContainerPtr> input)
                 : InstructionResult(DatabaseLoggerInstructionType::GET_LOGS_BY_CONSTRAINT), result(input) {}
                 
                 std::vector<LogDataContainerPtr> result;
@@ -119,7 +119,7 @@ namespace InstructionManagement_Sets
             
             struct UpdateSourceLoggingLevel : public InstructionResult<DatabaseLoggerInstructionType>
             {
-                UpdateSourceLoggingLevel(bool input)
+                explicit UpdateSourceLoggingLevel(bool input)
                 : InstructionResult(DatabaseLoggerInstructionType::UPDATE_SOURCE_LOGGING_LEVEL), result(input) {}
                 
                 bool result;
@@ -127,7 +127,7 @@ namespace InstructionManagement_Sets
             
             struct UpdateDefaultLoggingLevel : public InstructionResult<DatabaseLoggerInstructionType>
             {
-                UpdateDefaultLoggingLevel(bool input)
+                explicit UpdateDefaultLoggingLevel(bool input)
                 : InstructionResult(DatabaseLoggerInstructionType::UPDATE_DEFAULT_LOGGING_LEVEL), result(input) {}
                 
                 bool result;
@@ -135,7 +135,7 @@ namespace InstructionManagement_Sets
             
             struct DebugGetState : public InstructionResult<DatabaseLoggerInstructionType>
             {
-                DebugGetState(std::string input)
+                explicit DebugGetState(std::string input)
                 : InstructionResult(DatabaseLoggerInstructionType::DEBUG_GET_STATE), result(input) {}
                 
                 std::string result;

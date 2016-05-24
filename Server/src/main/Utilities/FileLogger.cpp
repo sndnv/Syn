@@ -21,48 +21,17 @@ Utilities::FileLogger::FileLogger(std::string fullFilePath, unsigned long maximu
 {
     filePath = fullFilePath;
     maxFileSize = maximumFileSize;
+    minSeverity = minimumSeverity;
     
-    //builds the minimum severity map
-    switch(minimumSeverity)
-    {
-        case FileLogSeverity::Info:
-        {
-            minSeverityMap.insert(std::pair<FileLogSeverity, bool>(FileLogSeverity::Debug, false));
-            minSeverityMap.insert(std::pair<FileLogSeverity, bool>(FileLogSeverity::Info, true));
-            minSeverityMap.insert(std::pair<FileLogSeverity, bool>(FileLogSeverity::Warning, true));
-            minSeverityMap.insert(std::pair<FileLogSeverity, bool>(FileLogSeverity::Error, true));
-        } break;
-        
-        case FileLogSeverity::Warning:
-        {
-            minSeverityMap.insert(std::pair<FileLogSeverity, bool>(FileLogSeverity::Debug, false));
-            minSeverityMap.insert(std::pair<FileLogSeverity, bool>(FileLogSeverity::Info, false));
-            minSeverityMap.insert(std::pair<FileLogSeverity, bool>(FileLogSeverity::Warning, true));
-            minSeverityMap.insert(std::pair<FileLogSeverity, bool>(FileLogSeverity::Error, true));
-        } break;
-        
-        case FileLogSeverity::Error:
-        {
-            minSeverityMap.insert(std::pair<FileLogSeverity, bool>(FileLogSeverity::Debug, false));
-            minSeverityMap.insert(std::pair<FileLogSeverity, bool>(FileLogSeverity::Info, false));
-            minSeverityMap.insert(std::pair<FileLogSeverity, bool>(FileLogSeverity::Warning, false));
-            minSeverityMap.insert(std::pair<FileLogSeverity, bool>(FileLogSeverity::Error, true));
-        } break;
-        
-        default:
-        {
-            minSeverityMap.insert(std::pair<FileLogSeverity, bool>(FileLogSeverity::Debug, true));
-            minSeverityMap.insert(std::pair<FileLogSeverity, bool>(FileLogSeverity::Info, true));
-            minSeverityMap.insert(std::pair<FileLogSeverity, bool>(FileLogSeverity::Warning, true));
-            minSeverityMap.insert(std::pair<FileLogSeverity, bool>(FileLogSeverity::Error, true));
-        } break;
-    }
+    fileLogSeverityToInt(minimumSeverity);
+    fileLogSeverityToInt(minSeverity);
     
     //starts the logger thread
     mainThread = new boost::thread(&Utilities::FileLogger::mainLoggerThread, this);
 }
 
-Utilities::FileLogger::FileLogger(FileLoggerParameters parameters) : FileLogger(parameters.logFilePath, parameters.maximumFileSize, parameters.minimumSeverity)
+Utilities::FileLogger::FileLogger(FileLoggerParameters parameters)
+: FileLogger(parameters.logFilePath, parameters.maximumFileSize, parameters.minimumSeverity)
 {}
 
 Utilities::FileLogger::~FileLogger()
@@ -84,10 +53,10 @@ void Utilities::FileLogger::logMessage(FileLogSeverity severity, std::string mes
 
 void Utilities::FileLogger::logMessage(boost::posix_time::ptime timestamp, Utilities::FileLogSeverity severity, std::string message)
 {
-    if(stopLogger)
+    if(stopLogger || !threadRunning)
         return;
     
-    if(!minSeverityMap[severity])
+    if(fileLogSeverityToInt(severity) < fileLogSeverityToInt(minSeverity))
         return;
         
     std::string severityStr = severityToString(severity);
@@ -96,7 +65,7 @@ void Utilities::FileLogger::logMessage(boost::posix_time::ptime timestamp, Utili
     //21 chars static size + size of severity + size of message
     unsigned int bufferSize = severityStr.size() + message.size() + 22;
     char messageBuffer[bufferSize];
-    snprintf(messageBuffer, bufferSize, "%04d-%02d-%02d %02d:%02d:%02d,%s,%s", 
+    snprintf(messageBuffer, bufferSize, "%04u-%02u-%02u %02d:%02d:%02d,%s,%s", 
             (unsigned short)timestamp.date().year(), (unsigned short)timestamp.date().month(), (unsigned short)timestamp.date().day(), 
             timestamp.time_of_day().hours(), timestamp.time_of_day().minutes(), timestamp.time_of_day().seconds(),
             severityStr.c_str(), message.c_str());
@@ -150,7 +119,7 @@ void Utilities::FileLogger::mainLoggerThread()
             //size of file name + 16 chars static size + 1 char for \0
             unsigned int bufferSize = filePath.size() + 17;
             char newFilePathBuffer[bufferSize];
-            snprintf(newFilePathBuffer, bufferSize, "%s_%04d%02d%02d_%02d%02d%02d",
+            snprintf(newFilePathBuffer, bufferSize, "%s_%04u%02u%02u_%02d%02d%02d",
                     filePath.c_str(),
                     (unsigned short)timestamp.date().year(), (unsigned short)timestamp.date().month(), (unsigned short)timestamp.date().day(), 
                     timestamp.time_of_day().hours(), timestamp.time_of_day().minutes(), timestamp.time_of_day().seconds());

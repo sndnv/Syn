@@ -94,6 +94,8 @@ namespace StorageManagement_Pools
                 LinkActionConditionType condition;
                 /** Action condition value (if any) */
                 LinkActionConditionValue conditionValue;
+                
+                bool operator==(const LinkParameters& other) const;
             };
             
             /** Parameters structure holding pool link configuration for persistent storage. */
@@ -107,6 +109,8 @@ namespace StorageManagement_Pools
                 LinkActionConditionType condition;
                 /** Action condition value (if any) */
                 LinkActionConditionValue conditionValue;
+                
+                bool operator==(const PersistentLinkParameters& other) const;
             };
             
             /** Data structure holding entity ID data. */
@@ -116,6 +120,8 @@ namespace StorageManagement_Pools
                 StoredDataID aggregatorEntityID;
                 /** Entity ID, as assigned by the pool */
                 StoredDataID poolEntityID;
+                
+                bool operator==(const EntityIDData& other) const;
             };
             
             /** Data structure holding local (to specific storage pool) entity ID data. */
@@ -125,6 +131,8 @@ namespace StorageManagement_Pools
                 PoolUUID pool;
                 /** Entity ID */
                 StoredDataID entity;
+                
+                bool operator==(const PoolEntityIDData& other) const;
             };
             
             /** Data structure holding pending action data. */
@@ -140,6 +148,8 @@ namespace StorageManagement_Pools
                 PoolUUID target;
                 /** Timestamp for the processing of the action */
                 Timestamp processingTime;
+                
+                bool operator==(const PendingActionData& other) const;
             };
             
             /**
@@ -331,7 +341,7 @@ namespace StorageManagement_Pools
              * operation fails, or if the aggregator is not in the correct
              * state, or if no data pools are able to satisfy the request
              */
-            ByteVectorPtr retrieveData(StoredDataID id);
+            ByteVectorPtr retrieveData(StoredDataID id) override;
             
             /**
              * Begins the storage process in the aggregator for the supplied data.
@@ -351,7 +361,7 @@ namespace StorageManagement_Pools
              * @throw invalid_argument if an empty or invalid data container
              * was supplied
              */
-            StoredDataID storeData(const ByteVectorPtr data);
+            StoredDataID storeData(const ByteVectorPtr data) override;
             
             /**
              * Discards the data associated with the specified ID.
@@ -365,7 +375,7 @@ namespace StorageManagement_Pools
              * @throw runtime_error if the specified ID was not found or if the
              * aggregator is not in the correct state/mode
              */
-            void discardData(StoredDataID id, bool erase = false);
+            void discardData(StoredDataID id, bool erase = false) override;
             
             /**
              * Clears all information associated with the data in the aggregator.
@@ -375,7 +385,7 @@ namespace StorageManagement_Pools
              * Note 2: The structure of the aggregator remains unchanged; no pools or
              * links are removed.
              */
-            void clearPool();
+            void clearPool() override;
             
             /**
              * Retrieves the pool ID of the aggregator.
@@ -384,15 +394,15 @@ namespace StorageManagement_Pools
              */
             PoolID getAggregatorID() const { return aggregatorID; }
             
-            DataPoolType getPoolType() const { return DataPoolType::AGGREGATE; }
-            DataSize getFreeSpace() const { return totalUsableSpace; }
-            EntitiesCountType getStoredEntitiesNumber() const { return idMap.size(); }
-            bool canStoreData(DataSize size) const;
-            DataSize getEntityManagementStorageOverhead() const { return 0; }
-            DataSize getPoolManagementStorageOverhead() const { return 0; }
-            DataSize getEntitySize(StoredDataID id) const;
-            bool areInputStreamsSupported() const { return true; }
-            bool areOutputStreamsSupported() const { return (streamingPoolID != INVALID_POOL_ID); }
+            DataPoolType getPoolType() const override { return DataPoolType::AGGREGATE; }
+            DataSize getFreeSpace() const override { return totalUsableSpace; }
+            EntitiesCountType getStoredEntitiesNumber() const override { return idMap.size(); }
+            bool canStoreData(DataSize size) const override;
+            DataSize getEntityManagementStorageOverhead() const override { return 0; }
+            DataSize getPoolManagementStorageOverhead() const override { return 0; }
+            DataSize getEntitySize(StoredDataID id) const override;
+            bool areInputStreamsSupported() const override { return true; }
+            bool areOutputStreamsSupported() const override { return (streamingPoolID != INVALID_POOL_ID); }
             
             /**
              * Retrieves a stream for reading data from the aggregator.
@@ -404,7 +414,7 @@ namespace StorageManagement_Pools
              * operation fails, or if the aggregator is not in the correct state,
              * or if no data pools are able to satisfy the request
              */
-            PoolInputStreamPtr getInputStream(StoredDataID id);
+            PoolInputStreamPtr getInputStream(StoredDataID id) override;
             
             /**
              * Retrieves a stream for writing data to the aggregator.
@@ -423,7 +433,7 @@ namespace StorageManagement_Pools
              * 
              * @throw invalid_argument if the specified data size is 0
              */
-            PoolOutputStreamPtr getOutputStream(DataSize dataSize);
+            PoolOutputStreamPtr getOutputStream(DataSize dataSize) override;
             
             /**
              * Notifies the aggregator that streaming of the specified entity
@@ -614,6 +624,13 @@ namespace StorageManagement_Pools
              * @throw runtime_error if there are other pending actions in the aggregator
              */
             void importPendingActions(const std::deque<PendingActionData> & pendingActions);
+            
+            /**
+             * Retrieves a map of pool UUIDs to pool IDs currently used by the aggregator.
+             * 
+             * @return the requested map
+             */
+            boost::unordered_map<PoolUUID, PoolID> getPoolIDsMap() const;
             
             /**
              * Retrieves the total amount of free space currently available in the aggregator.

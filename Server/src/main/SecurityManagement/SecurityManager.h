@@ -135,7 +135,7 @@ namespace SyncServer_Core
      * line 342 (Crypto++ version 5.6.2).
      * 
      */
-    class SecurityManager : public EntityManagement_Interfaces::DatabaseLoggingSource
+    class SecurityManager final : public EntityManagement_Interfaces::DatabaseLoggingSource
     {
         public:
             /** Parameters structure for holding user and device password hashing configuration. */
@@ -294,12 +294,12 @@ namespace SyncServer_Core
             SecurityManager(const SecurityManager&) = delete;             //Copying not allowed (pass/access only by reference/pointer)
             SecurityManager& operator=(const SecurityManager&) = delete;  //Copying not allowed (pass/access only by reference/pointer)
             
-            std::string getSourceName() const
+            std::string getSourceName() const override
             {
                 return "SecurityManager";
             }
             
-            bool registerLoggingHandler(const std::function<void(LogSeverity, const std::string &)> handler)
+            bool registerLoggingHandler(const std::function<void(LogSeverity, const std::string &)> handler) override
             {
                 if(!dbLogHandler)
                 {

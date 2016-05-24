@@ -86,16 +86,16 @@ namespace SecurityManagement_Rules
              * 
              * @param minimumLength the minimum allowed password length
              */
-            MinPasswordLength(unsigned int minimumLength)
+            explicit MinPasswordLength(unsigned int minimumLength)
             : minLength(minimumLength)
             {}
             
-            bool isPasswordValid(const std::string & rawPassword) const
+            bool isPasswordValid(const std::string & rawPassword) const override
             {
                 return (rawPassword.size() >= minLength);
             }
             
-            std::string getErrorMessage() const
+            std::string getErrorMessage() const override
             {
                 return "The password is below the minimum required length of ["
                         + Convert::toString(minLength) + "].";
@@ -117,16 +117,16 @@ namespace SecurityManagement_Rules
              * 
              * @param regularExpression the regular expression to be used
              */
-            AllowedPasswordStructure(std::string regularExpression)
+            explicit AllowedPasswordStructure(std::string regularExpression)
             : allowedStruct(regularExpression)
             {}
             
-            bool isPasswordValid(const std::string & rawPassword) const
+            bool isPasswordValid(const std::string & rawPassword) const override
             {
                 return boost::regex_match(rawPassword, boost::regex(allowedStruct));
             }
             
-            std::string getErrorMessage() const
+            std::string getErrorMessage() const override
             {
                 return "The password does not match the allowed structure ["
                         + allowedStruct + "].";
@@ -147,16 +147,16 @@ namespace SecurityManagement_Rules
              * 
              * @param minimumLength the minimum allowed name length
              */
-            MinNameLength(unsigned int minimumLength)
+            explicit MinNameLength(unsigned int minimumLength)
             : minLength(minimumLength)
             {}
             
-            bool isNameValid(const std::string & name) const
+            bool isNameValid(const std::string & name) const override
             {
                 return (name.size() >= minLength);
             }
             
-            std::string getErrorMessage() const
+            std::string getErrorMessage() const override
             {
                 return "The name is below the minimum required length of ["
                         + Convert::toString(minLength) + "].";
@@ -180,16 +180,16 @@ namespace SecurityManagement_Rules
              * 
              * @param maximumLength the maximum allowed name length
              */
-            MaxNameLength(unsigned int maximumLength)
+            explicit MaxNameLength(unsigned int maximumLength)
             : maxLength(maximumLength)
             {}
             
-            bool isNameValid(const std::string & name) const
+            bool isNameValid(const std::string & name) const override
             {
                 return (name.size() <= maxLength);
             }
             
-            std::string getErrorMessage() const
+            std::string getErrorMessage() const override
             {
                 return "The name is above the maximum allowed length of ["
                         + Convert::toString(maxLength) + "].";
@@ -210,16 +210,16 @@ namespace SecurityManagement_Rules
              * 
              * @param allowedCharactersList the list of allowed characters
              */
-            AllowedNameCharacters(std::string allowedCharactersList)
+            explicit AllowedNameCharacters(std::string allowedCharactersList)
             : allowedChars(allowedCharactersList)
             {}
             
-            bool isNameValid(const std::string & name) const
+            bool isNameValid(const std::string & name) const override
             {
                 return (name.find_first_not_of(allowedChars) == std::string::npos);
             }
             
-            std::string getErrorMessage() const
+            std::string getErrorMessage() const override
             {
                 return "The name contains one or more characters not in the allowed set ["
                         + allowedChars + "].";
@@ -241,16 +241,16 @@ namespace SecurityManagement_Rules
              * 
              * @param regularExpression the regular expression to be used
              */
-            AllowedNameStructure(std::string regularExpression)
+            explicit AllowedNameStructure(std::string regularExpression)
             : allowedStruct(regularExpression)
             {}
             
-            bool isNameValid(const std::string & name) const
+            bool isNameValid(const std::string & name) const override
             {
                 return boost::regex_match(name, boost::regex(allowedStruct));
             }
             
-            std::string getErrorMessage() const
+            std::string getErrorMessage() const override
             {
                 return "The name does not match the allowed structure ["
                         + allowedStruct + "].";
@@ -271,11 +271,11 @@ namespace SecurityManagement_Rules
              * 
              * @param requiredCharactersList the list of required characters
              */
-            RequiredNameCharacters(std::string requiredCharactersList)
+            explicit RequiredNameCharacters(std::string requiredCharactersList)
             : requiredChars(requiredCharactersList)
             {}
             
-            bool isNameValid(const std::string & name) const
+            bool isNameValid(const std::string & name) const override
             {
                 for(char currentChar : requiredChars)
                 {
@@ -286,7 +286,7 @@ namespace SecurityManagement_Rules
                 return true;
             }
             
-            std::string getErrorMessage() const
+            std::string getErrorMessage() const override
             {
                 return "The name does not have one or more of the required characters ["
                         + requiredChars + "].";

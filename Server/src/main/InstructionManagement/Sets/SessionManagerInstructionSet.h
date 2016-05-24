@@ -46,12 +46,12 @@ namespace InstructionManagement_Sets
     {
         struct GetSession : public Instruction<SessionManagerInstructionType>
         {
-            GetSession(InternalSessionID id)
+            explicit GetSession(InternalSessionID id)
             : Instruction(InstructionSetType::SESSION_MANAGER, SessionManagerInstructionType::GET_SESSION),
               sessionID(id)
             {}
             
-            bool isValid() { return (sessionID > INVALID_INTERNAL_SESSION_ID); }
+            bool isValid() override { return (sessionID > INVALID_INTERNAL_SESSION_ID); }
             InternalSessionID sessionID;
         };
         
@@ -62,7 +62,7 @@ namespace InstructionManagement_Sets
               constraintType(type), constraintValue(id)
             {}
             
-            bool isValid()
+            bool isValid() override
             {
                 if(constraintType == GetSessionsConstraintType::INVALID)
                     return false;
@@ -80,34 +80,34 @@ namespace InstructionManagement_Sets
         
         struct ForceSessionExpiration : public Instruction<SessionManagerInstructionType>
         {
-            ForceSessionExpiration(InternalSessionID id)
+            explicit ForceSessionExpiration(InternalSessionID id)
             : Instruction(InstructionSetType::SESSION_MANAGER, SessionManagerInstructionType::FORCE_SESSION_EXPIRATION),
               sessionID(id)
             {}
             
-            bool isValid() { return (sessionID > INVALID_INTERNAL_SESSION_ID); }
+            bool isValid() override { return (sessionID > INVALID_INTERNAL_SESSION_ID); }
             InternalSessionID sessionID;
         };
         
         struct ForceSessionReauthentication : public Instruction<SessionManagerInstructionType>
         {
-            ForceSessionReauthentication(InternalSessionID id)
+            explicit ForceSessionReauthentication(InternalSessionID id)
             : Instruction(InstructionSetType::SESSION_MANAGER, SessionManagerInstructionType::FORCE_SESSION_REAUTHENTICATION),
               sessionID(id)
             {}
             
-            bool isValid() { return (sessionID > INVALID_INTERNAL_SESSION_ID); }
+            bool isValid() override { return (sessionID > INVALID_INTERNAL_SESSION_ID); }
             InternalSessionID sessionID;
         };
         
         struct ForceExpirationProcess : public Instruction<SessionManagerInstructionType>
         {
-            ForceExpirationProcess(Seconds delay)
+            explicit ForceExpirationProcess(Seconds delay)
             : Instruction(InstructionSetType::SESSION_MANAGER, SessionManagerInstructionType::FORCE_EXPIRATION_PROCESS),
               delayTime(delay)
             {}
             
-            bool isValid() { return true; }
+            bool isValid() override { return true; }
             Seconds delayTime;
         };
         
@@ -117,14 +117,14 @@ namespace InstructionManagement_Sets
             : Instruction(InstructionSetType::SESSION_MANAGER, SessionManagerInstructionType::DEBUG_GET_STATE)
             {}
             
-            bool isValid() { return true; }
+            bool isValid() override { return true; }
         };
         
         namespace Results
         {
             struct GetSession : public InstructionResult<SessionManagerInstructionType>
             {
-                GetSession(SessionDataContainerPtr input)
+                explicit GetSession(SessionDataContainerPtr input)
                 : InstructionResult(SessionManagerInstructionType::GET_SESSION), result(input) {}
                 
                 SessionDataContainerPtr result;
@@ -132,7 +132,7 @@ namespace InstructionManagement_Sets
             
             struct GetSessionsByConstraint : public InstructionResult<SessionManagerInstructionType>
             {
-                GetSessionsByConstraint(std::vector<SessionDataContainerPtr> input)
+                explicit GetSessionsByConstraint(std::vector<SessionDataContainerPtr> input)
                 : InstructionResult(SessionManagerInstructionType::GET_SESSIONS_BY_CONSTRAINT), result(input) {}
                 
                 std::vector<SessionDataContainerPtr> result;
@@ -140,7 +140,7 @@ namespace InstructionManagement_Sets
             
             struct ForceSessionExpiration : public InstructionResult<SessionManagerInstructionType>
             {
-                ForceSessionExpiration(bool input)
+                explicit ForceSessionExpiration(bool input)
                 : InstructionResult(SessionManagerInstructionType::FORCE_SESSION_EXPIRATION), result(input) {}
                 
                 bool result;
@@ -148,7 +148,7 @@ namespace InstructionManagement_Sets
             
             struct ForceSessionReauthentication : public InstructionResult<SessionManagerInstructionType>
             {
-                ForceSessionReauthentication(bool input)
+                explicit ForceSessionReauthentication(bool input)
                 : InstructionResult(SessionManagerInstructionType::FORCE_SESSION_REAUTHENTICATION), result(input) {}
                 
                 bool result;
@@ -156,7 +156,7 @@ namespace InstructionManagement_Sets
             
             struct ForceExpirationProcess : public InstructionResult<SessionManagerInstructionType>
             {
-                ForceExpirationProcess(bool input)
+                explicit ForceExpirationProcess(bool input)
                 : InstructionResult(SessionManagerInstructionType::FORCE_EXPIRATION_PROCESS), result(input) {}
                 
                 bool result;
@@ -164,7 +164,7 @@ namespace InstructionManagement_Sets
             
             struct DebugGetState : public InstructionResult<SessionManagerInstructionType>
             {
-                DebugGetState(std::string input)
+                explicit DebugGetState(std::string input)
                 : InstructionResult(SessionManagerInstructionType::DEBUG_GET_STATE), result(input) {}
                 
                 std::string result;

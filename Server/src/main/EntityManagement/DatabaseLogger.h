@@ -65,7 +65,7 @@ namespace EntityManagement
     /**
      * Class for managing database logging activities.
      */
-    class DatabaseLogger
+    class DatabaseLogger final
     : public SecurityManagement_Interfaces::Securable,
       public InstructionManagement_Interfaces::InstructionTarget<DatabaseLoggerInstructionType>
     {
@@ -98,16 +98,16 @@ namespace EntityManagement
             DatabaseLogger(const DatabaseLogger&) = delete;
             DatabaseLogger& operator=(const DatabaseLogger&) = delete;
             
-            void postAuthorizationToken(const SecurityManagement_Types::AuthorizationTokenPtr token);
+            void postAuthorizationToken(const SecurityManagement_Types::AuthorizationTokenPtr token) override;
             
-            SecurityManagement_Types::SecurableComponentType getComponentType() const
+            SecurityManagement_Types::SecurableComponentType getComponentType() const override
             {
                 return SecurityManagement_Types::SecurableComponentType::DATABASE_LOGGER;
             }
             
-            bool registerInstructionSet(InstructionManagement_Sets::InstructionSetPtr<DatabaseLoggerInstructionType> set) const;
+            bool registerInstructionSet(InstructionManagement_Sets::InstructionSetPtr<DatabaseLoggerInstructionType> set) const override;
             
-            InstructionManagement_Types::InstructionSetType getType() const
+            InstructionManagement_Types::InstructionSetType getType() const override
             {
                 return InstructionManagement_Types::InstructionSetType::DATABASE_LOGGER;
             }

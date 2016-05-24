@@ -134,21 +134,21 @@ namespace DatabaseManagement_DALs
             DebugDAL(const DebugDAL&) = delete;             //Copy not allowed (pass/access only by reference/pointer)
             DebugDAL& operator=(const DebugDAL&) = delete;  //Copy not allowed (pass/access only by reference/pointer)
 
-            bool getObject(DatabaseRequestID requestID, boost::any constraintType, boost::any constraintValue);
-            bool putObject(DatabaseRequestID requestID, const DataContainerPtr inputData);
-            bool updateObject(DatabaseRequestID requestID, const DataContainerPtr inputData);
-            bool removeObject(DatabaseRequestID requestID, DBObjectID id);
+            bool getObject(DatabaseRequestID requestID, boost::any constraintType, boost::any constraintValue) override;
+            bool putObject(DatabaseRequestID requestID, const DataContainerPtr inputData) override;
+            bool updateObject(DatabaseRequestID requestID, const DataContainerPtr inputData) override;
+            bool removeObject(DatabaseRequestID requestID, DBObjectID id) override;
             
-            bool changeDatabaseSettings(const DatabaseSettingsContainer settings);
-            bool buildDatabase();
-            bool rebuildDatabase();
-            bool clearDatabase();
-            bool connect();
-            bool disconnect();
-            const DatabaseInformationContainer* getDatabaseInfo() const;
-            DatabaseObjectType getType() const;
-            void setID(DatabaseAbstractionLayerID id);
-            DatabaseAbstractionLayerID getID() const;
+            bool changeDatabaseSettings(const DatabaseSettingsContainer settings) override;
+            bool buildDatabase() override;
+            bool rebuildDatabase() override;
+            bool clearDatabase() override;
+            bool connect() override;
+            bool disconnect() override;
+            const DatabaseInformationContainer* getDatabaseInfo() const override;
+            DatabaseObjectType getType() const override;
+            void setID(DatabaseAbstractionLayerID id) override;
+            DatabaseAbstractionLayerID getID() const override;
             
         private:
             //Configuration
@@ -216,8 +216,8 @@ namespace DatabaseManagement_DALs
 
             std::string toString() { return "NO INFORMATION DEFINED"; }
 
-            virtual std::string getDatabaseName() { return "DEBUG FILE DB"; }
-            virtual long getDatabaseSize() { return 0; }
+            virtual std::string getDatabaseName() const { return "DEBUG FILE DB"; }
+            virtual long getDatabaseSize() const { return 0; }
     };
     
     //<editor-fold defaultstate="collapsed" desc="Stringifier">
@@ -520,6 +520,7 @@ namespace DatabaseManagement_DALs
                 unsigned int failedAttempts = boost::lexical_cast<unsigned int>(*currentToken);
                 
                 std::deque<UserAuthorizationRule> rules;
+                rules.push_back(UserAuthorizationRule(InstructionManagement_Types::InstructionSetType::TEST));
                 rules.push_back(UserAuthorizationRule(InstructionManagement_Types::InstructionSetType::DATABASE_MANAGER));
                 rules.push_back(UserAuthorizationRule(InstructionManagement_Types::InstructionSetType::SESSION_MANAGER));
                 rules.push_back(UserAuthorizationRule(InstructionManagement_Types::InstructionSetType::USER_MANAGER_ADMIN));

@@ -101,7 +101,8 @@ namespace NetworkManagement_Connections
              * @param externalReadBuffer externally supplied read buffer, if any
              * @param debugLogger logger for debugging, if any
              */
-            Connection(ConnectionParamters connectionParams,
+            Connection(boost::shared_ptr<boost::asio::io_service> service,
+                       ConnectionParamters connectionParams,
                        boost::asio::streambuf * externalReadBuffer = nullptr,
                        Utilities::FileLogger * debugLogger = nullptr);
             
@@ -115,7 +116,8 @@ namespace NetworkManagement_Connections
              * @param externalReadBuffer externally supplied read buffer, if any
              * @param debugLogger logger for debugging, if any
              */
-            Connection(ConnectionParamters connectionParams,
+            Connection(boost::shared_ptr<boost::asio::io_service> service,
+                       ConnectionParamters connectionParams,
                        ConnectionRequest requestParams,
                        boost::asio::streambuf * externalReadBuffer = nullptr,
                        Utilities::FileLogger * debugLogger = nullptr);
@@ -317,6 +319,7 @@ namespace NetworkManagement_Connections
             boost::asio::io_service::strand readStrand; //synchronisation strand for read operations
             
             //Connection
+            boost::shared_ptr<boost::asio::io_service> networkService; //socket's parent service
             SocketPtr socket;                           //socket pointer
             RawConnectionID connectionID;               //internal connection ID
             PeerType localPeerType;                     //local peer type
@@ -409,7 +412,8 @@ namespace NetworkManagement_Connections
                     }
                 }
                 
-                onConnect(connectionID);
+                auto eventTask = [&]() { onConnect(connectionID); };
+                networkService->post(eventTask);
             }
             
             /**
@@ -429,7 +433,8 @@ namespace NetworkManagement_Connections
                     }
                 }
                 
-                onDisconnect(connectionID);
+                auto eventTask = [&]() { onDisconnect(connectionID); };
+                networkService->post(eventTask);
             }
             
             /**
@@ -452,7 +457,8 @@ namespace NetworkManagement_Connections
                     }
                 }
                 
-                onDataReceived(data, remainingData);
+                auto eventTask = [&, data, remainingData]() { onDataReceived(data, remainingData); };
+                networkService->post(eventTask);
             }
             
             /**
@@ -474,7 +480,8 @@ namespace NetworkManagement_Connections
                     }
                 }
                 
-                onWriteResultReceived(writeResult);
+                auto eventTask = [&, writeResult]() { onWriteResultReceived(writeResult); };
+                networkService->post(eventTask);
             }
             
             /**
@@ -494,7 +501,8 @@ namespace NetworkManagement_Connections
                     }
                 }
                 
-                canBeDestroyed(connectionID, initiation);
+                auto eventTask = [&]() { canBeDestroyed(connectionID, initiation); };
+                networkService->post(eventTask);
             }
             
             /**
@@ -510,7 +518,7 @@ namespace NetworkManagement_Connections
                 boost::tuples::tuple<EventType, boost::any, boost::any> * currentEventData = 
                         new boost::tuples::tuple<EventType, boost::any, boost::any>(event, parameter, additionalParameter);
                 eventsData.insert(std::pair<ConnectionEventID, boost::tuples::tuple<EventType, boost::any, boost::any> *>(queuedEventID, currentEventData));
-                queuedEventID++;
+                ++queuedEventID;
             }
             //</editor-fold>
     };
@@ -518,4 +526,3 @@ namespace NetworkManagement_Connections
     typedef boost::shared_ptr<NetworkManagement_Connections::Connection> ConnectionPtr;
 }
 #endif	/* CONNECTION_H */
-

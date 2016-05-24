@@ -23,6 +23,7 @@
 #include "../../InstructionManagement/Types/Types.h"
 
 using InstructionManagement_Types::InstructionSetType;
+using InstructionManagement_Types::TestInstructionType;
 using InstructionManagement_Types::NetworkManagerConnectionLifeCycleInstructionType;
 using InstructionManagement_Types::DatabaseManagerInstructionType;
 using InstructionManagement_Types::SessionManagerInstructionType;
@@ -40,6 +41,8 @@ namespace Utilities
         {
             static const boost::unordered_map<InstructionSetType, std::string> instructionSetTypeToString;
             static const boost::unordered_map<std::string, InstructionSetType> stringToInstructionSetType;
+            static const boost::unordered_map<TestInstructionType, std::string> testInstructionTypeToString;
+            static const boost::unordered_map<std::string, TestInstructionType> stringToTestInstructionType;
             
             static const boost::unordered_map<DatabaseManagerInstructionType, std::string> databaseManagerInstructionTypeToString;
             static const boost::unordered_map<std::string, DatabaseManagerInstructionType> stringToDatabaseManagerInstructionType;
@@ -61,6 +64,8 @@ namespace Utilities
         
         std::string toString(InstructionSetType var);
         InstructionSetType toInstructionSetType(std::string var);
+        std::string toString(TestInstructionType var);
+        TestInstructionType toTestInstructionType(std::string var);
         
         std::string toString(DatabaseManagerInstructionType var);
         DatabaseManagerInstructionType toDatabaseManagerInstructionType(std::string var);

@@ -62,7 +62,7 @@ namespace InstructionManagement_Sets
         public:
             SetClosedException() {}
             ~SetClosedException() noexcept {}
-            const char* what() const noexcept { return "SetClosedException"; }
+            const char* what() const noexcept override { return "SetClosedException"; }
     };
     
     /**
@@ -74,7 +74,7 @@ namespace InstructionManagement_Sets
         public:
             InstructionNotSetException() {}
             ~InstructionNotSetException() noexcept {}
-            const char* what() const noexcept { return "InstructionNotSetException"; }
+            const char* what() const noexcept override { return "InstructionNotSetException"; }
     };
     
     /**
@@ -86,7 +86,7 @@ namespace InstructionManagement_Sets
         public:
             InstructionNotRecognisedException() {}
             ~InstructionNotRecognisedException() noexcept {}
-            const char* what() const noexcept { return "InstructionNotRecognisedException"; }
+            const char* what() const noexcept override { return "InstructionNotRecognisedException"; }
     };
     
     /**
@@ -101,7 +101,7 @@ namespace InstructionManagement_Sets
             std::string getInstructionResultTypeName() const { return instructionResultTypeName; }
             
         protected:
-            InstructionResultBase(std::string typeName)
+            explicit InstructionResultBase(std::string typeName)
             : instructionResultTypeName(typeName) {}
             
             std::string instructionResultTypeName;
@@ -126,7 +126,7 @@ namespace InstructionManagement_Sets
             virtual ~InstructionResult() {}
             
         protected:
-            InstructionResult(TInstructionTypeEnum instructionType)
+            explicit InstructionResult(TInstructionTypeEnum instructionType)
             : InstructionResultBase(Utilities::Strings::toString(instructionType)) {}
     };
     
@@ -296,7 +296,7 @@ namespace InstructionManagement_Sets
              * @param token the authorization token associated with the instruction
              * @throw std::invalid_argument if the specified instruction is not of the expected type
              */
-            void processInstruction(InstructionBasePtr instruction, SecurityManagement_Types::AuthorizationTokenPtr token)
+            void processInstruction(InstructionBasePtr instruction, SecurityManagement_Types::AuthorizationTokenPtr token) override
             {
                 InstructionPtr<TInstructionTypeEnum> actualInstruction = boost::dynamic_pointer_cast<Instruction<TInstructionTypeEnum>>(instruction);
                 if(actualInstruction)
@@ -329,7 +329,7 @@ namespace InstructionManagement_Sets
              * 
              * @return the minimum access level
              */
-            Common_Types::UserAccessLevel getMinimumAccessLevel() const
+            Common_Types::UserAccessLevel getMinimumAccessLevel() const override
             {
                 return minAccessLevel;
             }

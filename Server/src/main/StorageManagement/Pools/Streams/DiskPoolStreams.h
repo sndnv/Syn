@@ -84,7 +84,7 @@ namespace StorageManagement_Pools
              * @throw invalid_argument if <code>n</code> is not a valid value or if 
              * more data is requested to be read than is available
              */
-            std::streamsize read(char_type * s, std::streamsize n)
+            std::streamsize read(char_type * s, std::streamsize n) override
             {
                 if(n <= 0)
                     throw std::invalid_argument("DiskPoolInputStream::read() > The number of bytes to read must be larger than 0.");
@@ -108,9 +108,9 @@ namespace StorageManagement_Pools
                 return n;
             }
             
-            StoredDataID getDataID() const { return id; }
-            void resetDataID(StoredDataID newID) { id = newID; }
-            DataSize getMaxReadableBytes() const { return remainingData; }
+            StoredDataID getDataID() const override { return id; }
+            void resetDataID(StoredDataID newID) override { id = newID; }
+            DataSize getMaxReadableBytes() const override { return remainingData; }
             
         private:
             StoredDataID id;
@@ -164,7 +164,7 @@ namespace StorageManagement_Pools
              * @throw invalid_argument if <code>n</code> is not a valid value or if 
              * more data is requested to be written than is allowed
              */
-            std::streamsize write(const char_type * s, std::streamsize n)
+            std::streamsize write(const char_type * s, std::streamsize n) override
             {
                 if(n <= 0)
                     throw std::invalid_argument("DiskPoolOutputStream::write() > The number of bytes to write must be larger than 0.");
@@ -196,7 +196,7 @@ namespace StorageManagement_Pools
              * 
              * @throw logic_error if an unexpected input stream is encountered
              */
-            void streamData(PoolInputStream & input)
+            void streamData(PoolInputStream & input) override
             {
                 try { streamDataFromDisk(dynamic_cast<DiskPoolInputStream &>(input)); return; } catch(std::bad_cast & ex) {}
                 //support for more streaming source is added here
@@ -256,16 +256,16 @@ namespace StorageManagement_Pools
              * 
              * @return reference to this stream
              */
-            PoolOutputStream & flush()
+            PoolOutputStream & flush() override
             {
                 boost::lock_guard<boost::mutex> writeLock(poolWriteMutex);
                 fileStream.flush();
                 return *this;
             }
             
-            StoredDataID getDataID() const { return id; }
-            void resetDataID(StoredDataID newID) { id = newID; }
-            DataSize getMaxWritableBytes() const { return remainingData; }
+            StoredDataID getDataID() const override { return id; }
+            void resetDataID(StoredDataID newID) override { id = newID; }
+            DataSize getMaxWritableBytes() const override { return remainingData; }
             
         private:
             StoredDataID id;

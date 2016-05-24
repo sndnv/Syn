@@ -66,7 +66,7 @@ namespace EntityManagement
         public:
             virtual ~UserManagerAdminInstructionTarget() {}
             
-            InstructionManagement_Types::InstructionSetType getType() const
+            InstructionManagement_Types::InstructionSetType getType() const override
             {
                 return InstructionManagement_Types::InstructionSetType::USER_MANAGER_ADMIN;
             }
@@ -81,7 +81,7 @@ namespace EntityManagement
         public:
             virtual ~UserManagerSelfInstructionTarget() {}
             
-            InstructionManagement_Types::InstructionSetType getType() const
+            InstructionManagement_Types::InstructionSetType getType() const override
             {
                 return InstructionManagement_Types::InstructionSetType::USER_MANAGER_SELF;
             }
@@ -90,7 +90,7 @@ namespace EntityManagement
     /**
      * Class for managing user-related activities.
      */
-    class UserManager
+    class UserManager final
     : public SecurityManagement_Interfaces::Securable,
       public UserManagerAdminInstructionTarget,
       public UserManagerSelfInstructionTarget,
@@ -123,22 +123,22 @@ namespace EntityManagement
             UserManager(const UserManager&) = delete;
             UserManager& operator=(const UserManager&) = delete;
             
-            void postAuthorizationToken(const SecurityManagement_Types::AuthorizationTokenPtr token);
+            void postAuthorizationToken(const SecurityManagement_Types::AuthorizationTokenPtr token) override;
             
-            SecurityManagement_Types::SecurableComponentType getComponentType() const
+            SecurityManagement_Types::SecurableComponentType getComponentType() const override
             {
                 return SecurityManagement_Types::SecurableComponentType::USER_MANAGER;
             }
             
-            bool registerInstructionSet(InstructionManagement_Sets::InstructionSetPtr<UserManagerAdminInstructionType> set) const;
-            bool registerInstructionSet(InstructionManagement_Sets::InstructionSetPtr<UserManagerSelfInstructionType> set) const;
+            bool registerInstructionSet(InstructionManagement_Sets::InstructionSetPtr<UserManagerAdminInstructionType> set) const override;
+            bool registerInstructionSet(InstructionManagement_Sets::InstructionSetPtr<UserManagerSelfInstructionType> set) const override;
             
-            std::string getSourceName() const
+            std::string getSourceName() const override
             {
                 return "UserManager";
             }
             
-            bool registerLoggingHandler(const std::function<void(LogSeverity, const std::string &)> handler)
+            bool registerLoggingHandler(const std::function<void(LogSeverity, const std::string &)> handler) override
             {
                 if(!dbLogHandler)
                 {

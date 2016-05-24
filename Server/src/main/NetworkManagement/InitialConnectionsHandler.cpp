@@ -184,7 +184,7 @@ NetworkManagement_Handlers::InitialConnectionsHandler::createConnectionData
     SymmetricCryptoHandlerPtr cryptoHandler(new SymmetricCryptoHandler(cryptoData));
 
     boost::lock_guard<boost::mutex> globalDataLock(connectionDataMutex);
-    ConnectionData * newConnectionData = new ConnectionData
+    ConnectionDataPtr newConnectionData = ConnectionDataPtr(new ConnectionData
     {
         ConnectionSetupState::INITIATED,                        //connection setup state
         remotePeerData->initPassword,                           //initial shared password
@@ -197,14 +197,14 @@ NetworkManagement_Handlers::InitialConnectionsHandler::createConnectionData
         connection,                                             //connection pointer
         remotePeerData->newPeerID,                              //remote peer ID (as generated on the local system)
         remotePeerData->peerType                                //remote peer type
-    };
+    });
 
     auto connectionData = connectionsData.find(remotePeerData->transientID);
     if(connectionData == connectionsData.end())
     {
         auto result = connectionsData.insert(
             std::pair<TransientConnectionID, ConnectionDataPtr>(
-                remotePeerData->transientID, ConnectionDataPtr(newConnectionData)));
+                remotePeerData->transientID, newConnectionData));
         
         return result.first->second;
     }
@@ -271,20 +271,20 @@ NetworkManagement_Handlers::InitialConnectionsHandler::createUnknownConnectionDa
 (ConnectionPtr connection, const ConnectionID connectionID)
 {
     boost::lock_guard<boost::mutex> globalDataLock(connectionDataMutex);
-    UnknownConnectionData * newConnectionData = new UnknownConnectionData
+    UnknownConnectionDataPtr newConnectionData = UnknownConnectionDataPtr(new UnknownConnectionData
     {
         connection,                     //connection pointer
         ConnectionSetupState::INITIATED,//connection setup state
         INVALID_TRANSIENT_CONNECTION_ID,//no transient ID is available yet
         nullptr                         //no data sent yet
-    };
+    });
 
     auto connectionData = unknownConnectionsData.find(connectionID);
     if(connectionData == unknownConnectionsData.end())
     {
         auto result = unknownConnectionsData.insert(
             std::pair<ConnectionID, UnknownConnectionDataPtr>(
-                connectionID, UnknownConnectionDataPtr(newConnectionData)));
+                connectionID, newConnectionData));
         
         return result.first->second;
     }

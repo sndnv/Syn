@@ -77,11 +77,11 @@ namespace StorageManagement_Pools
     {
         public:
             /** Disk pool file signature */
-            const std::string FILE_SIGNATURE = "DDP";
+            static const std::string FILE_SIGNATURE;
             /** Disk pool version */
-            const char CURRENT_VERSION = '1';
+            static const char CURRENT_VERSION;
             /** Pool UUID size (in bytes) */
-            const DataSize UUID_BYTE_LENGTH = 36;
+            static const DataSize UUID_BYTE_LENGTH = 36;
             
             /** Parameters structure holding <code>DiskDataPool</code> configuration for new pool initialization. */
             struct DiskDataPoolInitParameters
@@ -234,10 +234,9 @@ namespace StorageManagement_Pools
             };
             
             /** Storage overhead for managing the disk pool (in bytes) */
-            const DataSize OVERHEAD_POOL_MANAGEMENT = (FILE_SIGNATURE.size() + sizeof(CURRENT_VERSION) + UUID_BYTE_LENGTH
-                                                       + PoolHeader::BYTE_LENGTH + PoolFooter::BYTE_LENGTH);
+            static const DataSize OVERHEAD_POOL_MANAGEMENT;
             /** Storage overhead for managing each entity (piece of data) stored (in bytes; per entity) */
-            const DataSize OVERHEAD_ENTITY_MANAGEMENT = sizeof(EntityHeader);
+            static const DataSize OVERHEAD_ENTITY_MANAGEMENT = sizeof(EntityHeader);
             
             /**
              * Constructs a new disk data pool management object and creates
@@ -250,7 +249,7 @@ namespace StorageManagement_Pools
              * @throw invalid_argument if the file already exists or if the pool size is too low
              * @throw runtime_error if the new pool file cannot be opened or if the file initialization fails
              */
-            DiskDataPool(DiskDataPoolInitParameters parameters); 
+            explicit DiskDataPool(DiskDataPoolInitParameters parameters); 
            
             /**
              * Constructs a new disk data pool management object and loads an existing disk.
@@ -260,7 +259,7 @@ namespace StorageManagement_Pools
              * @throw runtime error if the pool file cannot be opened, or if the file is not a valid disk pool,
              * or if the pool is corrupted
              */
-            DiskDataPool(DiskDataPoolLoadParameters parameters);
+            explicit DiskDataPool(DiskDataPoolLoadParameters parameters);
             
             /**
              * Clears all data structures and closes the file stream.
@@ -279,7 +278,7 @@ namespace StorageManagement_Pools
              * 
              * @throw runtime_error if the ID is not found or if the read operation fails or if the pool is not in the correct state
              */
-            ByteVectorPtr retrieveData(StoredDataID id);
+            ByteVectorPtr retrieveData(StoredDataID id) override;
             
             /**
              * Stores the supplied data in the pool.
@@ -291,7 +290,7 @@ namespace StorageManagement_Pools
              *                      or if the pool is not in the correct state/mode
              * @throw invalid_argument if an empty or invalid data container was supplied
              */
-            StoredDataID storeData(const ByteVectorPtr data);
+            StoredDataID storeData(const ByteVectorPtr data) override;
             
             /**
              * Discards the data associated with the specified ID.
@@ -308,7 +307,7 @@ namespace StorageManagement_Pools
              * 
              * @throw runtime_error if the specified ID was not found or if the pool is not in the correct state/mode
              */
-            void discardData(StoredDataID id, bool erase = false)
+            void discardData(StoredDataID id, bool erase = false) override
             {
                 boost::lock_guard<boost::mutex> fileLock(fileMutex);
                 discardDataWithoutLock(id, erase);
@@ -321,7 +320,7 @@ namespace StorageManagement_Pools
              * 
              * @throw runtime_error if the pool is not in the correct state/mode or if the pool file update operation fails
              */
-            void clearPool();
+            void clearPool() override;
             
             /**
              * Retrieves a stream for reading data from the pool.
@@ -331,7 +330,7 @@ namespace StorageManagement_Pools
              * 
              * @throw runtime_error if the stream is not in an open state or if the specified ID could not be found
              */
-            PoolInputStreamPtr getInputStream(StoredDataID dataID);
+            PoolInputStreamPtr getInputStream(StoredDataID dataID) override;
             
             /**
              * Retrieves a stream for writing data to the pool.
@@ -345,17 +344,17 @@ namespace StorageManagement_Pools
              * or if the pool is not in the correct state/mode
              * @throw invalid_argument if an empty or invalid data container was supplied
              */
-            PoolOutputStreamPtr getOutputStream(DataSize dataSize);
+            PoolOutputStreamPtr getOutputStream(DataSize dataSize) override;
             
-            DataPoolType getPoolType() const { return DataPoolType::LOCAL_DISK; }
-            DataSize getFreeSpace() const { return totalFreeSpace; }
-            EntitiesCountType getStoredEntitiesNumber() const { return entities.size(); }
-            bool canStoreData(DataSize size) const { return (freeChunks.lower_bound(size) != freeChunks.end()); }
-            DataSize getEntityManagementStorageOverhead() const { return OVERHEAD_ENTITY_MANAGEMENT;}
-            DataSize getPoolManagementStorageOverhead() const { return OVERHEAD_POOL_MANAGEMENT; }
-            DataSize getEntitySize(StoredDataID id) const;
-            bool areInputStreamsSupported() const { return true; }
-            bool areOutputStreamsSupported() const { return true; }
+            DataPoolType getPoolType() const override { return DataPoolType::LOCAL_DISK; }
+            DataSize getFreeSpace() const override { return totalFreeSpace; }
+            EntitiesCountType getStoredEntitiesNumber() const override { return entities.size(); }
+            bool canStoreData(DataSize size) const override { return (freeChunks.lower_bound(size) != freeChunks.end()); }
+            DataSize getEntityManagementStorageOverhead() const override { return OVERHEAD_ENTITY_MANAGEMENT;}
+            DataSize getPoolManagementStorageOverhead() const override { return OVERHEAD_POOL_MANAGEMENT; }
+            DataSize getEntitySize(StoredDataID id) const override;
+            bool areInputStreamsSupported() const override { return true; }
+            bool areOutputStreamsSupported() const override { return true; }
             
         private:
             //Pool state/configuration

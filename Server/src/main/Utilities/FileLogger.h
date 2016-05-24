@@ -33,6 +33,18 @@ namespace Utilities
     /** FileLogger event severity type */
     enum class FileLogSeverity { Debug, Info, Warning, Error };
     
+    inline unsigned int fileLogSeverityToInt(const FileLogSeverity severity)
+    {
+        switch(severity)
+        {
+            case FileLogSeverity::Debug: return 1;
+            case FileLogSeverity::Info: return 2;
+            case FileLogSeverity::Warning: return 3;
+            case FileLogSeverity::Error: return 4;
+            default: throw std::logic_error("fileLogSeverityToInt() > An unexpected log severity was encountered.");
+        }
+    }
+    
     /** Parameter structure for FileLogger initialisation */
     struct FileLoggerParameters
     {
@@ -57,7 +69,7 @@ namespace Utilities
              * @param minimumSeverity the lowest severity level that will be recorded (DEBUG < INFO < WARNING < ERROR)
              * @return the new logger object
              */
-            FileLogger(std::string fullFilePath, unsigned long maximumFileSize, FileLogSeverity minimumSeverity = FileLogSeverity::Debug);
+            explicit FileLogger(std::string fullFilePath, unsigned long maximumFileSize, FileLogSeverity minimumSeverity = FileLogSeverity::Debug);
             
             /**
              * Builds the FileLogger object.
@@ -67,7 +79,7 @@ namespace Utilities
              * @param parameters the parameters for the logger
              * @return the new logger object
              */
-            FileLogger(FileLoggerParameters parameters);
+            explicit FileLogger(FileLoggerParameters parameters);
             
             /**
              * Destroys the FileLogger object.
@@ -118,8 +130,7 @@ namespace Utilities
             unsigned int logRotations = 0;                  //# of log file rotations
             
             //Logger management
-            //severity type -> state (true -> if messages with that severity are to be logger)
-            boost::unordered_map<FileLogSeverity, bool> minSeverityMap; 
+            FileLogSeverity minSeverity;                    //min log severity
             unsigned long maxFileSize;                      //max file size limit (bytes), before a log rotation is triggered
             std::string filePath;                           //full log file path
             std::ofstream fileStream;                       //output stream for the log file
@@ -129,7 +140,7 @@ namespace Utilities
             boost::mutex threadMutex;                       //main thread mutex
             boost::condition_variable threadLockCondition;  //thread condition variable
             std::atomic<bool> stopLogger{false};            //atomic variable for denoting the state of the logger
-            std::atomic<bool> threadRunning;                //atomic variable for denoting the state of the main thread
+            std::atomic<bool> threadRunning{false};         //atomic variable for denoting the state of the main thread
             
             //Requests management
             std::queue<std::string> messages;               //list of pending messages

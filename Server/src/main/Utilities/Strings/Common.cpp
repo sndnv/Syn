@@ -112,7 +112,7 @@ std::string Utilities::Strings::toString(boost::posix_time::ptime var)
 {
     unsigned int bufferSize = 20;
     char timestampBuffer[bufferSize];
-    snprintf(timestampBuffer, bufferSize, "%04d-%02d-%02d %02d:%02d:%02d", 
+    snprintf(timestampBuffer, bufferSize, "%04u-%02u-%02u %02d:%02d:%02d", 
             (unsigned short)var.date().year(), (unsigned short)var.date().month(), (unsigned short)var.date().day(), 
             var.time_of_day().hours(), var.time_of_day().minutes(), var.time_of_day().seconds());
 

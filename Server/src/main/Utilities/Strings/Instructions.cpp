@@ -71,6 +71,22 @@ const boost::unordered_map<std::string, InstructionSetType> Maps::stringToInstru
     {"INVALID",                                 InstructionSetType::INVALID}
 };
 
+const boost::unordered_map<TestInstructionType, std::string> Maps::testInstructionTypeToString
+{
+    {TestInstructionType::DO_TEST_1,    "DO_TEST_1"},
+    {TestInstructionType::DO_TEST_2,    "DO_TEST_2"},
+    {TestInstructionType::DO_TEST_3,    "DO_TEST_3"},
+    {TestInstructionType::INVALID,      "INVALID"}
+};
+
+const boost::unordered_map<std::string, TestInstructionType> Maps::stringToTestInstructionType
+{
+    {"DO_TEST_1",   TestInstructionType::DO_TEST_1},
+    {"DO_TEST_2",   TestInstructionType::DO_TEST_2},
+    {"DO_TEST_3",   TestInstructionType::DO_TEST_3},
+    {"INVALID",     TestInstructionType::INVALID}
+};
+
 const boost::unordered_map<DatabaseManagerInstructionType, std::string> Maps::databaseManagerInstructionTypeToString
 {
     /* CORE */
@@ -489,6 +505,23 @@ InstructionSetType Utilities::Strings::toInstructionSetType(std::string var)
         return Maps::stringToInstructionSetType.at(var);
     else
         return InstructionSetType::INVALID;
+}
+
+
+std::string Utilities::Strings::toString(TestInstructionType var)
+{
+    if(Maps::testInstructionTypeToString.find(var) != Maps::testInstructionTypeToString.end())
+        return Maps::testInstructionTypeToString.at(var);
+    else
+        return "INVALID";
+}
+
+TestInstructionType Utilities::Strings::toTestInstructionType(std::string var)
+{
+    if(Maps::stringToTestInstructionType.find(var) != Maps::stringToTestInstructionType.end())
+        return Maps::stringToTestInstructionType.at(var);
+    else
+        return TestInstructionType::INVALID;
 }
 
 std::string Utilities::Strings::toString(DatabaseManagerInstructionType var)

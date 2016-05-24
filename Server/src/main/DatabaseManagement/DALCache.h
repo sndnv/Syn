@@ -159,27 +159,27 @@ namespace SyncServer_Core
                  * 
                  * Stops all threads and clears all data structures.
                  */
-                ~DALCache();
+                ~DALCache() override;
 
                 DALCache() = delete;                            //No default constructor
                 DALCache(const DALCache&) = delete;             //Copying not allowed (pass/access only by reference/pointer)
                 DALCache& operator=(const DALCache&) = delete;  //Copying not allowed (pass/access only by reference/pointer)
 
-                bool getObject(DatabaseRequestID requestID, boost::any constraintType, boost::any constraintValue);
-                bool putObject(DatabaseRequestID requestID, const DataContainerPtr inputData);
-                bool updateObject(DatabaseRequestID requestID, const DataContainerPtr inputData);
-                bool removeObject(DatabaseRequestID requestID, DBObjectID id);
+                bool getObject(DatabaseRequestID requestID, boost::any constraintType, boost::any constraintValue) override;
+                bool putObject(DatabaseRequestID requestID, const DataContainerPtr inputData) override;
+                bool updateObject(DatabaseRequestID requestID, const DataContainerPtr inputData) override;
+                bool removeObject(DatabaseRequestID requestID, DBObjectID id) override;
 
-                bool changeDatabaseSettings(const DatabaseSettingsContainer settings)   { return dal->changeDatabaseSettings(settings); }
-                bool buildDatabase()                                                    { return dal->buildDatabase(); }
-                bool rebuildDatabase()                                                  { return dal->rebuildDatabase(); }
-                bool clearDatabase()                                                    { return dal->clearDatabase(); }
-                bool connect()                                                          { return dal->connect(); }
-                bool disconnect()                                                       { return commitCache(); }
-                const DatabaseInformationContainer* getDatabaseInfo()             const { return dal->getDatabaseInfo(); }
-                void setID(DatabaseAbstractionLayerID id)                               { dalID = id; dal->setID(dalID); }
-                DatabaseAbstractionLayerID getID()                                const { return dalID; }
-                DatabaseObjectType getType()                                      const { return dal->getType(); }
+                bool changeDatabaseSettings(const DatabaseSettingsContainer settings) override  { return dal->changeDatabaseSettings(settings); }
+                bool buildDatabase() override                                                   { return dal->buildDatabase(); }
+                bool rebuildDatabase() override                                                 { return dal->rebuildDatabase(); }
+                bool clearDatabase() override                                                   { return dal->clearDatabase(); }
+                bool connect() override                                                         { return dal->connect(); }
+                bool disconnect() override                                                      { return commitCache(); }
+                const DatabaseInformationContainer* getDatabaseInfo() const override            { return dal->getDatabaseInfo(); }
+                void setID(DatabaseAbstractionLayerID id) override                              { dalID = id; dal->setID(dalID); }
+                DatabaseAbstractionLayerID getID() const override                               { return dalID; }
+                DatabaseObjectType getType() const override                                     { return dal->getType(); }
 
                 /**
                  * Sends a request for performing a data commit.
@@ -373,4 +373,3 @@ namespace SyncServer_Core
 }
 
 #endif	/* DALCACHE_H */
-

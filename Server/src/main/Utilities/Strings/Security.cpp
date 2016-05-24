@@ -26,7 +26,7 @@ const boost::unordered_map<SecurableComponentType, std::string> Maps::securableC
     {SecurableComponentType::SECURITY_MANAGER,  "SECURITY_MANAGER"},
     {SecurableComponentType::STORAGE_MANAGER,   "STORAGE_MANAGER"},
     {SecurableComponentType::SESSION_MANAGER,   "SESSION_MANAGER"},
-    {SecurableComponentType::INVALID,           "INVALID"},
+    {SecurableComponentType::INVALID,           "INVALID"}
 };
 
 const boost::unordered_map<std::string, SecurableComponentType> Maps::stringToSecurableComponentType
@@ -36,21 +36,21 @@ const boost::unordered_map<std::string, SecurableComponentType> Maps::stringToSe
     {"SECURITY_MANAGER",    SecurableComponentType::SECURITY_MANAGER},
     {"STORAGE_MANAGER",     SecurableComponentType::STORAGE_MANAGER},
     {"SESSION_MANAGER",     SecurableComponentType::SESSION_MANAGER},
-    {"INVALID",             SecurableComponentType::INVALID},
+    {"INVALID",             SecurableComponentType::INVALID}
 };
 
 const boost::unordered_map<CacheEvictionType, std::string> Maps::cacheEvictionTypeToString
 {
     {CacheEvictionType::LRU,     "LRU"},
     {CacheEvictionType::MRU,     "MRU"},
-    {CacheEvictionType::INVALID, "INVALID"},
+    {CacheEvictionType::INVALID, "INVALID"}
 };
 
 const boost::unordered_map<std::string, CacheEvictionType> Maps::stringToCacheEvictionType
 {
     {"LRU",     CacheEvictionType::LRU},
     {"MRU",     CacheEvictionType::MRU},
-    {"INVALID", CacheEvictionType::INVALID},
+    {"INVALID", CacheEvictionType::INVALID}
 };
 
 const boost::unordered_map<HashAlgorithmType, std::string> Maps::hashAlgorithmTypeToString
@@ -90,7 +90,7 @@ const boost::unordered_map<std::string, HashAlgorithmType> Maps::stringToHashAlg
 const boost::unordered_map<AsymmetricCipherType, std::string> Maps::asymmetricCipherTypeToString
 {
     {AsymmetricCipherType::RSA,     "RSA"},
-    {AsymmetricCipherType::INVALID, "INVALID"},
+    {AsymmetricCipherType::INVALID, "INVALID"}
 };
 
 const boost::unordered_map<std::string, AsymmetricCipherType> Maps::stringToAsymmetricCipherType
@@ -104,7 +104,7 @@ const boost::unordered_map<SymmetricCipherType, std::string> Maps::symmetricCiph
     {SymmetricCipherType::AES,      "AES"},
     {SymmetricCipherType::TWOFISH,  "TWOFISH"},
     {SymmetricCipherType::SERPENT,  "SERPENT"},
-    {SymmetricCipherType::INVALID,  "INVALID"},
+    {SymmetricCipherType::INVALID,  "INVALID"}
 };
 
 const boost::unordered_map<std::string, SymmetricCipherType> Maps::stringToSymmetricCipherType
@@ -120,7 +120,7 @@ const boost::unordered_map<AuthenticatedSymmetricCipherModeType, std::string> Ma
     {AuthenticatedSymmetricCipherModeType::GCM,     "GCM"},
     {AuthenticatedSymmetricCipherModeType::CCM,     "CCM"},
     {AuthenticatedSymmetricCipherModeType::EAX,     "EAX"},
-    {AuthenticatedSymmetricCipherModeType::INVALID, "INVALID"},
+    {AuthenticatedSymmetricCipherModeType::INVALID, "INVALID"}
 };
 
 const boost::unordered_map<std::string, AuthenticatedSymmetricCipherModeType> Maps::stringToAuthenticatedSymmetricCipherModeType
@@ -135,7 +135,7 @@ const boost::unordered_map<KeyExchangeType, std::string> Maps::keyExchangeTypeTo
 {
     {KeyExchangeType::RSA,      "RSA"},
     {KeyExchangeType::EC_DH,    "EC_DH"},
-    {KeyExchangeType::INVALID,  "INVALID"},
+    {KeyExchangeType::INVALID,  "INVALID"}
 };
 
 const boost::unordered_map<std::string, KeyExchangeType> Maps::stringToKeyExchangeType
@@ -143,6 +143,40 @@ const boost::unordered_map<std::string, KeyExchangeType> Maps::stringToKeyExchan
     {"RSA",     KeyExchangeType::RSA},
     {"EC_DH",   KeyExchangeType::EC_DH},
     {"INVALID", KeyExchangeType::INVALID}
+};
+
+const boost::unordered_map<EllipticCurveType, std::string> Maps::ellipticCurveTypeToString
+{
+    {EllipticCurveType::BP_P160R1,      "BP_P160R1"},
+    {EllipticCurveType::BP_P192R1,      "BP_P192R1"},
+    {EllipticCurveType::BP_P224R1,      "BP_P224R1"},
+    {EllipticCurveType::BP_P256R1,      "BP_P256R1"},
+    {EllipticCurveType::BP_P320R1,      "BP_P320R1"},
+    {EllipticCurveType::BP_P384R1,      "BP_P384R1"},
+    {EllipticCurveType::BP_P512R1,      "BP_P512R1"},
+    {EllipticCurveType::P192R1,         "P192R1"},
+    {EllipticCurveType::P224R1,         "P224R1"},
+    {EllipticCurveType::P256R1,         "P256R1"},
+    {EllipticCurveType::P384R1,         "P384R1"},
+    {EllipticCurveType::P521R1,         "P521R1"},
+    {EllipticCurveType::INVALID,        "INVALID"}
+};
+
+const boost::unordered_map<std::string, EllipticCurveType> Maps::stringToEllipticCurveType
+{
+    {"BP_P160R1",       EllipticCurveType::BP_P160R1},
+    {"BP_P192R1",       EllipticCurveType::BP_P192R1},
+    {"BP_P224R1",       EllipticCurveType::BP_P224R1},
+    {"BP_P256R1",       EllipticCurveType::BP_P256R1},
+    {"BP_P320R1",       EllipticCurveType::BP_P320R1},
+    {"BP_P384R1",       EllipticCurveType::BP_P384R1},
+    {"BP_P512R1",       EllipticCurveType::BP_P512R1},
+    {"P192R1",          EllipticCurveType::P192R1},
+    {"P224R1",          EllipticCurveType::P224R1},
+    {"P256R1",          EllipticCurveType::P256R1},
+    {"P384R1",          EllipticCurveType::P384R1},
+    {"P521R1",          EllipticCurveType::P521R1},
+    {"INVALID",         EllipticCurveType::INVALID}
 };
 
 std::string Utilities::Strings::toString(SecurableComponentType var)
@@ -255,4 +289,20 @@ KeyExchangeType Utilities::Strings::toKeyExchangeType(std::string var)
         return Maps::stringToKeyExchangeType.at(var);
     else
         return KeyExchangeType::INVALID;
+}
+
+std::string Utilities::Strings::toString(EllipticCurveType var)
+{
+    if(Maps::ellipticCurveTypeToString.find(var) != Maps::ellipticCurveTypeToString.end())
+        return Maps::ellipticCurveTypeToString.at(var);
+    else
+        return "INVALID";
+}
+
+EllipticCurveType Utilities::Strings::toEllipticCurveType(std::string var)
+{
+    if(Maps::stringToEllipticCurveType.find(var) != Maps::stringToEllipticCurveType.end())
+        return Maps::stringToEllipticCurveType.at(var);
+    else
+        return EllipticCurveType::INVALID;
 }

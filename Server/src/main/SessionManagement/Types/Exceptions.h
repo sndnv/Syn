@@ -29,7 +29,7 @@ namespace SessionManagement_Types
     class TooManyUserSessionsException : public std::runtime_error
     {
         public:
-            TooManyUserSessionsException(const std::string & message)
+            explicit TooManyUserSessionsException(const std::string & message)
             : std::runtime_error("TooManyUserSessionsException {" + message + "}.")
             {}
             
@@ -42,7 +42,7 @@ namespace SessionManagement_Types
     class TooManyDeviceSessionsException : public std::runtime_error
     {
         public:
-            TooManyDeviceSessionsException(const std::string & message)
+            explicit TooManyDeviceSessionsException(const std::string & message)
             : std::runtime_error("TooManyDeviceSessionsException {" + message + "}.")
             {}
             

@@ -29,7 +29,7 @@ namespace SecurityManagement_Types
     class InstructionNotAllowedException : public std::runtime_error
     {
         public:
-            InstructionNotAllowedException(const std::string & message)
+            explicit InstructionNotAllowedException(const std::string & message)
             : std::runtime_error("InstructionNotAllowedException {" + message + "}.")
             {}
             
@@ -42,7 +42,7 @@ namespace SecurityManagement_Types
     class InsufficientUserAccessException : public std::runtime_error
     {
         public:
-            InsufficientUserAccessException(const std::string & message)
+            explicit InsufficientUserAccessException(const std::string & message)
             : std::runtime_error("InsufficientUserAccessException {" + message + "}.")
             {}
             
@@ -55,7 +55,7 @@ namespace SecurityManagement_Types
     class UnexpectedDeviceException : public std::runtime_error
     {
         public:
-            UnexpectedDeviceException(const std::string & message)
+            explicit UnexpectedDeviceException(const std::string & message)
             : std::runtime_error("UnrecognisedDeviceException {" + message + "}.")
             {}
             
@@ -68,7 +68,7 @@ namespace SecurityManagement_Types
     class DeviceLockedException : public std::runtime_error
     {
         public:
-            DeviceLockedException(const std::string & message)
+            explicit DeviceLockedException(const std::string & message)
             : std::runtime_error("DeviceLockedException {" + message + "}.")
             {}
             
@@ -81,7 +81,7 @@ namespace SecurityManagement_Types
     class DeviceNotFoundException : public std::runtime_error
     {
         public:
-            DeviceNotFoundException(const std::string & message)
+            explicit DeviceNotFoundException(const std::string & message)
             : std::runtime_error("DeviceNotFoundException {" + message + "}.")
             {}
             
@@ -94,7 +94,7 @@ namespace SecurityManagement_Types
     class UserNotFoundException : public std::runtime_error
     {
         public:
-            UserNotFoundException(const std::string & message)
+            explicit UserNotFoundException(const std::string & message)
             : std::runtime_error("UserNotFoundException {" + message + "}.")
             {}
             
@@ -107,7 +107,7 @@ namespace SecurityManagement_Types
     class InvalidPassswordException : public std::runtime_error
     {
         public:
-            InvalidPassswordException(const std::string & message)
+            explicit InvalidPassswordException(const std::string & message)
             : std::runtime_error("InvalidPassswordException {" + message + "}.")
             {}
             
@@ -120,7 +120,7 @@ namespace SecurityManagement_Types
     class UserLockedException : public std::runtime_error
     {
         public:
-            UserLockedException(const std::string & message)
+            explicit UserLockedException(const std::string & message)
             : std::runtime_error("UserLockedException {" + message + "}.")
             {}
             
@@ -133,7 +133,7 @@ namespace SecurityManagement_Types
     class UserNotAuthenticatedException : public std::runtime_error
     {
         public:
-            UserNotAuthenticatedException(const std::string & message)
+            explicit UserNotAuthenticatedException(const std::string & message)
             : std::runtime_error("UserNotAuthenticatedException {" + message + "}.")
             {}
             
@@ -146,7 +146,7 @@ namespace SecurityManagement_Types
     class InvalidAuthorizationTokenException : public std::runtime_error
     {
         public:
-            InvalidAuthorizationTokenException(const std::string & message)
+            explicit InvalidAuthorizationTokenException(const std::string & message)
             : std::runtime_error("InvalidAuthorizationTokenException {" + message + "}.")
             {}
             

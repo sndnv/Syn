@@ -134,7 +134,7 @@ namespace Utilities
             std::atomic<bool> stopPool{false};
             boost::asio::io_service threadService;
             boost::shared_ptr<boost::asio::io_service::work> poolWork;
-            boost::mutex threadDataMutex;
+            boost::timed_mutex threadDataMutex;
             boost::thread_group threadGroup;
             boost::unordered_map<boost::thread::id, boost::thread *> threads;
             

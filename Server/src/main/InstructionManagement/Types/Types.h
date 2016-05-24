@@ -26,7 +26,7 @@ namespace InstructionManagement_Types
     
     enum class InstructionSetType
     {
-        INVALID,
+        INVALID, TEST,
         CONNECTION_MANAGER, NETWORK_MANAGER_ADMIN, NETWORK_MANAGER_USER, NETWORK_MANAGER_STATE, //Networking
         NETWORK_MANAGER_CONNECTION_LIFE_CYCLE, NETWORK_MANAGER_CONNECTION_BRIDGING , //Networking
         DATABASE_MANAGER, DAL, DAL_CACHE, DAL_QUEUE, DAL_MIGRATOR, DAL_DISTRIBUTED_CACHE, //Database Management
@@ -34,6 +34,14 @@ namespace InstructionManagement_Types
         SESSION_MANAGER, //Sessions
         FILE_LOGGER, THREAD_POOL, //Utilities
         USER_MANAGER_ADMIN, USER_MANAGER_SELF, DEVICE_MANAGER_ADMIN, DEVICE_MANAGER_USER, DATABASE_LOGGER //Entities
+    };
+    
+    enum class TestInstructionType
+    {
+        DO_TEST_1,
+        DO_TEST_2,
+        DO_TEST_3,
+        INVALID
     };
     
     enum class DatabaseManagerInstructionType

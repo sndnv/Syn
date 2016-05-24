@@ -29,6 +29,7 @@ using SecurityManagement_Types::AsymmetricCipherType;
 using SecurityManagement_Types::SymmetricCipherType;
 using SecurityManagement_Types::AuthenticatedSymmetricCipherModeType;
 using SecurityManagement_Types::KeyExchangeType;
+using SecurityManagement_Types::EllipticCurveType;
 
 namespace Utilities
 {
@@ -50,6 +51,8 @@ namespace Utilities
             static const boost::unordered_map<std::string, AsymmetricCipherType> stringToAsymmetricCipherType;
             static const boost::unordered_map<KeyExchangeType, std::string> keyExchangeTypeToString;
             static const boost::unordered_map<std::string, KeyExchangeType> stringToKeyExchangeType;
+            static const boost::unordered_map<EllipticCurveType, std::string> ellipticCurveTypeToString;
+            static const boost::unordered_map<std::string, EllipticCurveType> stringToEllipticCurveType;
         };
         
         std::string toString(SecurableComponentType var);
@@ -59,6 +62,7 @@ namespace Utilities
         std::string toString(AsymmetricCipherType var);
         std::string toString(AuthenticatedSymmetricCipherModeType var);
         std::string toString(KeyExchangeType var);
+        std::string toString(EllipticCurveType var);
         SecurableComponentType toSecurableComponentType(std::string var);
         CacheEvictionType toCacheEvictionType(std::string var);
         HashAlgorithmType toHashAlgorithmType(std::string var);
@@ -66,6 +70,7 @@ namespace Utilities
         SymmetricCipherType toSymmetricCipherType(std::string var);
         AuthenticatedSymmetricCipherModeType toAuthenticatedSymmetricCipherModeType(std::string var);
         KeyExchangeType toKeyExchangeType(std::string var);
+        EllipticCurveType toEllipticCurveType(std::string var);
     }
 }
 

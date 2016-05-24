@@ -712,7 +712,7 @@ namespace SecurityManagement_Crypto
              * 
              * @return a pointer to the newly created container.
              */
-            static ECDHCryptoDataContainer * getContainerFromKeyPair(const std::string & pvKey, const std::string & pbKey)
+            static ECDHCryptoDataContainer * getContainerPtrFromKeyPair(const std::string & pvKey, const std::string & pbKey)
             {
                 if(pvKey.size() == 0 || pbKey.size() == 0)
                 {
@@ -743,7 +743,7 @@ namespace SecurityManagement_Crypto
              * 
              * @return a pointer to the newly created container.
              */
-            static ECDHCryptoDataContainer * getContainerFromPublicKey(const std::string & pbKey)
+            static ECDHCryptoDataContainer * getContainerPtrFromPublicKey(const std::string & pbKey)
             {
                 if(pbKey.size() == 0)
                 {

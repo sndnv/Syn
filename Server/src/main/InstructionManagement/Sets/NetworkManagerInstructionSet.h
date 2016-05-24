@@ -72,7 +72,7 @@ namespace InstructionManagement_Sets
               remotePeerType(remotePeerType), remotePeerID(remotePeerID), transientID(transientID)
             {}
             
-            bool isValid()
+            bool isValid() override
             {
                 return (!sharedPassword.empty()
                         && remotePeerType != PeerType::INVALID
@@ -100,7 +100,7 @@ namespace InstructionManagement_Sets
               cipherMode(mode), encrypt(shouldEncrypt), compress(shouldCompress)
             {}
             
-            bool isValid()
+            bool isValid() override
             {
                 return (transientID != INVALID_TRANSIENT_CONNECTION_ID
                         && key.SizeInBytes() > 0 && iv.SizeInBytes() > 0
@@ -123,7 +123,7 @@ namespace InstructionManagement_Sets
         {
             struct LifeCycleOpenInitConnection : public InstructionResult<NetworkManagerConnectionLifeCycleInstructionType>
             {
-                LifeCycleOpenInitConnection(bool input)
+                explicit LifeCycleOpenInitConnection(bool input)
                 : InstructionResult(NetworkManagerConnectionLifeCycleInstructionType::OPEN_INIT_CONNECTION), result(input)
                 {}
                 bool result;
@@ -131,7 +131,7 @@ namespace InstructionManagement_Sets
             
             struct LifeCycleOpenDataConnection : public InstructionResult<NetworkManagerConnectionLifeCycleInstructionType>
             {
-                LifeCycleOpenDataConnection(bool input)
+                explicit LifeCycleOpenDataConnection(bool input)
                 : InstructionResult(NetworkManagerConnectionLifeCycleInstructionType::OPEN_DATA_CONNECTION), result(input) {}
                 bool result;
             };

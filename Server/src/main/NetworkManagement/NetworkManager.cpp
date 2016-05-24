@@ -64,6 +64,10 @@ SyncServer_Core::NetworkManager::NetworkManager
   commandsReceived(0),
   connectionsInitiated(0),
   connectionsReceived(0),
+  setupsStarted(0),
+  setupsCompleted(0),
+  setupsPartiallyCompleted(0),
+  setupsFailed(0),
   instructionsReceived(0),
   instructionsProcessed(0)
 {
@@ -986,6 +990,8 @@ void SyncServer_Core::NetworkManager::onInitSetupCompletedHandler(
     const TransientConnectionID transientID,
     const NewDeviceConnectionParameters & deviceConfig)
 {
+    ++setupsCompleted;
+    
     setPendingConnectionState(connectionID, ConnectionSetupState::COMPLETED);
     DeviceDataContainerPtr deviceData = databaseManager.Devices().getDevice(deviceID);
     deviceData->setDeviceCommandAddress(deviceConfig.ipSettings.commandAddress);
@@ -1001,6 +1007,7 @@ void SyncServer_Core::NetworkManager::onInitSetupCompletedHandler(
     }
     catch(const InvalidPassswordException & e)
     {
+        ++setupsPartiallyCompleted;
         logMessage(LogSeverity::Error, "(onInitSetupCompletedHandler) >"
                 " Invalid password supplied on connection [" + Convert::toString(connectionID)
                 + "] for device [" + Convert::toString(deviceID) + "]: [" + e.what() + "].");
@@ -1020,6 +1027,8 @@ void SyncServer_Core::NetworkManager::onInitSetupCompletedHandler(
 void SyncServer_Core::NetworkManager::onInitSetupFailedHandler
 (const ConnectionID connectionID, const TransientConnectionID transientID)
 {
+    ++setupsFailed;
+    
     setPendingConnectionState(connectionID, ConnectionSetupState::FAILED);
 
     if(!dataStore.discardInitConnectionData(transientID))
@@ -1416,6 +1425,8 @@ void SyncServer_Core::NetworkManager::lifeCycleOpenDataConnectionHandler
                     actualInstruction->encrypt,
                     actualInstruction->compress);
         }
+        
+        resultValue = true;
     }
 
     auto result = boost::shared_ptr<InstructionResults::LifeCycleOpenDataConnection>(
@@ -1444,6 +1455,7 @@ void SyncServer_Core::NetworkManager::lifeCycleOpenInitConnectionHandler
 
     if(actualInstruction)
     {
+        ++setupsStarted;
         if(actualInstruction->managerID == INVALID_CONNECTION_MANAGER_ID)
         {
             waitForDeviceSetupProcess(
@@ -1463,6 +1475,8 @@ void SyncServer_Core::NetworkManager::lifeCycleOpenInitConnectionHandler
                     actualInstruction->remotePeerID,
                     actualInstruction->transientID);
         }
+        
+        resultValue = true;
     }
 
     auto result = boost::shared_ptr<InstructionResults::LifeCycleOpenInitConnection>(

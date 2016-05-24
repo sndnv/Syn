@@ -20,7 +20,7 @@
 Utilities::ThreadPool::ThreadPool(unsigned long poolSize, Utilities::FileLogger * parentLogger)
             : logger(parentLogger), poolID(boost::uuids::random_generator()()), poolWork(new boost::asio::io_service::work(threadService))
 {
-    boost::lock_guard<boost::mutex> threadsLock(threadDataMutex);
+    boost::lock_guard<boost::timed_mutex> threadsLock(threadDataMutex);
     for(unsigned long i = 0; i < poolSize; i++)
     {
         boost::thread * newThread = threadGroup.create_thread(boost::bind(&Utilities::ThreadPool::threadHandler, this));
@@ -32,9 +32,10 @@ Utilities::ThreadPool::ThreadPool(unsigned long poolSize, Utilities::FileLogger 
 Utilities::ThreadPool::~ThreadPool()
 {
     logMessage("Destruction initiated.");
-    boost::lock_guard<boost::mutex> threadsLock(threadDataMutex);
+    boost::lock_guard<boost::timed_mutex> threadsLock(threadDataMutex);
     stopPool = true;
     poolWork.reset();
+    threadService.stop();
     logMessage("Waiting for all threads to terminate.");
     threadGroup.join_all();
     logMessage("All threads terminated.");
@@ -61,8 +62,13 @@ void Utilities::ThreadPool::assignTimedTask(std::function<void(void)> task, unsi
     {
         if(!timerError)
         {
-            threadService.post(task);
-            logMessage("New timed task added to pool.");
+            if(!stopPool)
+            {
+                threadService.post(task);
+                logMessage("New timed task added to pool.");
+            }
+            else
+                logMessage("Failed to add timed task to pool; pool is stopping.");
         }
         else
             logMessage("Timer error encountered: [" + timerError.message() + "]");
@@ -85,8 +91,13 @@ void Utilities::ThreadPool::assignTimedTask(std::function<void(void)> task, boos
     {
         if(!timerError)
         {
-            threadService.post(task);
-            logMessage("New timed task added to pool.");
+            if(!stopPool)
+            {
+                threadService.post(task);
+                logMessage("New timed task added to pool.");
+            }
+            else
+                logMessage("Failed to add timed task to pool; pool is stopping.");
         }
         else
             logMessage("Timer error encountered: [" + timerError.message() + "]");
@@ -103,13 +114,24 @@ void Utilities::ThreadPool::addThreads(unsigned long number)
     if(stopPool)
         return;
     
-    boost::lock_guard<boost::mutex> threadsLock(threadDataMutex);
-    for(unsigned long i = 0; i < number; i++)
+    bool done = false;
+    do
     {
-        boost::thread * newThread = threadGroup.create_thread(boost::bind(&Utilities::ThreadPool::threadHandler, this));
-        threads.insert(std::pair<boost::thread::id, boost::thread *>(newThread->get_id(), newThread));
-        logMessage("Thread <" + boost::lexical_cast<std::string>(newThread->get_id()) + "> added to pool.");
-    }
+        boost::timed_mutex::scoped_lock connectionDataLock(threadDataMutex, boost::get_system_time() + boost::posix_time::milliseconds(100));
+
+        if(connectionDataLock.owns_lock() && !stopPool)
+        {
+            for(unsigned long i = 0; i < number; i++)
+            {
+                boost::thread * newThread = threadGroup.create_thread(boost::bind(&Utilities::ThreadPool::threadHandler, this));
+                threads.insert(std::pair<boost::thread::id, boost::thread *>(newThread->get_id(), newThread));
+                logMessage("Thread <" + boost::lexical_cast<std::string>(newThread->get_id()) + "> added to pool.");
+            }
+            done = true;
+        }
+        else if(stopPool)
+            done = true;
+    } while(!done);
 }
 
 void Utilities::ThreadPool::removeThreads(unsigned long number)
@@ -141,12 +163,23 @@ void Utilities::ThreadPool::stopThreadPool()
         return;
     
     logMessage("Stopping thread pool.");
-    boost::lock_guard<boost::mutex> threadsLock(threadDataMutex);
+    
+    bool done = false;
+    do
+    {
+        boost::timed_mutex::scoped_lock connectionDataLock(threadDataMutex, boost::get_system_time() + boost::posix_time::milliseconds(100));
 
-    stopPool = true;
-    poolWork.reset();
-    threadService.stop();
-    logMessage("Thread pool stopped.");
+        if(connectionDataLock.owns_lock() && !stopPool)
+        {
+            stopPool = true;
+            poolWork.reset();
+            threadService.stop();
+            logMessage("Thread pool stopped.");
+            done = true;
+        }
+        else if(stopPool)
+            done = true;
+    } while(!done);
 }
 
 void Utilities::ThreadPool::threadHandler()
@@ -162,11 +195,24 @@ void Utilities::ThreadPool::threadHandler()
         catch(ThreadPool::StopThreadException)
         {
             logMessage("Thread stop requested for <" + boost::lexical_cast<std::string>(boost::this_thread::get_id()) + ">");
-            boost::lock_guard<boost::mutex> groupLock(threadDataMutex);
-            boost::thread * currentThread = threads[boost::this_thread::get_id()];
-            threads.erase(boost::this_thread::get_id());
-            threadGroup.remove_thread(currentThread);
-            currentThread->detach();
+            
+            bool done = false;
+            do
+            {
+                boost::timed_mutex::scoped_lock connectionDataLock(threadDataMutex, boost::get_system_time() + boost::posix_time::milliseconds(100));
+
+                if(connectionDataLock.owns_lock() && !stopPool)
+                {
+                    boost::thread * currentThread = threads[boost::this_thread::get_id()];
+                    threads.erase(boost::this_thread::get_id());
+                    threadGroup.remove_thread(currentThread);
+                    currentThread->detach();
+                    done = true;
+                }
+                else if(stopPool)
+                    done = true;
+            } while(!done);
+            
             break;
         }
         catch(std::exception & ex)

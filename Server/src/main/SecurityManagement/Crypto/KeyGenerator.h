@@ -115,7 +115,11 @@ namespace SecurityManagement_Crypto
                 IVSize defaultIVSize;
                 /** Minimum symmetric key size (in bytes) */
                 KeySize minSymmetricKeySize;
-                /** Default symmetric key size (in bytes) */
+                /** Default symmetric key size (in bytes).
+                 *  Note: Sizes beyond 20 bytes can cause failures during ECDH
+                 *  key generation (depending on selected curve).
+                 *  For example, if BP_P384R1 is used, the default symmetric
+                 *  key size can be at most 48 bytes. */
                 KeySize defaultSymmetricKeySize;
             };
             
@@ -152,6 +156,36 @@ namespace SecurityManagement_Crypto
               derivedKeyMinSaltSize(dkParams.derivedKeyMinSaltSize),
               derivedKeyDefaultSaltSize(dkParams.derivedKeyDefaultSaltSize)
             {
+                if(defaultSymmetricCipher != SymmetricCipherType::AES
+                    && defaultSymmetricCipher != SymmetricCipherType::SERPENT
+                    && defaultSymmetricCipher != SymmetricCipherType::TWOFISH)
+                {
+                    throw std::invalid_argument("KeyGenerator::() > Invalid symmetric cipher supplied.");
+                }
+                
+                if(defaultSymmetricCipherMode != AuthenticatedSymmetricCipherModeType::CCM
+                    && defaultSymmetricCipherMode != AuthenticatedSymmetricCipherModeType::EAX
+                    && defaultSymmetricCipherMode != AuthenticatedSymmetricCipherModeType::GCM)
+                {
+                    throw std::invalid_argument("KeyGenerator::() > Invalid symmetric cipher mode supplied.");
+                }
+                
+                if(defaultEllipticCurve != EllipticCurveType::BP_P160R1
+                    && defaultEllipticCurve != EllipticCurveType::BP_P192R1
+                    && defaultEllipticCurve != EllipticCurveType::BP_P224R1
+                    && defaultEllipticCurve != EllipticCurveType::BP_P256R1
+                    && defaultEllipticCurve != EllipticCurveType::BP_P320R1
+                    && defaultEllipticCurve != EllipticCurveType::BP_P384R1
+                    && defaultEllipticCurve != EllipticCurveType::BP_P512R1
+                    && defaultEllipticCurve != EllipticCurveType::P192R1
+                    && defaultEllipticCurve != EllipticCurveType::P224R1
+                    && defaultEllipticCurve != EllipticCurveType::P256R1
+                    && defaultEllipticCurve != EllipticCurveType::P384R1
+                    && defaultEllipticCurve != EllipticCurveType::P521R1)
+                {
+                    throw std::invalid_argument("KeyGenerator::() > Invalid elliptic curve supplied.");
+                }
+                
                 if(derivedKeyMinSaltSize > derivedKeyDefaultSaltSize)
                 {
                     throw std::invalid_argument("KeyGenerator::() > The default derived key salt size must be "

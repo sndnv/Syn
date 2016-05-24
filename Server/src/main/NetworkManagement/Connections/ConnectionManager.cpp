@@ -25,8 +25,8 @@ NetworkManagement_Connections::ConnectionManager::ConnectionManager
   connectionRequestTimeout(parameters.connectionRequestTimeout),
   defaultReadBufferSize(parameters.defaultReadBufferSize),
   localEndpoint(boost::asio::ip::address::from_string(parameters.listeningAddress), listeningPort), 
-  networkService(), connectionAcceptor(networkService, localEndpoint),
-  poolWork(new boost::asio::io_service::work(networkService))
+  networkService(new boost::asio::io_service()), connectionAcceptor(*networkService, localEndpoint),
+  poolWork(new boost::asio::io_service::work(*networkService))
 {
     this->debugLogger = debugLogger;
     
@@ -47,12 +47,12 @@ NetworkManagement_Connections::ConnectionManager::~ConnectionManager()
     
     stopManager = true;
     connectionAcceptor.close();
-    networkService.stop();
+    networkService->stop();
     
-    boost::lock_guard<boost::mutex> incomingConnectionDataLock(incomingConnectionDataMutex);
+    boost::lock_guard<boost::timed_mutex> incomingConnectionDataLock(incomingConnectionDataMutex);
     incomingConnections.clear();
     
-    boost::lock_guard<boost::mutex> outgoingConnectionDataLock(outgoingConnectionDataMutex);
+    boost::lock_guard<boost::timed_mutex> outgoingConnectionDataLock(outgoingConnectionDataMutex);
     outgoingConnections.clear();
     
     poolWork.reset();
@@ -82,7 +82,7 @@ void NetworkManagement_Connections::ConnectionManager::initiateNewConnection
     
     boost::asio::ip::tcp::endpoint remoteEndpoint(boost::asio::ip::address::from_string(remoteAddress), port);
     
-    SocketPtr newLocalSocket(new boost::asio::ip::tcp::socket(networkService));
+    SocketPtr newLocalSocket(new boost::asio::ip::tcp::socket(*networkService));
     
     newLocalSocket->async_connect(remoteEndpoint, 
             boost::bind(&NetworkManagement_Connections::ConnectionManager::createLocalConnection,
@@ -94,7 +94,7 @@ void NetworkManagement_Connections::ConnectionManager::acceptNewConnection()
     if(stopManager)
         return;
     
-    SocketPtr newRemoteSocket(new boost::asio::ip::tcp::socket(networkService));
+    SocketPtr newRemoteSocket(new boost::asio::ip::tcp::socket(*networkService));
     connectionAcceptor.async_accept(*newRemoteSocket,
             boost::bind(&NetworkManagement_Connections::ConnectionManager::createRemoteConnection,
                         this, newRemoteSocket));
@@ -107,10 +107,10 @@ void NetworkManagement_Connections::ConnectionManager::createLocalConnection
         return;
     
     RawConnectionID connectionID = getNewConnectionID();
-    ++initiatedOutgoingConnections;
     
     if(!error)
     {
+        ++initiatedOutgoingConnections;
         Connection::ConnectionParamters connectionParams{managerType,
                                                          localPeerType,
                                                          ConnectionInitiation::LOCAL,
@@ -119,7 +119,7 @@ void NetworkManagement_Connections::ConnectionManager::createLocalConnection
                                                          defaultReadBufferSize};
                                                          
         ConnectionRequest requestParams{localPeerType, managerType};
-        ConnectionPtr newConnection(new Connection(connectionParams, requestParams, nullptr, debugLogger));
+        ConnectionPtr newConnection(new Connection(networkService, connectionParams, requestParams, nullptr, debugLogger));
         
         newConnection->onConnectEventAttach(boost::bind(&NetworkManagement_Connections::ConnectionManager::onConnectHandler,
                                                         this, _1, ConnectionInitiation::LOCAL));
@@ -127,10 +127,19 @@ void NetworkManagement_Connections::ConnectionManager::createLocalConnection
         newConnection->canBeDestroyedEventAttach(boost::bind(&NetworkManagement_Connections::ConnectionManager::destroyConnection,
                                                              this, _1, _2));
         
+        bool done = false;
+        do
         {
-            boost::lock_guard<boost::mutex> connectionDataLock(outgoingConnectionDataMutex);
-            outgoingConnections.insert(std::pair<RawConnectionID, ConnectionPtr>(connectionID, newConnection));
-        }
+            boost::timed_mutex::scoped_lock connectionDataLock(outgoingConnectionDataMutex, boost::get_system_time() + boost::posix_time::milliseconds(mutexWaitInterval));
+            
+            if(connectionDataLock.owns_lock() && !stopManager)
+            {
+                outgoingConnections.insert(std::pair<RawConnectionID, ConnectionPtr>(connectionID, newConnection));
+                done = true;
+            }
+            else if(stopManager)
+                return;
+        } while(!done);
                                                              
         newConnection->enableLifecycleEvents();
     }
@@ -159,7 +168,7 @@ void NetworkManagement_Connections::ConnectionManager::createRemoteConnection(So
                                                      remoteSocket,
                                                      defaultReadBufferSize};
     
-    ConnectionPtr newConnection(new Connection(connectionParams, nullptr, debugLogger));
+    ConnectionPtr newConnection(new Connection(networkService, connectionParams, nullptr, debugLogger));
     
     newConnection->onConnectEventAttach(boost::bind(&NetworkManagement_Connections::ConnectionManager::onConnectHandler,
                                                     this, _1, ConnectionInitiation::REMOTE));
@@ -167,22 +176,31 @@ void NetworkManagement_Connections::ConnectionManager::createRemoteConnection(So
     newConnection->canBeDestroyedEventAttach(boost::bind(&NetworkManagement_Connections::ConnectionManager::destroyConnection,
                                                          this, _1, _2));
     
+    bool done = false;
+    do
     {
-        boost::lock_guard<boost::mutex> connectionDataLock(incomingConnectionDataMutex);
-        incomingConnections.insert(std::pair<RawConnectionID, ConnectionPtr>(connectionID, newConnection));
-    }
+        boost::timed_mutex::scoped_lock connectionDataLock(incomingConnectionDataMutex, boost::get_system_time() + boost::posix_time::milliseconds(mutexWaitInterval));
+
+        if(connectionDataLock.owns_lock() && !stopManager)
+        {
+            incomingConnections.insert(std::pair<RawConnectionID, ConnectionPtr>(connectionID, newConnection));
+            done = true;
+        }
+        else if(stopManager)
+            return;
+    } while(!done);
     
     if(connectionRequestTimeout > 0)
     {//timeout is enabled
-        boost::asio::deadline_timer * newTimer = new boost::asio::deadline_timer(networkService);
+        boost::shared_ptr<boost::asio::deadline_timer> newTimer(new boost::asio::deadline_timer(*networkService));
         
         {
             boost::lock_guard<boost::mutex> timerLock(deadlineTimerMutex);
             
-            auto connectionTimerData = std::pair<ConnectionPtr, boost::asio::deadline_timer *>
+            auto connectionTimerData = std::pair<ConnectionPtr, boost::shared_ptr<boost::asio::deadline_timer>>
                     (newConnection, newTimer);
             
-            timerData.insert(std::pair<RawConnectionID, std::pair<ConnectionPtr, boost::asio::deadline_timer *>>
+            timerData.insert(std::pair<RawConnectionID, std::pair<ConnectionPtr, boost::shared_ptr<boost::asio::deadline_timer>>>
                     (connectionID, connectionTimerData));
         }
         
@@ -221,7 +239,6 @@ void NetworkManagement_Connections::ConnectionManager::timeoutConnection
                 + "] > Timeout error encountered: <" + timeoutError.message() + ">");
         }
 
-        delete currentConnectionData.second;
         timerData.erase(connectionID);
     }
 }
@@ -236,44 +253,66 @@ void NetworkManagement_Connections::ConnectionManager::destroyConnection
     {
         case ConnectionInitiation::LOCAL:
         {
-            boost::lock_guard<boost::mutex> connectionDataLock(outgoingConnectionDataMutex);
-            
-            if(outgoingConnections.find(connectionID) != outgoingConnections.end())
+            bool done = false;
+            do
             {
-                queueConnectionForDestruction(outgoingConnections[connectionID]);
-                outgoingConnections.erase(connectionID);
-                
-                debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "ConnectionManager / "
-                    + Convert::toString(managerType) + " (Destroy Connection) Outgoing connection <"
-                    + Convert::toString(connectionID) + "> removed.");
-            }
-            else
-            {
-                debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "ConnectionManager / "
-                    + Convert::toString(managerType) + " (Destroy Connection) Outgoing connection <"
-                    + Convert::toString(connectionID) + "> not found in table.");
-            }
+                boost::timed_mutex::scoped_lock connectionDataLock(outgoingConnectionDataMutex, boost::get_system_time() + boost::posix_time::milliseconds(mutexWaitInterval));
+
+                if(connectionDataLock.owns_lock() && !stopManager)
+                {
+                    if(outgoingConnections.find(connectionID) != outgoingConnections.end())
+                    {
+                        queueConnectionForDestruction(outgoingConnections[connectionID]);
+                        outgoingConnections.erase(connectionID);
+
+                        debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "ConnectionManager / "
+                            + Convert::toString(managerType) + " (Destroy Connection) Outgoing connection <"
+                            + Convert::toString(connectionID) + "> removed.");
+                    }
+                    else
+                    {
+                        debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "ConnectionManager / "
+                            + Convert::toString(managerType) + " (Destroy Connection) Outgoing connection <"
+                            + Convert::toString(connectionID) + "> not found in table.");
+                    }
+                    
+                    done = true;
+                }
+                else if(stopManager)
+                    return;
+            } while(!done);
         } break;
         
         case ConnectionInitiation::REMOTE:
         {
-            boost::lock_guard<boost::mutex> connectionDataLock(incomingConnectionDataMutex);
-            
-            if(incomingConnections.find(connectionID) != incomingConnections.end())
+            bool done = false;
+            do
             {
-                queueConnectionForDestruction(incomingConnections[connectionID]);
-                incomingConnections.erase(connectionID);
-                
-                debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "ConnectionManager / "
-                    + Convert::toString(managerType) + " (Destroy Connection) Incoming connection <"
-                    + Convert::toString(connectionID) + "> removed.");
-            }
-            else
-            {
-                debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "ConnectionManager / "
-                    + Convert::toString(managerType) + " (Destroy Connection) Incoming connection <"
-                    + Convert::toString(connectionID) + "> not found in table.");
-            }
+                boost::timed_mutex::scoped_lock connectionDataLock(incomingConnectionDataMutex, boost::get_system_time() + boost::posix_time::milliseconds(mutexWaitInterval));
+
+                if(connectionDataLock.owns_lock() && !stopManager)
+                {
+                    if(incomingConnections.find(connectionID) != incomingConnections.end())
+                    {
+                        queueConnectionForDestruction(incomingConnections[connectionID]);
+                        incomingConnections.erase(connectionID);
+
+                        debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "ConnectionManager / "
+                            + Convert::toString(managerType) + " (Destroy Connection) Incoming connection <"
+                            + Convert::toString(connectionID) + "> removed.");
+                    }
+                    else
+                    {
+                        debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "ConnectionManager / "
+                            + Convert::toString(managerType) + " (Destroy Connection) Incoming connection <"
+                            + Convert::toString(connectionID) + "> not found in table.");
+                    }
+                    
+                    done = true;
+                }
+                else if(stopManager)
+                    return;
+            } while(!done);
         } break;
         
         default:
@@ -297,10 +336,19 @@ void NetworkManagement_Connections::ConnectionManager::onConnectHandler
         {
             ConnectionPtr currentConnection;
             
+            bool done = false;
+            do
             {
-                boost::lock_guard<boost::mutex> connectionDataLock(outgoingConnectionDataMutex);
-                currentConnection = outgoingConnections.at(connectionID);
-            }
+                boost::timed_mutex::scoped_lock connectionDataLock(outgoingConnectionDataMutex, boost::get_system_time() + boost::posix_time::milliseconds(mutexWaitInterval));
+
+                if(connectionDataLock.owns_lock() && !stopManager)
+                {
+                    currentConnection = outgoingConnections.at(connectionID);
+                    done = true;
+                }
+                else if(stopManager)
+                    return;
+            } while(!done);
             
             onConnectionCreated(currentConnection, ConnectionInitiation::LOCAL);
         } break;
@@ -312,8 +360,6 @@ void NetworkManagement_Connections::ConnectionManager::onConnectHandler
                 boost::lock_guard<boost::mutex> timerLock(deadlineTimerMutex);
                 if(timerData.find(connectionID) != timerData.end())
                 {//there is a pending timer that has not expired yet
-                    auto currentConnectionData = timerData[connectionID];
-                    delete currentConnectionData.second;
                     timerData.erase(connectionID);
                 }
                 else
@@ -328,10 +374,19 @@ void NetworkManagement_Connections::ConnectionManager::onConnectHandler
             
             ConnectionPtr currentConnection;
             
+            bool done = false;
+            do
             {
-                boost::lock_guard<boost::mutex> connectionDataLock(incomingConnectionDataMutex);
-                currentConnection = incomingConnections.at(connectionID);
-            }
+                boost::timed_mutex::scoped_lock connectionDataLock(incomingConnectionDataMutex, boost::get_system_time() + boost::posix_time::milliseconds(mutexWaitInterval));
+
+                if(connectionDataLock.owns_lock() && !stopManager)
+                {
+                    currentConnection = incomingConnections.at(connectionID);
+                    done = true;
+                }
+                else if(stopManager)
+                    return;
+            } while(!done);
             
             onConnectionCreated(currentConnection, ConnectionInitiation::REMOTE);
         } break;
@@ -354,15 +409,18 @@ void NetworkManagement_Connections::ConnectionManager::poolThreadHandler()
         + Convert::toString(managerType) + " (Pool Thread Handler) Thread <"
         + Convert::toString(boost::this_thread::get_id()) + "> started.");
 
-    try
+    while(!stopManager)
     {
-        networkService.run(); //the current threads starts work on the networking service
-    }
-    catch(std::exception & ex)
-    {
-        debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "ConnectionManager / "
-            + Convert::toString(managerType) + " (Pool Thread Handler) Exception encountered in thread <"
-            + Convert::toString(boost::this_thread::get_id()) + ">: [" + ex.what() + "]");
+        try
+        {
+            networkService->run(); //the current threads starts work on the networking service
+        }
+        catch(std::exception & ex)
+        {
+            debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "ConnectionManager / "
+                + Convert::toString(managerType) + " (Pool Thread Handler) Exception encountered in thread <"
+                + Convert::toString(boost::this_thread::get_id()) + ">: [" + ex.what() + "]");
+        }
     }
     
     debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "ConnectionManager / "
@@ -401,6 +459,10 @@ void NetworkManagement_Connections::ConnectionManager::disconnectedConnectionsTh
                 if(currentConnection->getPendingHandlersNumber() > 0)
                     remainingConnections.push_back(currentConnection);
             }
+            
+            debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "ConnectionManager / "
+                + Convert::toString(managerType) + " (Disconnect Manager Thread) > Waiting for <"
+                + Convert::toString(remainingConnections.size()) + "> connections with pending handlers.");
             
             disconnectedConnections.clear();
             disconnectedConnections.swap(remainingConnections);

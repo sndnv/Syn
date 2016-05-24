@@ -164,7 +164,7 @@ namespace SyncServer_Core
         public:
             virtual ~NetworkManagerAdminInstructionTarget() {}
             
-            InstructionManagement_Types::InstructionSetType getType() const
+            InstructionManagement_Types::InstructionSetType getType() const override
             {
                 return InstructionManagement_Types::InstructionSetType::NETWORK_MANAGER_ADMIN;
             }
@@ -179,7 +179,7 @@ namespace SyncServer_Core
         public:
             virtual ~NetworkManagerUserInstructionTarget() {}
             
-            InstructionManagement_Types::InstructionSetType getType() const
+            InstructionManagement_Types::InstructionSetType getType() const override
             {
                 return InstructionManagement_Types::InstructionSetType::NETWORK_MANAGER_USER;
             }
@@ -194,7 +194,7 @@ namespace SyncServer_Core
         public:
             virtual ~NetworkManagerStateInstructionTarget() {}
             
-            InstructionManagement_Types::InstructionSetType getType() const
+            InstructionManagement_Types::InstructionSetType getType() const override
             {
                 return InstructionManagement_Types::InstructionSetType::NETWORK_MANAGER_STATE;
             }
@@ -209,7 +209,7 @@ namespace SyncServer_Core
         public:
             virtual ~NetworkManagerConnectionLifeCycleInstructionTarget() {}
             
-            InstructionManagement_Types::InstructionSetType getType() const
+            InstructionManagement_Types::InstructionSetType getType() const override
             {
                 return InstructionManagement_Types::InstructionSetType::NETWORK_MANAGER_CONNECTION_LIFE_CYCLE;
             }
@@ -224,7 +224,7 @@ namespace SyncServer_Core
         public:
             virtual ~NetworkManagerConnectionBridgingInstructionTarget() {}
             
-            InstructionManagement_Types::InstructionSetType getType() const
+            InstructionManagement_Types::InstructionSetType getType() const override
             {
                 return InstructionManagement_Types::InstructionSetType::NETWORK_MANAGER_CONNECTION_BRIDGING;
             }
@@ -237,7 +237,7 @@ namespace SyncServer_Core
      * Handles serialization/parsing, compression/decompression,
      * encryption/decryption and all connection setup processes.
      */
-    class NetworkManager
+    class NetworkManager final
     : public SecurityManagement_Interfaces::Securable,
       public NetworkManagerAdminInstructionTarget,
       public NetworkManagerUserInstructionTarget,
@@ -305,20 +305,20 @@ namespace SyncServer_Core
             NetworkManager(const NetworkManager&) = delete;
             NetworkManager& operator=(const NetworkManager&) = delete;
             
-            void postAuthorizationToken(const AuthorizationTokenPtr token);
+            void postAuthorizationToken(const AuthorizationTokenPtr token) override;
             
-            SecurityManagement_Types::SecurableComponentType getComponentType() const
+            SecurityManagement_Types::SecurableComponentType getComponentType() const override
             {
                 return SecurityManagement_Types::SecurableComponentType::NETWORK_MANAGER;
             }
             
-            bool registerInstructionSet(InstructionSetPtr<NetworkManagerAdminInstructionType> set) const;
-            bool registerInstructionSet(InstructionSetPtr<NetworkManagerUserInstructionType> set) const;
-            bool registerInstructionSet(InstructionSetPtr<NetworkManagerStateInstructionType> set) const;
-            bool registerInstructionSet(InstructionSetPtr<NetworkManagerConnectionLifeCycleInstructionType> set) const;
-            bool registerInstructionSet(InstructionSetPtr<NetworkManagerConnectionBridgingInstructionType> set) const;
+            bool registerInstructionSet(InstructionSetPtr<NetworkManagerAdminInstructionType> set) const override;
+            bool registerInstructionSet(InstructionSetPtr<NetworkManagerUserInstructionType> set) const override;
+            bool registerInstructionSet(InstructionSetPtr<NetworkManagerStateInstructionType> set) const override;
+            bool registerInstructionSet(InstructionSetPtr<NetworkManagerConnectionLifeCycleInstructionType> set) const override;
+            bool registerInstructionSet(InstructionSetPtr<NetworkManagerConnectionBridgingInstructionType> set) const override;
             
-            bool registerInstructionHandler(const std::function<void(InstructionBasePtr, AuthorizationTokenPtr)> handler)
+            bool registerInstructionHandler(const std::function<void(InstructionBasePtr, AuthorizationTokenPtr)> handler) override
             {
                 if(!processInstruction)
                 {
@@ -333,7 +333,7 @@ namespace SyncServer_Core
                 }
             }
             
-            std::vector<InstructionSetType> getRequiredInstructionSetTypes()
+            std::vector<InstructionSetType> getRequiredInstructionSetTypes() override
             {
                 return std::vector<InstructionManagement_Types::InstructionSetType>(
                 {
@@ -341,12 +341,12 @@ namespace SyncServer_Core
                 });
             }
             
-            std::string getSourceName() const
+            std::string getSourceName() const override
             {
                 return "NetworkManager";
             }
             
-            bool registerLoggingHandler(const std::function<void(LogSeverity, const std::string &)> handler)
+            bool registerLoggingHandler(const std::function<void(LogSeverity, const std::string &)> handler) override
             {
                 if(!dbLogHandler)
                 {
@@ -440,9 +440,21 @@ namespace SyncServer_Core
              */
             TransientConnectionID getNewTransientID()
             {
-                boost::lock_guard<boost::mutex> transientIDLock(transientIDMutex);
                 return ++lastTransientID;
             }
+            
+            StatCounter getCommandsReceived() const         { return commandsReceived; }
+            StatCounter getCommandsSent() const             { return commandsSent; }
+            StatCounter getConnectionsInitiated() const     { return connectionsInitiated; }
+            StatCounter getConnectionsReceived() const      { return connectionsReceived; }
+            StatCounter getDataReceived() const             { return dataReceived; }
+            StatCounter getDataSent() const                 { return dataSent; }
+            StatCounter getSetupsCompleted() const          { return setupsCompleted; }
+            StatCounter getSetupsFailed() const             { return setupsFailed; }
+            StatCounter getSetupsPartiallyCompleted() const { return setupsPartiallyCompleted; }
+            StatCounter getSetupsStarted() const            { return setupsStarted; }
+            unsigned long getInstructionsProcessed() const  { return instructionsProcessed; }
+            unsigned long getInstructionsReceived() const   { return instructionsReceived; }
             
         private:
             Utilities::ThreadPool networkingThreadPool;     //thread pool for networking tasks
@@ -491,10 +503,8 @@ namespace SyncServer_Core
             boost::signals2::connection onSetupFailedEventConnection;
             
             //Connection Counters
-            boost::mutex connectionIDMutex;
-            ConnectionID lastConnectionID = INVALID_CONNECTION_ID;
-            boost::mutex transientIDMutex;
-            TransientConnectionID lastTransientID = INVALID_TRANSIENT_CONNECTION_ID;
+            std::atomic<ConnectionID> lastConnectionID{INVALID_CONNECTION_ID};
+            std::atomic<TransientConnectionID> lastTransientID{INVALID_TRANSIENT_CONNECTION_ID};
             
             //Timeout Settings
             Seconds commandConnectionSetupTimeout;
@@ -513,6 +523,10 @@ namespace SyncServer_Core
             std::atomic<StatCounter> commandsReceived;
             std::atomic<StatCounter> connectionsInitiated;
             std::atomic<StatCounter> connectionsReceived;
+            std::atomic<StatCounter> setupsStarted;
+            std::atomic<StatCounter> setupsCompleted;
+            std::atomic<StatCounter> setupsPartiallyCompleted;
+            std::atomic<StatCounter> setupsFailed;
             
             //<editor-fold defaultstate="collapsed" desc="Handlers - Connection Setup">
             /**
@@ -829,7 +843,6 @@ namespace SyncServer_Core
              */
             ConnectionID getNewConnectionID()
             {
-                boost::lock_guard<boost::mutex> connectionIDLock(connectionIDMutex);
                 return ++lastConnectionID;
             }
             
@@ -916,4 +929,3 @@ namespace SyncServer_Core
 }
 
 #endif	/* NETWORKMANAGER_H */
-

@@ -17,6 +17,41 @@
 
 #include "PoolAggregator.h"
 
+bool StorageManagement_Pools::PoolAggregator::LinkParameters::operator==(const LinkParameters& other) const
+{
+    return (targetPool == other.targetPool
+            && action == other.action
+            && condition == other.condition
+            && conditionValue == other.conditionValue);
+}
+
+bool StorageManagement_Pools::PoolAggregator::PersistentLinkParameters::operator==(const PersistentLinkParameters& other) const
+{
+    return (targetPool == other.targetPool
+            && action == other.action
+            && condition == other.condition
+            && conditionValue == other.conditionValue);
+}
+
+bool StorageManagement_Pools::PoolAggregator::EntityIDData::operator==(const EntityIDData& other) const
+{
+    return (aggregatorEntityID == other.aggregatorEntityID && poolEntityID == other.poolEntityID);
+}
+
+bool StorageManagement_Pools::PoolAggregator::PoolEntityIDData::operator==(const PoolEntityIDData& other) const
+{
+    return (pool == other.pool && entity == other.entity);
+}
+
+bool StorageManagement_Pools::PoolAggregator::PendingActionData::operator==(const PendingActionData& other) const
+{
+    return (aggregatorEntityID == other.aggregatorEntityID
+            && action == other.action
+            && source == other.source
+            && target == other.target
+            && processingTime == other.processingTime);
+}
+
 StorageManagement_Pools::PoolAggregator::PoolAggregator
 (PoolAggregatorInitParameters parameters, Utilities::FileLogger * debugLogger)
 : debugLogger(debugLogger), threadPool(parameters.threadPoolSize, debugLogger),
@@ -103,7 +138,7 @@ StorageManagement_Pools::PoolAggregator::PoolAggregator
                     + Convert::toString(currentPoolData.second->getPoolUUID()) + "] is not valid.");
         }
         
-        StoredDataID newPoolID = ++lastPoolID;
+        PoolID newPoolID = ++lastPoolID;
         pools.insert({newPoolID, currentPoolData.second});
         links.insert({newPoolID, std::deque<LinkParameters>()});
         
@@ -400,7 +435,8 @@ void StorageManagement_Pools::PoolAggregator::clearPool()
     totalUsableSpace = maxUsableSpace;
 
     for(auto currentPoolPair : pools)
-        currentPoolPair.second->clearPool();
+        if(currentPoolPair.first != aggregatorID)
+            currentPoolPair.second->clearPool();
 
     idMap.clear();
 }
@@ -1210,6 +1246,23 @@ void StorageManagement_Pools::PoolAggregator::importPendingActions
     threadPool.assignTimedTask(
             boost::bind(&StorageManagement_Pools::PoolAggregator::processPendingActions, this),
             nextDelayTime);
+}
+
+boost::unordered_map<PoolUUID, PoolID> StorageManagement_Pools::PoolAggregator::getPoolIDsMap() const
+{
+    boost::lock_guard<boost::mutex> dataLock(dataMutex);
+    
+    boost::unordered_map<PoolUUID, PoolID> result;
+    
+    for(auto currentPool : pools)
+    {
+        if(currentPool.first != aggregatorID)
+            result.insert(std::pair<PoolUUID, PoolID>(
+                    currentPool.second->getPoolUUID(),
+                    getPoolID(currentPool.second->getPoolUUID())));
+    }
+    
+    return result;
 }
 //</editor-fold>
 

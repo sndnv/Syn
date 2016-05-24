@@ -77,19 +77,19 @@ namespace InstructionManagement_Sets
         struct GetQueuesList : public Instruction<DatabaseManagerInstructionType>
         {
             GetQueuesList() : Instruction(InstructionSetType::DATABASE_MANAGER, DatabaseManagerInstructionType::GET_QUEUES_LIST) {}
-            bool isValid() { return true; }
+            bool isValid() override { return true; }
         };
         
         struct GetCachesList : public Instruction<DatabaseManagerInstructionType>
         {
             GetCachesList() : Instruction(InstructionSetType::DATABASE_MANAGER, DatabaseManagerInstructionType::GET_CACHES_LIST) {}
-            bool isValid() { return true; }
+            bool isValid() override { return true; }
         };
         
         struct GetDALsList : public Instruction<DatabaseManagerInstructionType>
         {
             GetDALsList() : Instruction(InstructionSetType::DATABASE_MANAGER, DatabaseManagerInstructionType::GET_DALS_LIST) {}
-            bool isValid() { return true; }
+            bool isValid() override { return true; }
         };
         
         struct SetDefaultDALCacheParameters : public Instruction<DatabaseManagerInstructionType>
@@ -99,14 +99,14 @@ namespace InstructionManagement_Sets
               parameters(input)
             {}
             
-            bool isValid() { return true; }
+            bool isValid() override { return true; }
             DALCache::DALCacheParameters parameters;
         };
         
         struct GetDefaultDALCacheParameters : public Instruction<DatabaseManagerInstructionType>
         {
             GetDefaultDALCacheParameters() : Instruction(InstructionSetType::DATABASE_MANAGER, DatabaseManagerInstructionType::GET_DEFAULT_CACHE_PARAMS) {}
-            bool isValid() { return true; }
+            bool isValid() override { return true; }
         };
         
         struct SetCacheParameters : public Instruction<DatabaseManagerInstructionType>
@@ -115,7 +115,7 @@ namespace InstructionManagement_Sets
             : Instruction(InstructionSetType::DATABASE_MANAGER, DatabaseManagerInstructionType::SET_CACHE_PARAMS),
               queueType(type), cacheID(id), parameters(params)
             {}
-            bool isValid() { return true; }
+            bool isValid() override { return true; }
             DatabaseObjectType queueType;
             DatabaseAbstractionLayerID cacheID;
             DALCache::DALCacheParameters parameters;
@@ -127,7 +127,7 @@ namespace InstructionManagement_Sets
             : Instruction(InstructionSetType::DATABASE_MANAGER, DatabaseManagerInstructionType::GET_CACHE_PARAMS),
               queueType(type), cacheID(id)
             {}
-            bool isValid() { return true; }
+            bool isValid() override { return true; }
             DatabaseObjectType queueType;
             DatabaseAbstractionLayerID cacheID;
         };
@@ -138,7 +138,7 @@ namespace InstructionManagement_Sets
             : Instruction(InstructionSetType::DATABASE_MANAGER, DatabaseManagerInstructionType::SET_QUEUE_PARAMS),
               queueType(type), parameters(params)
             {}
-            bool isValid() { return true; }
+            bool isValid() override { return true; }
             DatabaseObjectType queueType;
             DALQueue::DALQueueParameters parameters;
         };
@@ -149,7 +149,7 @@ namespace InstructionManagement_Sets
             : Instruction(InstructionSetType::DATABASE_MANAGER, DatabaseManagerInstructionType::GET_QUEUE_PARAMS),
               queueType(type)
             {}
-            bool isValid() { return true; }
+            bool isValid() override { return true; }
             DatabaseObjectType queueType;
         };
         
@@ -159,14 +159,14 @@ namespace InstructionManagement_Sets
             : Instruction(InstructionSetType::DATABASE_MANAGER, DatabaseManagerInstructionType::SET_FUNCTION_TIMEOUT),
               timeout(timeoutPeriod)
             {}
-            bool isValid() { return true; }
+            bool isValid() override { return true; }
             FunctionCallTimeoutPeriod timeout;
         };
         
         struct GetFunctionTimeout : public Instruction<DatabaseManagerInstructionType>
         {
             GetFunctionTimeout() : Instruction(InstructionSetType::DATABASE_MANAGER, DatabaseManagerInstructionType::GET_FUNCTION_TIMEOUT) {}
-            bool isValid() { return true; }
+            bool isValid() override { return true; }
         };
         
         struct AddDAL : public Instruction<DatabaseManagerInstructionType>
@@ -175,7 +175,7 @@ namespace InstructionManagement_Sets
             : Instruction(InstructionSetType::DATABASE_MANAGER, DatabaseManagerInstructionType::ADD_DAL),
               newDAL(dal), enableCache(cache)
             {}
-            bool isValid() { return true; }
+            bool isValid() override { return true; }
             DALPtr newDAL;
             bool enableCache;
         };
@@ -186,7 +186,7 @@ namespace InstructionManagement_Sets
             : Instruction(InstructionSetType::DATABASE_MANAGER, DatabaseManagerInstructionType::ADD_DAL_WITH_CACHE_PARAMS),
               newDAL(dal), parameters(params)
             {}
-            bool isValid() { return true; }
+            bool isValid() override { return true; }
             DALPtr newDAL;
             DALCache::DALCacheParameters parameters;
         };
@@ -197,7 +197,7 @@ namespace InstructionManagement_Sets
             : Instruction(InstructionSetType::DATABASE_MANAGER, DatabaseManagerInstructionType::REMOVE_DAL),
               DALToRemove(dal)
             {}
-            bool isValid() { return true; }
+            bool isValid() override { return true; }
             DALPtr DALToRemove;
         };
         //</editor-fold>
@@ -206,43 +206,43 @@ namespace InstructionManagement_Sets
         struct GetSystemInstallTimestamp : public Instruction<DatabaseManagerInstructionType>
         {
             GetSystemInstallTimestamp() : Instruction(InstructionSetType::DATABASE_MANAGER, DatabaseManagerInstructionType::GET_SYSTEM_INSTALL_TIMESTAMP) {}
-            bool isValid() { return true; }
+            bool isValid() override { return true; }
         };
         
         struct GetSystemStartTimestamp : public Instruction<DatabaseManagerInstructionType>
         {
             GetSystemStartTimestamp() : Instruction(InstructionSetType::DATABASE_MANAGER, DatabaseManagerInstructionType::GET_SYSTEM_START_TIMESTAMP) {}
-            bool isValid() { return true; }
+            bool isValid() override { return true; }
         };
         
         struct GetTotalTransferredData : public Instruction<DatabaseManagerInstructionType>
         {
             GetTotalTransferredData() : Instruction(InstructionSetType::DATABASE_MANAGER, DatabaseManagerInstructionType::GET_TOTAL_TRANSFERRED_DATA) {}
-            bool isValid() { return true; }
+            bool isValid() override { return true; }
         };
         
         struct GetTotalTransferredFiles : public Instruction<DatabaseManagerInstructionType>
         {
             GetTotalTransferredFiles() : Instruction(InstructionSetType::DATABASE_MANAGER, DatabaseManagerInstructionType::GET_TOTAL_NUMBER_TRANSFERRED_FILES) {}
-            bool isValid() { return true; }
+            bool isValid() override { return true; }
         };
         
         struct GetTotalFailedTransfers : public Instruction<DatabaseManagerInstructionType>
         {
             GetTotalFailedTransfers() : Instruction(InstructionSetType::DATABASE_MANAGER, DatabaseManagerInstructionType::GET_TOTAL_NUMBER_FAILED_TRANSFERS) {}
-            bool isValid() { return true; }
+            bool isValid() override { return true; }
         };
         
         struct GetTotalRetriedTransfers : public Instruction<DatabaseManagerInstructionType>
         {
             GetTotalRetriedTransfers() : Instruction(InstructionSetType::DATABASE_MANAGER, DatabaseManagerInstructionType::GET_TOTAL_NUMBER_RETRIED_TRANSFERS) {}
-            bool isValid() { return true; }
+            bool isValid() override { return true; }
         };
         
         struct GetAllStats : public Instruction<DatabaseManagerInstructionType>
         {
             GetAllStats() : Instruction(InstructionSetType::DATABASE_MANAGER, DatabaseManagerInstructionType::GET_ALL_STATS) {}
-            bool isValid() { return true; }
+            bool isValid() override { return true; }
         };
         //</editor-fold>
         
@@ -257,7 +257,7 @@ namespace InstructionManagement_Sets
             : Instruction(InstructionSetType::DATABASE_MANAGER, DatabaseManagerInstructionType::ADD_SYNC),
               syncData(sync)
             {}
-            bool isValid() { return true; }
+            bool isValid() override { return true; }
             SyncDataContainerPtr syncData;
         };
         
@@ -267,7 +267,7 @@ namespace InstructionManagement_Sets
             : Instruction(InstructionSetType::DATABASE_MANAGER, DatabaseManagerInstructionType::REMOVE_SYNC),
               syncID(id)
             {}
-            bool isValid() { return true; }
+            bool isValid() override { return true; }
             SyncID syncID;
         };
         
@@ -277,7 +277,7 @@ namespace InstructionManagement_Sets
             : Instruction(InstructionSetType::DATABASE_MANAGER, DatabaseManagerInstructionType::UPDATE_SYNC),
               syncData(sync)
             {}
-            bool isValid() { return true; }
+            bool isValid() override { return true; }
             SyncDataContainerPtr syncData;
         };
         
@@ -287,7 +287,7 @@ namespace InstructionManagement_Sets
             : Instruction(InstructionSetType::DATABASE_MANAGER, DatabaseManagerInstructionType::GET_SYNCS_BY_CONSTRAINT),
               constraintType(type), constraintValue(value)
             {}
-            bool isValid() { return true; }
+            bool isValid() override { return true; }
             DatabaseSelectConstraints::SYNC constraintType;
             boost::any constraintValue;
         };
@@ -298,7 +298,7 @@ namespace InstructionManagement_Sets
             : Instruction(InstructionSetType::DATABASE_MANAGER, DatabaseManagerInstructionType::GET_SYNC),
               syncID(id)
             {}
-            bool isValid() { return true; }
+            bool isValid() override { return true; }
             SyncID syncID;
         };
         //</editor-fold>
@@ -310,7 +310,7 @@ namespace InstructionManagement_Sets
             : Instruction(InstructionSetType::DATABASE_MANAGER, DatabaseManagerInstructionType::ADD_DEVICE),
               deviceData(device)
             {}
-            bool isValid() { return true; }
+            bool isValid() override { return true; }
             DeviceDataContainerPtr deviceData;
         };
         
@@ -320,7 +320,7 @@ namespace InstructionManagement_Sets
             : Instruction(InstructionSetType::DATABASE_MANAGER, DatabaseManagerInstructionType::UPDATE_DEVICE),
               deviceData(device)
             {}
-            bool isValid() { return true; }
+            bool isValid() override { return true; }
             DeviceDataContainerPtr deviceData;
         };
         
@@ -330,7 +330,7 @@ namespace InstructionManagement_Sets
             : Instruction(InstructionSetType::DATABASE_MANAGER, DatabaseManagerInstructionType::REMOVE_DEVICE),
               deviceID(id)
             {}
-            bool isValid() { return true; }
+            bool isValid() override { return true; }
             DeviceID deviceID;
         };
         
@@ -340,7 +340,7 @@ namespace InstructionManagement_Sets
             : Instruction(InstructionSetType::DATABASE_MANAGER, DatabaseManagerInstructionType::GET_DEVICES_BY_CONSTRAINT),
               constraintType(type), constraintValue(value)
             {}
-            bool isValid() { return true; }
+            bool isValid() override { return true; }
             DatabaseSelectConstraints::DEVICES constraintType;
             boost::any constraintValue;
         };
@@ -351,7 +351,7 @@ namespace InstructionManagement_Sets
             : Instruction(InstructionSetType::DATABASE_MANAGER, DatabaseManagerInstructionType::GET_DEVICE),
               deviceID(id)
             {}
-            bool isValid() { return true; }
+            bool isValid() override { return true; }
             DeviceID deviceID;
         };
         //</editor-fold>
@@ -363,7 +363,7 @@ namespace InstructionManagement_Sets
             : Instruction(InstructionSetType::DATABASE_MANAGER, DatabaseManagerInstructionType::ADD_SCHEDULE),
               scheduleData(schedule)
             {}
-            bool isValid() { return true; }
+            bool isValid() override { return true; }
             ScheduleDataContainerPtr scheduleData;
         };
         
@@ -373,7 +373,7 @@ namespace InstructionManagement_Sets
             : Instruction(InstructionSetType::DATABASE_MANAGER, DatabaseManagerInstructionType::UPDATE_SCHEDULE),
               scheduleData(schedule)
             {}
-            bool isValid() { return true; }
+            bool isValid() override { return true; }
             ScheduleDataContainerPtr scheduleData;
         };
         
@@ -383,7 +383,7 @@ namespace InstructionManagement_Sets
             : Instruction(InstructionSetType::DATABASE_MANAGER, DatabaseManagerInstructionType::REMOVE_SCHEDULE),
               scheduleID(id)
             {}
-            bool isValid() { return true; }
+            bool isValid() override { return true; }
             ScheduleID scheduleID;
         };
         
@@ -393,7 +393,7 @@ namespace InstructionManagement_Sets
             : Instruction(InstructionSetType::DATABASE_MANAGER, DatabaseManagerInstructionType::GET_SCHEDULES_BY_CONSTRAINT),
               constraintType(type), constraintValue(value)
             {}
-            bool isValid() { return true; }
+            bool isValid() override { return true; }
             DatabaseSelectConstraints::SCHEDULES constraintType;
             boost::any constraintValue;
         };
@@ -404,7 +404,7 @@ namespace InstructionManagement_Sets
             : Instruction(InstructionSetType::DATABASE_MANAGER, DatabaseManagerInstructionType::GET_SCHEDULE),
               scheduleID(id)
             {}
-            bool isValid() { return true; }
+            bool isValid() override { return true; }
             ScheduleID scheduleID;
         };
         //</editor-fold>
@@ -416,7 +416,7 @@ namespace InstructionManagement_Sets
             : Instruction(InstructionSetType::DATABASE_MANAGER, DatabaseManagerInstructionType::ADD_USER),
               userData(user)
             {}
-            bool isValid() { return true; }
+            bool isValid() override { return true; }
             UserDataContainerPtr userData;
         };
         
@@ -426,7 +426,7 @@ namespace InstructionManagement_Sets
             : Instruction(InstructionSetType::DATABASE_MANAGER, DatabaseManagerInstructionType::UPDATE_USER),
               userData(user)
             {}
-            bool isValid() { return true; }
+            bool isValid() override { return true; }
             UserDataContainerPtr userData;
         };
         
@@ -436,7 +436,7 @@ namespace InstructionManagement_Sets
             : Instruction(InstructionSetType::DATABASE_MANAGER, DatabaseManagerInstructionType::REMOVE_USER),
               userID(id)
             {}
-            bool isValid() { return true; }
+            bool isValid() override { return true; }
             UserID userID;
         };
         
@@ -446,7 +446,7 @@ namespace InstructionManagement_Sets
             : Instruction(InstructionSetType::DATABASE_MANAGER, DatabaseManagerInstructionType::GET_USERS_BY_CONSTRAINT),
               constraintType(type), constraintValue(value)
             {}
-            bool isValid() { return true; }
+            bool isValid() override { return true; }
             DatabaseSelectConstraints::USERS constraintType;
             boost::any constraintValue;
         };
@@ -463,7 +463,7 @@ namespace InstructionManagement_Sets
               username(name), idSet(false)
             {}
             
-            bool isValid() { return true; }
+            bool isValid() override { return true; }
             UserID userID;
             std::string username;
             bool idSet;
@@ -477,7 +477,7 @@ namespace InstructionManagement_Sets
             : Instruction(InstructionSetType::DATABASE_MANAGER, DatabaseManagerInstructionType::ADD_LOG),
               logData(log)
             {}
-            bool isValid() { return true; }
+            bool isValid() override { return true; }
             LogDataContainerPtr logData;
         };
         
@@ -487,7 +487,7 @@ namespace InstructionManagement_Sets
             : Instruction(InstructionSetType::DATABASE_MANAGER, DatabaseManagerInstructionType::ADD_LOG_ASYNC),
               logData(log)
             {}
-            bool isValid() { return true; }
+            bool isValid() override { return true; }
             LogDataContainerPtr logData;
         };
         
@@ -497,7 +497,7 @@ namespace InstructionManagement_Sets
             : Instruction(InstructionSetType::DATABASE_MANAGER, DatabaseManagerInstructionType::GET_LOGS_BY_CONSTRAINT),
               constraintType(type), constraintValue(value)
             {}
-            bool isValid() { return true; }
+            bool isValid() override { return true; }
             DatabaseSelectConstraints::LOGS constraintType;
             boost::any constraintValue;
         };
@@ -508,7 +508,7 @@ namespace InstructionManagement_Sets
             : Instruction(InstructionSetType::DATABASE_MANAGER, DatabaseManagerInstructionType::GET_LOG),
               logID(id)
             {}
-            bool isValid() { return true; }
+            bool isValid() override { return true; }
             LogID logID;
         };
         //</editor-fold>
@@ -520,7 +520,7 @@ namespace InstructionManagement_Sets
             : Instruction(InstructionSetType::DATABASE_MANAGER, DatabaseManagerInstructionType::GET_SESSIONS_BY_CONSTRAINT),
               constraintType(type), constraintValue(value)
             {}
-            bool isValid() { return true; }
+            bool isValid() override { return true; }
             DatabaseSelectConstraints::SESSIONS constraintType;
             boost::any constraintValue;
         };
@@ -531,7 +531,7 @@ namespace InstructionManagement_Sets
             : Instruction(InstructionSetType::DATABASE_MANAGER, DatabaseManagerInstructionType::GET_SESSION),
               sessionID(id)
             {}
-            bool isValid() { return true; }
+            bool isValid() override { return true; }
             SessionID sessionID;
         };
         //</editor-fold>

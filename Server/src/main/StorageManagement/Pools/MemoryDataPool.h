@@ -59,7 +59,7 @@ namespace StorageManagement_Pools
              * 
              * @param parameters the pool configuration
              */
-            MemoryDataPool(MemoryDataPoolParameters parameters);
+            explicit MemoryDataPool(MemoryDataPoolParameters parameters);
             
             /**
              * Clears all data structures.
@@ -78,7 +78,7 @@ namespace StorageManagement_Pools
              * 
              * @throw runtime_error if the ID is not found or if the pool is not in the correct state
              */
-            ByteVectorPtr retrieveData(StoredDataID id);
+            ByteVectorPtr retrieveData(StoredDataID id) override;
             
             /**
              * Stores the supplied data in the pool.
@@ -89,7 +89,7 @@ namespace StorageManagement_Pools
              * @throw runtime_error if the pool doesn't have enough space or if the pool is not in the correct state/mode
              * @throw invalid_argument if an empty or invalid data container was supplied
              */
-            StoredDataID storeData(const ByteVectorPtr data);
+            StoredDataID storeData(const ByteVectorPtr data) override;
             
             /**
              * Discards the data associated with the specified ID.
@@ -104,7 +104,7 @@ namespace StorageManagement_Pools
              * 
              * @throw runtime_error if the specified ID was not found or if the pool is not in the correct state/mode
              */
-            void discardData(StoredDataID id, bool erase = false);
+            void discardData(StoredDataID id, bool erase = false) override;
             
             /**
              * Clears all information associated with the data in the pool.
@@ -114,20 +114,20 @@ namespace StorageManagement_Pools
              * 
              * @throw runtime_error if the pool is not in the correct state/mode
              */
-            void clearPool();
+            void clearPool() override;
             
-            DataPoolType getPoolType() const { return DataPoolType::LOCAL_MEMORY; }
-            DataPoolSize getFreeSpace() const { return totalFreeSpace; }
-            EntitiesCountType getStoredEntitiesNumber() const { return entities.size(); }
-            bool canStoreData(DataSize size) const { return (totalFreeSpace >= size); }
-            DataSize getEntityManagementStorageOverhead() const { return 0;}
-            DataSize getPoolManagementStorageOverhead() const { return 0; }
-            DataSize getEntitySize(StoredDataID id) const;
-            bool areInputStreamsSupported() const { return false; }
-            bool areOutputStreamsSupported() const { return false; }
-            PoolInputStreamPtr getInputStream(StoredDataID dataID)
+            DataPoolType getPoolType() const override { return DataPoolType::LOCAL_MEMORY; }
+            DataPoolSize getFreeSpace() const override { return totalFreeSpace; }
+            EntitiesCountType getStoredEntitiesNumber() const override { return entities.size(); }
+            bool canStoreData(DataSize size) const override { return (totalFreeSpace >= size); }
+            DataSize getEntityManagementStorageOverhead() const override { return 0;}
+            DataSize getPoolManagementStorageOverhead() const override { return 0; }
+            DataSize getEntitySize(StoredDataID id) const override;
+            bool areInputStreamsSupported() const override { return false; }
+            bool areOutputStreamsSupported() const override { return false; }
+            PoolInputStreamPtr getInputStream(StoredDataID dataID) override
             { throw std::logic_error("MemoryDataPool::getInputStream() > Input streams are not supported."); }
-            PoolOutputStreamPtr getOutputStream(DataSize dataSize)
+            PoolOutputStreamPtr getOutputStream(DataSize dataSize) override
             { throw std::logic_error("MemoryDataPool::getOutputStream() > Output streams are not supported."); }
             
         private:

@@ -68,7 +68,7 @@ namespace SyncServer_Core
      * source and one target must be registered.
      * 
      */
-    class InstructionDispatcher: public EntityManagement_Interfaces::DatabaseLoggingSource
+    class InstructionDispatcher final : public EntityManagement_Interfaces::DatabaseLoggingSource
     {
         public:
             /** Parameters structure for holding <code>InstructionDispatcher</code> configuration data. */
@@ -176,12 +176,12 @@ namespace SyncServer_Core
                     return UserAccessLevel::INVALID;
             }
             
-            std::string getSourceName() const
+            std::string getSourceName() const override
             {
                 return "InstructionDispatcher";
             }
             
-            bool registerLoggingHandler(const std::function<void(LogSeverity, const std::string &)> handler)
+            bool registerLoggingHandler(const std::function<void(LogSeverity, const std::string &)> handler) override
             {
                 if(!dbLogHandler)
                 {
@@ -195,6 +195,26 @@ namespace SyncServer_Core
                     
                     return false;
                 }
+            }
+            
+            /**
+             * Retrieves the number of registered target sets.
+             * 
+             * @return the number of target sets
+             */
+            unsigned int getTargetSetsCount()
+            {
+                return targetSets.size();
+            }
+            
+            /**
+             * Retrieves the number of registered sources.
+             * 
+             * @return the number of sources
+             */
+            unsigned int getSourcesCount()
+            {
+                return sources.size();
             }
             
         private:

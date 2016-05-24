@@ -67,7 +67,7 @@ namespace EntityManagement
         public:
             virtual ~DeviceManagerAdminInstructionTarget() {}
             
-            InstructionManagement_Types::InstructionSetType getType() const
+            InstructionManagement_Types::InstructionSetType getType() const override
             {
                 return InstructionManagement_Types::InstructionSetType::DEVICE_MANAGER_ADMIN;
             }
@@ -82,7 +82,7 @@ namespace EntityManagement
         public:
             virtual ~DeviceManagerUserInstructionTarget() {}
             
-            InstructionManagement_Types::InstructionSetType getType() const
+            InstructionManagement_Types::InstructionSetType getType() const override
             {
                 return InstructionManagement_Types::InstructionSetType::DEVICE_MANAGER_USER;
             }
@@ -91,7 +91,7 @@ namespace EntityManagement
     /**
      * Class for managing device-related activities.
      */
-    class DeviceManager
+    class DeviceManager final
     : public SecurityManagement_Interfaces::Securable,
       public DeviceManagerAdminInstructionTarget,
       public DeviceManagerUserInstructionTarget,
@@ -124,22 +124,22 @@ namespace EntityManagement
             DeviceManager(const DeviceManager&) = delete;
             DeviceManager& operator=(const DeviceManager&) = delete;
 
-            void postAuthorizationToken(const SecurityManagement_Types::AuthorizationTokenPtr token);
+            void postAuthorizationToken(const SecurityManagement_Types::AuthorizationTokenPtr token) override;
 
-            SecurityManagement_Types::SecurableComponentType getComponentType() const
+            SecurityManagement_Types::SecurableComponentType getComponentType() const override
             {
                 return SecurityManagement_Types::SecurableComponentType::DEVICE_MANAGER;
             }
 
-            bool registerInstructionSet(InstructionManagement_Sets::InstructionSetPtr<DeviceManagerAdminInstructionType> set) const;
-            bool registerInstructionSet(InstructionManagement_Sets::InstructionSetPtr<DeviceManagerUserInstructionType> set) const;
+            bool registerInstructionSet(InstructionManagement_Sets::InstructionSetPtr<DeviceManagerAdminInstructionType> set) const override;
+            bool registerInstructionSet(InstructionManagement_Sets::InstructionSetPtr<DeviceManagerUserInstructionType> set) const override;
 
-            std::string getSourceName() const
+            std::string getSourceName() const override
             {
                 return "DeviceManager";
             }
             
-            bool registerLoggingHandler(const std::function<void(LogSeverity, const std::string &)> handler)
+            bool registerLoggingHandler(const std::function<void(LogSeverity, const std::string &)> handler) override
             {
                 if(!dbLogHandler)
                 {

@@ -27,8 +27,8 @@ namespace DatabaseManagement_Interfaces
         public:
             virtual ~DatabaseInformationContainer() {}
             
-            virtual std::string getDatabaseName()=0;
-            virtual long getDatabaseSize()=0;
+            virtual std::string getDatabaseName() const = 0;
+            virtual long getDatabaseSize() const = 0;
     };
 }
 

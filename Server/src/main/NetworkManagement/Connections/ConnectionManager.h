@@ -163,13 +163,12 @@ namespace NetworkManagement_Connections
             unsigned long long getTotalIncomingConnectionsCount()   const { return acceptedIncomingConnections; }
             
         private:
-            boost::mutex connectionIDMutex;
-            RawConnectionID newConnectionID = INVALID_RAW_CONNECTION_ID;
+            std::atomic<RawConnectionID> newConnectionID{INVALID_RAW_CONNECTION_ID};
             Utilities::FileLogger * debugLogger; //debugging logger
             
             //Statistics
-            unsigned long long initiatedOutgoingConnections = 0;   //number of initiated outgoing connections
-            unsigned long long acceptedIncomingConnections = 0;    //number of accepted incoming connections
+            std::atomic<unsigned long long> initiatedOutgoingConnections{0};   //number of initiated outgoing connections
+            std::atomic<unsigned long long> acceptedIncomingConnections{0};    //number of accepted incoming connections
             
             //Configuration
             ConnectionType managerType;         //manager and child connections type
@@ -177,24 +176,25 @@ namespace NetworkManagement_Connections
             IPAddress listeningAddress;         //listening address for the manager
             IPPort listeningPort;               //listening port for the manager
             unsigned int maxActiveConnections;  //TODO - implement //0 = unlimited
-            std::atomic<OperationTimeoutLength> connectionRequestTimeout{0}; //0 = unlimited (in seconds)
+            OperationTimeoutLength connectionRequestTimeout; //0 = unlimited (in seconds)
             BufferSize defaultReadBufferSize;   //default read buffer size for all new connections
             
-            unsigned long connectionDestructionInterval = 5; //TODO - update/rename/what
+            unsigned long connectionDestructionInterval = 5; //in seconds
             
             //Connection Management
-            boost::asio::ip::tcp::endpoint localEndpoint;       //local listening endpoint
-            boost::asio::io_service networkService;             //io_service for handling networking
-            boost::asio::ip::tcp::acceptor connectionAcceptor;  //acceptor for incoming connections
+            boost::asio::ip::tcp::endpoint localEndpoint;               //local listening endpoint
+            boost::shared_ptr<boost::asio::io_service> networkService;  //io_service for handling networking
+            boost::asio::ip::tcp::acceptor connectionAcceptor;          //acceptor for incoming connections
             
             //Deadline timers data
             boost::mutex deadlineTimerMutex;
-            boost::unordered_map<RawConnectionID, std::pair<ConnectionPtr, boost::asio::deadline_timer *>> timerData;
+            boost::unordered_map<RawConnectionID, std::pair<ConnectionPtr, boost::shared_ptr<boost::asio::deadline_timer>>> timerData;
             
             //Incoming & outgoing connections containers
-            boost::mutex incomingConnectionDataMutex;
+            unsigned long mutexWaitInterval = 100; //in milliseconds
+            boost::timed_mutex incomingConnectionDataMutex;
             boost::unordered_map<RawConnectionID, ConnectionPtr> incomingConnections;
-            boost::mutex outgoingConnectionDataMutex;
+            boost::timed_mutex outgoingConnectionDataMutex;
             boost::unordered_map<RawConnectionID, ConnectionPtr> outgoingConnections;
             
             std::vector<ConnectionPtr> disconnectedConnections; //connections waiting for destruction
@@ -293,7 +293,6 @@ namespace NetworkManagement_Connections
              */
             RawConnectionID getNewConnectionID()
             {
-                boost::lock_guard<boost::mutex> sessionIDLock(connectionIDMutex);
                 return ++newConnectionID;
             }
     };

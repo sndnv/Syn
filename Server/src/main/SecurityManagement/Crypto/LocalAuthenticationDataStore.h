@@ -48,7 +48,7 @@ namespace SecurityManagement_Crypto
              * 
              * @param data the data to be used for the initialization
              */
-            LocalAuthenticationDataStore(boost::unordered_map<DeviceID, LocalPeerAuthenticationEntry> data)
+            explicit LocalAuthenticationDataStore(boost::unordered_map<DeviceID, LocalPeerAuthenticationEntry> data)
             : authenticationData(data)
             {}
             

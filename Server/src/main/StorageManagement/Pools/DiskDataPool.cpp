@@ -17,6 +17,17 @@
 
 #include "DiskDataPool.h"
 
+const std::string StorageManagement_Pools::DiskDataPool::FILE_SIGNATURE = "DDP";
+
+const DataSize StorageManagement_Pools::DiskDataPool::OVERHEAD_POOL_MANAGEMENT =
+    (StorageManagement_Pools::DiskDataPool::FILE_SIGNATURE.size()
+        + sizeof(StorageManagement_Pools::DiskDataPool::CURRENT_VERSION)
+        + StorageManagement_Pools::DiskDataPool::UUID_BYTE_LENGTH
+        + StorageManagement_Pools::DiskDataPool::PoolHeader::BYTE_LENGTH
+        + StorageManagement_Pools::DiskDataPool::PoolFooter::BYTE_LENGTH);
+
+const char StorageManagement_Pools::DiskDataPool::CURRENT_VERSION = '1';
+
 ByteVector StorageManagement_Pools::DiskDataPool::PoolHeader::toBytes()
 {
     auto nFooterLocation = htonl(footer);

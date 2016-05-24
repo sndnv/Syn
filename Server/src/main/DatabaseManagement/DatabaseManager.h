@@ -114,7 +114,7 @@ namespace SyncServer_Core
     /**
      * Class for managing database access and activities.
      */
-    class DatabaseManager : public InstructionManagement_Interfaces::InstructionTarget<InstructionManagement_Types::DatabaseManagerInstructionType>
+    class DatabaseManager final : public InstructionManagement_Interfaces::InstructionTarget<InstructionManagement_Types::DatabaseManagerInstructionType>
     {
         public:
             class Functions_Statistics;
@@ -290,8 +290,8 @@ namespace SyncServer_Core
             /** Retrieves a reference to the SESSIONS DB access functions object.\n\n@return the sessions functions object */
             Functions_Sessions    &  Sessions()   { return *internal_Sessions; }
         
-            bool registerInstructionSet(InstructionManagement_Sets::InstructionSetPtr<DatabaseManagerInstructionType> set) const;
-            InstructionManagement_Types::InstructionSetType getType() const { return InstructionManagement_Types::InstructionSetType::DATABASE_MANAGER; };
+            bool registerInstructionSet(InstructionManagement_Sets::InstructionSetPtr<DatabaseManagerInstructionType> set) const override;
+            InstructionManagement_Types::InstructionSetType getType() const override { return InstructionManagement_Types::InstructionSetType::DATABASE_MANAGER; };
             
         private:
             //File Logger

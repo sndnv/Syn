@@ -48,17 +48,17 @@ namespace InstructionManagement_Sets
     {
         struct AdminGetUser : public Instruction<UserManagerAdminInstructionType>
         {
-            AdminGetUser(UserID id)
+            explicit AdminGetUser(UserID id)
             : Instruction(InstructionSetType::USER_MANAGER_ADMIN, UserManagerAdminInstructionType::GET_USER),
               userID(id), username("")
             {}
             
-            AdminGetUser(const std::string & user)
+            explicit AdminGetUser(const std::string & user)
             : Instruction(InstructionSetType::USER_MANAGER_ADMIN, UserManagerAdminInstructionType::GET_USER),
               userID(INVALID_USER_ID), username(user)
             {}
             
-            bool isValid() { return (userID != INVALID_USER_ID || !username.empty()); }
+            bool isValid() override { return (userID != INVALID_USER_ID || !username.empty()); }
             UserID userID;
             std::string username;
         };
@@ -69,7 +69,7 @@ namespace InstructionManagement_Sets
             : Instruction(InstructionSetType::USER_MANAGER_ADMIN, UserManagerAdminInstructionType::GET_USERS_BY_CONSTRAINT),
               constraintType(type), constraintValue(value)
             {}
-            bool isValid() { return true; }
+            bool isValid() override { return true; }
             DatabaseSelectConstraints::USERS constraintType;
             boost::any constraintValue;
         };
@@ -81,7 +81,7 @@ namespace InstructionManagement_Sets
               username(user), rawPassword(password), accessLevel(access), forcePasswordReset(forcePassReset)
             {}
             
-            bool isValid() { return (!username.empty() && !rawPassword.empty() && accessLevel != UserAccessLevel::INVALID); }
+            bool isValid() override { return (!username.empty() && !rawPassword.empty() && accessLevel != UserAccessLevel::INVALID); }
             
             std::string username;
             const std::string rawPassword;
@@ -91,12 +91,12 @@ namespace InstructionManagement_Sets
         
         struct AdminRemoveUser : public Instruction<UserManagerAdminInstructionType>
         {
-            AdminRemoveUser(UserID id)
+            explicit AdminRemoveUser(UserID id)
             : Instruction(InstructionSetType::USER_MANAGER_ADMIN, UserManagerAdminInstructionType::REMOVE_USER),
               userID(id)
             {}
             
-            bool isValid() { return (userID != INVALID_USER_ID); }
+            bool isValid() override { return (userID != INVALID_USER_ID); }
             UserID userID;
         };
         
@@ -107,41 +107,41 @@ namespace InstructionManagement_Sets
               userID(id), rawPassword(password)
             {}
             
-            bool isValid() { return (userID != INVALID_USER_ID && !rawPassword.empty()); }
+            bool isValid() override { return (userID != INVALID_USER_ID && !rawPassword.empty()); }
             UserID userID;
             const std::string rawPassword;
         };
         
         struct AdminForcePasswordReset : public Instruction<UserManagerAdminInstructionType>
         {
-            AdminForcePasswordReset(UserID id)
+            explicit AdminForcePasswordReset(UserID id)
             : Instruction(InstructionSetType::USER_MANAGER_ADMIN, UserManagerAdminInstructionType::FORCE_PASSWORD_RESET),
               userID(id)
             {}
             
-            bool isValid() { return (userID != INVALID_USER_ID); }
+            bool isValid() override { return (userID != INVALID_USER_ID); }
             UserID userID;
         };
         
         struct AdminLockUser : public Instruction<UserManagerAdminInstructionType>
         {
-            AdminLockUser(UserID id)
+            explicit AdminLockUser(UserID id)
             : Instruction(InstructionSetType::USER_MANAGER_ADMIN, UserManagerAdminInstructionType::LOCK_USER),
               userID(id)
             {}
             
-            bool isValid() { return (userID != INVALID_USER_ID); }
+            bool isValid() override { return (userID != INVALID_USER_ID); }
             UserID userID;
         };
         
         struct AdminUnlockUser : public Instruction<UserManagerAdminInstructionType>
         {
-            AdminUnlockUser(UserID id)
+            explicit AdminUnlockUser(UserID id)
             : Instruction(InstructionSetType::USER_MANAGER_ADMIN, UserManagerAdminInstructionType::UNLOCK_USER),
               userID(id)
             {}
             
-            bool isValid() { return (userID != INVALID_USER_ID); }
+            bool isValid() override { return (userID != INVALID_USER_ID); }
             UserID userID;
         };
         
@@ -152,19 +152,19 @@ namespace InstructionManagement_Sets
               userID(id), level(newLevel)
             {}
             
-            bool isValid() { return (userID != INVALID_USER_ID); }
+            bool isValid() override { return (userID != INVALID_USER_ID); }
             UserID userID;
             UserAccessLevel level;
         };
         
         struct AdminResetFailedAuthenticationAttempts : public Instruction<UserManagerAdminInstructionType>
         {
-            AdminResetFailedAuthenticationAttempts(UserID id)
+            explicit AdminResetFailedAuthenticationAttempts(UserID id)
             : Instruction(InstructionSetType::USER_MANAGER_ADMIN, UserManagerAdminInstructionType::RESET_FAILED_AUTHENTICATION_ATTEMPTS),
               userID(id)
             {}
             
-            bool isValid() { return (userID != INVALID_USER_ID); }
+            bool isValid() override { return (userID != INVALID_USER_ID); }
             UserID userID;
         };
         
@@ -175,7 +175,7 @@ namespace InstructionManagement_Sets
               userID(id), rule(newRule)
             {}
             
-            bool isValid() { return (userID != INVALID_USER_ID); }
+            bool isValid() override { return (userID != INVALID_USER_ID); }
             UserID userID;
             UserAuthorizationRule rule;
         };
@@ -187,19 +187,19 @@ namespace InstructionManagement_Sets
               userID(id), rule(oldRule)
             {}
             
-            bool isValid() { return (userID != INVALID_USER_ID); }
+            bool isValid() override { return (userID != INVALID_USER_ID); }
             UserID userID;
             UserAuthorizationRule rule;
         };
         
         struct AdminClearAuthorizationRules : public Instruction<UserManagerAdminInstructionType>
         {
-            AdminClearAuthorizationRules(UserID id)
+            explicit AdminClearAuthorizationRules(UserID id)
             : Instruction(InstructionSetType::USER_MANAGER_ADMIN, UserManagerAdminInstructionType::CLEAR_AUTHORIZATION_RULES),
               userID(id)
             {}
             
-            bool isValid() { return (userID != INVALID_USER_ID); }
+            bool isValid() override { return (userID != INVALID_USER_ID); }
             UserID userID;
         };
         
@@ -209,17 +209,17 @@ namespace InstructionManagement_Sets
             : Instruction(InstructionSetType::USER_MANAGER_ADMIN, UserManagerAdminInstructionType::DEBUG_GET_STATE)
             {}
             
-            bool isValid() { return true; }
+            bool isValid() override { return true; }
         };
         
         struct SelfResetPassword : public Instruction<UserManagerSelfInstructionType>
         {
-            SelfResetPassword(const std::string & password)
+            explicit SelfResetPassword(const std::string & password)
             : Instruction(InstructionSetType::USER_MANAGER_SELF, UserManagerSelfInstructionType::RESET_PASSWORD),
               rawPassword(password)
             {}
             
-            bool isValid() { return !rawPassword.empty(); }
+            bool isValid() override { return !rawPassword.empty(); }
             const std::string rawPassword;
         };
         
@@ -229,14 +229,14 @@ namespace InstructionManagement_Sets
             : Instruction(InstructionSetType::USER_MANAGER_SELF, UserManagerSelfInstructionType::GET_USER)
             {}
             
-            bool isValid() { return true; }
+            bool isValid() override { return true; }
         };
         
         namespace Results
         {
             struct AdminGetUser : public InstructionResult<UserManagerAdminInstructionType>
             {
-                AdminGetUser(UserDataContainerPtr input)
+                explicit AdminGetUser(UserDataContainerPtr input)
                 : InstructionResult(UserManagerAdminInstructionType::GET_USER), result(input) {}
                 
                 UserDataContainerPtr result;
@@ -244,7 +244,7 @@ namespace InstructionManagement_Sets
             
             struct AdminGetUsersByConstraint : public InstructionResult<UserManagerAdminInstructionType>
             {
-                AdminGetUsersByConstraint(std::vector<UserDataContainerPtr> input)
+                explicit AdminGetUsersByConstraint(std::vector<UserDataContainerPtr> input)
                 : InstructionResult(UserManagerAdminInstructionType::GET_USERS_BY_CONSTRAINT), result(input) {}
                 
                 std::vector<UserDataContainerPtr> result;
@@ -252,7 +252,7 @@ namespace InstructionManagement_Sets
             
             struct AdminAddUser : public InstructionResult<UserManagerAdminInstructionType>
             {
-                AdminAddUser(bool input)
+                explicit AdminAddUser(bool input)
                 : InstructionResult(UserManagerAdminInstructionType::ADD_USER), result(input) {}
                 
                 bool result;
@@ -260,7 +260,7 @@ namespace InstructionManagement_Sets
             
             struct AdminRemoveUser : public InstructionResult<UserManagerAdminInstructionType>
             {
-                AdminRemoveUser(bool input)
+                explicit AdminRemoveUser(bool input)
                 : InstructionResult(UserManagerAdminInstructionType::REMOVE_USER), result(input) {}
                 
                 bool result;
@@ -268,7 +268,7 @@ namespace InstructionManagement_Sets
             
             struct AdminResetPassword : public InstructionResult<UserManagerAdminInstructionType>
             {
-                AdminResetPassword(bool input)
+                explicit AdminResetPassword(bool input)
                 : InstructionResult(UserManagerAdminInstructionType::RESET_PASSWORD), result(input) {}
                 
                 bool result;
@@ -276,7 +276,7 @@ namespace InstructionManagement_Sets
             
             struct AdminForcePasswordReset : public InstructionResult<UserManagerAdminInstructionType>
             {
-                AdminForcePasswordReset(bool input)
+                explicit AdminForcePasswordReset(bool input)
                 : InstructionResult(UserManagerAdminInstructionType::FORCE_PASSWORD_RESET), result(input) {}
                 
                 bool result;
@@ -284,7 +284,7 @@ namespace InstructionManagement_Sets
             
             struct AdminLockUser : public InstructionResult<UserManagerAdminInstructionType>
             {
-                AdminLockUser(bool input)
+                explicit AdminLockUser(bool input)
                 : InstructionResult(UserManagerAdminInstructionType::LOCK_USER), result(input) {}
                 
                 bool result;
@@ -292,7 +292,7 @@ namespace InstructionManagement_Sets
             
             struct AdminUnlockUser : public InstructionResult<UserManagerAdminInstructionType>
             {
-                AdminUnlockUser(bool input)
+                explicit AdminUnlockUser(bool input)
                 : InstructionResult(UserManagerAdminInstructionType::UNLOCK_USER), result(input) {}
                 
                 bool result;
@@ -300,7 +300,7 @@ namespace InstructionManagement_Sets
             
             struct AdminUpdateAccessLevel : public InstructionResult<UserManagerAdminInstructionType>
             {
-                AdminUpdateAccessLevel(bool input)
+                explicit AdminUpdateAccessLevel(bool input)
                 : InstructionResult(UserManagerAdminInstructionType::UPDATE_ACCESS_LEVEL), result(input) {}
                 
                 bool result;
@@ -308,7 +308,7 @@ namespace InstructionManagement_Sets
             
             struct AdminResetFailedAuthenticationAttempts : public InstructionResult<UserManagerAdminInstructionType>
             {
-                AdminResetFailedAuthenticationAttempts(bool input)
+                explicit AdminResetFailedAuthenticationAttempts(bool input)
                 : InstructionResult(UserManagerAdminInstructionType::RESET_FAILED_AUTHENTICATION_ATTEMPTS), result(input) {}
                 
                 bool result;
@@ -316,7 +316,7 @@ namespace InstructionManagement_Sets
             
             struct AdminAddAuthorizationRule : public InstructionResult<UserManagerAdminInstructionType>
             {
-                AdminAddAuthorizationRule(bool input)
+                explicit AdminAddAuthorizationRule(bool input)
                 : InstructionResult(UserManagerAdminInstructionType::ADD_AUTHORIZATION_RULE), result(input) {}
                 
                 bool result;
@@ -324,7 +324,7 @@ namespace InstructionManagement_Sets
             
             struct AdminRemoveAuthorizationRule : public InstructionResult<UserManagerAdminInstructionType>
             {
-                AdminRemoveAuthorizationRule(bool input)
+                explicit AdminRemoveAuthorizationRule(bool input)
                 : InstructionResult(UserManagerAdminInstructionType::REMOVE_AUTHORIZATION_RULE), result(input) {}
                 
                 bool result;
@@ -332,7 +332,7 @@ namespace InstructionManagement_Sets
             
             struct AdminClearAuthorizationRules : public InstructionResult<UserManagerAdminInstructionType>
             {
-                AdminClearAuthorizationRules(bool input)
+                explicit AdminClearAuthorizationRules(bool input)
                 : InstructionResult(UserManagerAdminInstructionType::CLEAR_AUTHORIZATION_RULES), result(input) {}
                 
                 bool result;
@@ -340,7 +340,7 @@ namespace InstructionManagement_Sets
             
             struct SelfResetPassword : public InstructionResult<UserManagerSelfInstructionType>
             {
-                SelfResetPassword(bool input)
+                explicit SelfResetPassword(bool input)
                 : InstructionResult(UserManagerSelfInstructionType::GET_USER), result(input) {}
                 
                 bool result;
@@ -348,7 +348,7 @@ namespace InstructionManagement_Sets
             
             struct SelfGetUser : public InstructionResult<UserManagerSelfInstructionType>
             {
-                SelfGetUser(UserDataContainerPtr input)
+                explicit SelfGetUser(UserDataContainerPtr input)
                 : InstructionResult(UserManagerSelfInstructionType::RESET_PASSWORD), result(input) {}
                 
                 UserDataContainerPtr result;
@@ -356,7 +356,7 @@ namespace InstructionManagement_Sets
             
             struct DebugGetState : public InstructionResult<UserManagerAdminInstructionType>
             {
-                DebugGetState(std::string input)
+                explicit DebugGetState(std::string input)
                 : InstructionResult(UserManagerAdminInstructionType::DEBUG_GET_STATE), result(input) {}
                 
                 std::string result;

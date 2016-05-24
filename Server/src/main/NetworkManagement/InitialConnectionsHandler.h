@@ -155,12 +155,12 @@ namespace NetworkManagement_Handlers
             InitialConnectionsHandler(const InitialConnectionsHandler&) = delete;
             InitialConnectionsHandler& operator=(const InitialConnectionsHandler&) = delete;
             
-            std::string getSourceName() const
+            std::string getSourceName() const override
             {
                 return "InitialConnectionsHandler";
             }
             
-            bool registerLoggingHandler(const std::function<void(LogSeverity, const std::string &)> handler)
+            bool registerLoggingHandler(const std::function<void(LogSeverity, const std::string &)> handler) override
             {
                 if(!dbLogHandler)
                 {

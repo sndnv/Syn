@@ -56,12 +56,12 @@ namespace InstructionManagement_Sets
     {
         struct AdminGetDevice : public Instruction<DeviceManagerAdminInstructionType>
         {
-            AdminGetDevice(DeviceID id)
+            explicit AdminGetDevice(DeviceID id)
             : Instruction(InstructionSetType::DEVICE_MANAGER_ADMIN, DeviceManagerAdminInstructionType::GET_DEVICE),
               deviceID(id)
             {}
             
-            bool isValid() { return (deviceID != INVALID_DEVICE_ID); }
+            bool isValid() override { return (deviceID != INVALID_DEVICE_ID); }
             DeviceID deviceID;
         };
         
@@ -71,7 +71,7 @@ namespace InstructionManagement_Sets
             : Instruction(InstructionSetType::DEVICE_MANAGER_ADMIN, DeviceManagerAdminInstructionType::GET_DEVICES_BY_CONSTRAINT),
               constraintType(type), constraintValue(value)
             {}
-            bool isValid() { return true; }
+            bool isValid() override { return true; }
             DatabaseSelectConstraints::DEVICES constraintType;
             boost::any constraintValue;
         };
@@ -83,7 +83,7 @@ namespace InstructionManagement_Sets
               deviceName(name), rawPassword(password), ownerID(owner), transferType(xferType), peerType(type)
             {}
             
-            bool isValid() { return (!deviceName.empty() && !rawPassword.empty()
+            bool isValid() override { return (!deviceName.empty() && !rawPassword.empty()
                     && ownerID != INVALID_USER_ID && transferType != DataTransferType::INVALID); }
             
             std::string deviceName;
@@ -95,12 +95,12 @@ namespace InstructionManagement_Sets
         
         struct AdminRemoveDevice : public Instruction<DeviceManagerAdminInstructionType>
         {
-            AdminRemoveDevice(DeviceID id)
+            explicit AdminRemoveDevice(DeviceID id)
             : Instruction(InstructionSetType::DEVICE_MANAGER_ADMIN, DeviceManagerAdminInstructionType::REMOVE_DEVICE),
               deviceID(id)
             {}
             
-            bool isValid() { return (deviceID != INVALID_DEVICE_ID); }
+            bool isValid() override { return (deviceID != INVALID_DEVICE_ID); }
             DeviceID deviceID;
         };
         
@@ -111,7 +111,7 @@ namespace InstructionManagement_Sets
               deviceID(id), rawPassword(password)
             {}
             
-            bool isValid() { return (deviceID != INVALID_DEVICE_ID && !rawPassword.empty()); }
+            bool isValid() override { return (deviceID != INVALID_DEVICE_ID && !rawPassword.empty()); }
             DeviceID deviceID;
             const std::string rawPassword;
         };
@@ -123,7 +123,7 @@ namespace InstructionManagement_Sets
               deviceID(id), ipAddress(ip), ipPort(port), transferType(xferType)
             {}
             
-            bool isValid() { return (deviceID != INVALID_DEVICE_ID && ipAddress != INVALID_IP_ADDRESS
+            bool isValid() override { return (deviceID != INVALID_DEVICE_ID && ipAddress != INVALID_IP_ADDRESS
                     && ipPort != INVALID_IP_PORT && transferType != DataTransferType::INVALID); }
             
             DeviceID deviceID;
@@ -139,7 +139,7 @@ namespace InstructionManagement_Sets
               deviceID(id), deviceName(name), deviceInfo(info)
             {}
             
-            bool isValid() { return (deviceID != INVALID_DEVICE_ID && !deviceName.empty()); }
+            bool isValid() override { return (deviceID != INVALID_DEVICE_ID && !deviceName.empty()); }
             DeviceID deviceID;
             std::string deviceName;
             std::string deviceInfo;
@@ -147,34 +147,34 @@ namespace InstructionManagement_Sets
         
         struct AdminLockDevice : public Instruction<DeviceManagerAdminInstructionType>
         {
-            AdminLockDevice(DeviceID id)
+            explicit AdminLockDevice(DeviceID id)
             : Instruction(InstructionSetType::DEVICE_MANAGER_ADMIN, DeviceManagerAdminInstructionType::LOCK_DEVICE),
               deviceID(id)
             {}
             
-            bool isValid() { return (deviceID != INVALID_DEVICE_ID); }
+            bool isValid() override { return (deviceID != INVALID_DEVICE_ID); }
             DeviceID deviceID;
         };
         
         struct AdminUnlockDevice : public Instruction<DeviceManagerAdminInstructionType>
         {
-            AdminUnlockDevice(DeviceID id)
+            explicit AdminUnlockDevice(DeviceID id)
             : Instruction(InstructionSetType::DEVICE_MANAGER_ADMIN, DeviceManagerAdminInstructionType::UNLOCK_DEVICE),
               deviceID(id)
             {}
             
-            bool isValid() { return (deviceID != INVALID_DEVICE_ID); }
+            bool isValid() override { return (deviceID != INVALID_DEVICE_ID); }
             DeviceID deviceID;
         };
         
         struct AdminResetFailedAuthenticationAttempts : public Instruction<DeviceManagerAdminInstructionType>
         {
-            AdminResetFailedAuthenticationAttempts(DeviceID id)
+            explicit AdminResetFailedAuthenticationAttempts(DeviceID id)
             : Instruction(InstructionSetType::DEVICE_MANAGER_ADMIN, DeviceManagerAdminInstructionType::RESET_FAILED_AUTHENTICATION_ATTEMPTS),
               deviceID(id)
             {}
             
-            bool isValid() { return (deviceID != INVALID_DEVICE_ID); }
+            bool isValid() override { return (deviceID != INVALID_DEVICE_ID); }
             DeviceID deviceID;
         };
         
@@ -184,17 +184,17 @@ namespace InstructionManagement_Sets
             : Instruction(InstructionSetType::DEVICE_MANAGER_ADMIN, DeviceManagerAdminInstructionType::DEBUG_GET_STATE)
             {}
             
-            bool isValid() { return true; }
+            bool isValid() override { return true; }
         };
         
         struct UserGetDevice : public Instruction<DeviceManagerUserInstructionType>
         {
-            UserGetDevice(DeviceID id)
+            explicit UserGetDevice(DeviceID id)
             : Instruction(InstructionSetType::DEVICE_MANAGER_USER, DeviceManagerUserInstructionType::GET_DEVICE),
               deviceID(id)
             {}
             
-            bool isValid() { return (deviceID != INVALID_DEVICE_ID); }
+            bool isValid() override { return (deviceID != INVALID_DEVICE_ID); }
             DeviceID deviceID;
         };
         
@@ -204,7 +204,7 @@ namespace InstructionManagement_Sets
             : Instruction(InstructionSetType::DEVICE_MANAGER_USER, DeviceManagerUserInstructionType::GET_DEVICES)
             {}
             
-            bool isValid() { return true; }
+            bool isValid() override { return true; }
         };
         
         struct UserAddDevice : public Instruction<DeviceManagerUserInstructionType>
@@ -214,7 +214,7 @@ namespace InstructionManagement_Sets
               deviceName(name), rawPassword(password), transferType(xferType), peerType(type)
             {}
             
-            bool isValid() { return (!deviceName.empty() && !rawPassword.empty() && transferType != DataTransferType::INVALID); }
+            bool isValid() override { return (!deviceName.empty() && !rawPassword.empty() && transferType != DataTransferType::INVALID); }
             std::string deviceName;
             const std::string rawPassword;
             DataTransferType transferType;
@@ -223,12 +223,12 @@ namespace InstructionManagement_Sets
         
         struct UserRemoveDevice : public Instruction<DeviceManagerUserInstructionType>
         {
-            UserRemoveDevice(DeviceID id)
+            explicit UserRemoveDevice(DeviceID id)
             : Instruction(InstructionSetType::DEVICE_MANAGER_USER, DeviceManagerUserInstructionType::REMOVE_DEVICE),
               deviceID(id)
             {}
             
-            bool isValid() { return (deviceID != INVALID_DEVICE_ID); }
+            bool isValid() override { return (deviceID != INVALID_DEVICE_ID); }
             DeviceID deviceID;
         };
         
@@ -239,7 +239,7 @@ namespace InstructionManagement_Sets
               deviceID(id), rawPassword(password)
             {}
             
-            bool isValid() { return (deviceID != INVALID_DEVICE_ID && !rawPassword.empty()); }
+            bool isValid() override { return (deviceID != INVALID_DEVICE_ID && !rawPassword.empty()); }
             DeviceID deviceID;
             const std::string rawPassword;
         };
@@ -251,7 +251,7 @@ namespace InstructionManagement_Sets
               deviceID(id), ipAddress(ip), ipPort(port), transferType(xferType)
             {}
             
-            bool isValid() { return (deviceID != INVALID_DEVICE_ID && ipAddress != INVALID_IP_ADDRESS
+            bool isValid() override { return (deviceID != INVALID_DEVICE_ID && ipAddress != INVALID_IP_ADDRESS
                     && ipPort != INVALID_IP_PORT && transferType != DataTransferType::INVALID); }
             
             DeviceID deviceID;
@@ -267,7 +267,7 @@ namespace InstructionManagement_Sets
               deviceID(id), deviceName(name), deviceInfo(info)
             {}
             
-            bool isValid() { return (deviceID != INVALID_DEVICE_ID && !deviceName.empty()); }
+            bool isValid() override { return (deviceID != INVALID_DEVICE_ID && !deviceName.empty()); }
             DeviceID deviceID;
             std::string deviceName;
             std::string deviceInfo;
@@ -275,34 +275,34 @@ namespace InstructionManagement_Sets
         
         struct UserLockDevice : public Instruction<DeviceManagerUserInstructionType>
         {
-            UserLockDevice(DeviceID id)
+            explicit UserLockDevice(DeviceID id)
             : Instruction(InstructionSetType::DEVICE_MANAGER_USER, DeviceManagerUserInstructionType::LOCK_DEVICE),
               deviceID(id)
             {}
             
-            bool isValid() { return (deviceID != INVALID_DEVICE_ID); }
+            bool isValid() override { return (deviceID != INVALID_DEVICE_ID); }
             DeviceID deviceID;
         };
         
         struct UserUnlockDevice : public Instruction<DeviceManagerUserInstructionType>
         {
-            UserUnlockDevice(DeviceID id)
+            explicit UserUnlockDevice(DeviceID id)
             : Instruction(InstructionSetType::DEVICE_MANAGER_USER, DeviceManagerUserInstructionType::UNLOCK_DEVICE),
               deviceID(id)
             {}
             
-            bool isValid() { return (deviceID != INVALID_DEVICE_ID); }
+            bool isValid() override { return (deviceID != INVALID_DEVICE_ID); }
             DeviceID deviceID;
         };
         
         struct UserResetFailedAuthenticationAttempts : public Instruction<DeviceManagerUserInstructionType>
         {
-            UserResetFailedAuthenticationAttempts(DeviceID id)
+            explicit UserResetFailedAuthenticationAttempts(DeviceID id)
             : Instruction(InstructionSetType::DEVICE_MANAGER_USER, DeviceManagerUserInstructionType::RESET_FAILED_AUTHENTICATION_ATTEMPTS),
               deviceID(id)
             {}
             
-            bool isValid() { return (deviceID != INVALID_DEVICE_ID); }
+            bool isValid() override { return (deviceID != INVALID_DEVICE_ID); }
             DeviceID deviceID;
         };
         
@@ -310,7 +310,7 @@ namespace InstructionManagement_Sets
         {
             struct AdminGetDevice : public InstructionResult<DeviceManagerAdminInstructionType>
             {
-                AdminGetDevice(DeviceDataContainerPtr input)
+                explicit AdminGetDevice(DeviceDataContainerPtr input)
                 : InstructionResult(DeviceManagerAdminInstructionType::GET_DEVICE), result(input) {}
                 
                 DeviceDataContainerPtr result;
@@ -318,7 +318,7 @@ namespace InstructionManagement_Sets
             
             struct AdminGetDevicesByConstraint : public InstructionResult<DeviceManagerAdminInstructionType>
             {
-                AdminGetDevicesByConstraint(std::vector<DeviceDataContainerPtr> input)
+                explicit AdminGetDevicesByConstraint(std::vector<DeviceDataContainerPtr> input)
                 : InstructionResult(DeviceManagerAdminInstructionType::GET_DEVICES_BY_CONSTRAINT), result(input) {}
                 
                 std::vector<DeviceDataContainerPtr> result;
@@ -326,7 +326,7 @@ namespace InstructionManagement_Sets
             
             struct AdminAddDevice : public InstructionResult<DeviceManagerAdminInstructionType>
             {
-                AdminAddDevice(bool input)
+                explicit AdminAddDevice(bool input)
                 : InstructionResult(DeviceManagerAdminInstructionType::ADD_DEVICE), result(input) {}
                 
                 bool result;
@@ -334,7 +334,7 @@ namespace InstructionManagement_Sets
             
             struct AdminRemoveDevice : public InstructionResult<DeviceManagerAdminInstructionType>
             {
-                AdminRemoveDevice(bool input)
+                explicit AdminRemoveDevice(bool input)
                 : InstructionResult(DeviceManagerAdminInstructionType::REMOVE_DEVICE), result(input) {}
                 
                 bool result;
@@ -342,7 +342,7 @@ namespace InstructionManagement_Sets
             
             struct AdminResetDevicePassword : public InstructionResult<DeviceManagerAdminInstructionType>
             {
-                AdminResetDevicePassword(bool input)
+                explicit AdminResetDevicePassword(bool input)
                 : InstructionResult(DeviceManagerAdminInstructionType::RESET_DEVICE_PASSWORD), result(input) {}
                 
                 bool result;
@@ -350,7 +350,7 @@ namespace InstructionManagement_Sets
             
             struct AdminUpdateConnectionInfo : public InstructionResult<DeviceManagerAdminInstructionType>
             {
-                AdminUpdateConnectionInfo(bool input)
+                explicit AdminUpdateConnectionInfo(bool input)
                 : InstructionResult(DeviceManagerAdminInstructionType::UPDATE_CONNECTION_INFO), result(input) {}
                 
                 bool result;
@@ -358,7 +358,7 @@ namespace InstructionManagement_Sets
             
             struct AdminUpdateGeneralInfo : public InstructionResult<DeviceManagerAdminInstructionType>
             {
-                AdminUpdateGeneralInfo(bool input)
+                explicit AdminUpdateGeneralInfo(bool input)
                 : InstructionResult(DeviceManagerAdminInstructionType::UPDATE_GENERAL_INFO), result(input) {}
                 
                 bool result;
@@ -366,7 +366,7 @@ namespace InstructionManagement_Sets
             
             struct AdminLockDevice : public InstructionResult<DeviceManagerAdminInstructionType>
             {
-                AdminLockDevice(bool input)
+                explicit AdminLockDevice(bool input)
                 : InstructionResult(DeviceManagerAdminInstructionType::LOCK_DEVICE), result(input) {}
                 
                 bool result;
@@ -374,7 +374,7 @@ namespace InstructionManagement_Sets
             
             struct AdminUnlockDevice : public InstructionResult<DeviceManagerAdminInstructionType>
             {
-                AdminUnlockDevice(bool input)
+                explicit AdminUnlockDevice(bool input)
                 : InstructionResult(DeviceManagerAdminInstructionType::UNLOCK_DEVICE), result(input) {}
                 
                 bool result;
@@ -382,7 +382,7 @@ namespace InstructionManagement_Sets
             
             struct AdminResetFailedAuthenticationAttempts : public InstructionResult<DeviceManagerAdminInstructionType>
             {
-                AdminResetFailedAuthenticationAttempts(bool input)
+                explicit AdminResetFailedAuthenticationAttempts(bool input)
                 : InstructionResult(DeviceManagerAdminInstructionType::RESET_FAILED_AUTHENTICATION_ATTEMPTS), result(input) {}
                 
                 bool result;
@@ -390,7 +390,7 @@ namespace InstructionManagement_Sets
             
             struct DebugGetState : public InstructionResult<DeviceManagerAdminInstructionType>
             {
-                DebugGetState(std::string input)
+                explicit DebugGetState(std::string input)
                 : InstructionResult(DeviceManagerAdminInstructionType::DEBUG_GET_STATE), result(input) {}
                 
                 std::string result;
@@ -398,7 +398,7 @@ namespace InstructionManagement_Sets
             
             struct UserGetDevice : public InstructionResult<DeviceManagerUserInstructionType>
             {
-                UserGetDevice(DeviceDataContainerPtr input)
+                explicit UserGetDevice(DeviceDataContainerPtr input)
                 : InstructionResult(DeviceManagerUserInstructionType::GET_DEVICE), result(input) {}
                 
                 DeviceDataContainerPtr result;
@@ -406,7 +406,7 @@ namespace InstructionManagement_Sets
             
             struct UserGetDevices : public InstructionResult<DeviceManagerUserInstructionType>
             {
-                UserGetDevices(std::vector<DeviceDataContainerPtr> input)
+                explicit UserGetDevices(std::vector<DeviceDataContainerPtr> input)
                 : InstructionResult(DeviceManagerUserInstructionType::GET_DEVICES), result(input) {}
                 
                 std::vector<DeviceDataContainerPtr> result;
@@ -414,7 +414,7 @@ namespace InstructionManagement_Sets
             
             struct UserAddDevice : public InstructionResult<DeviceManagerUserInstructionType>
             {
-                UserAddDevice(bool input)
+                explicit UserAddDevice(bool input)
                 : InstructionResult(DeviceManagerUserInstructionType::ADD_DEVICE), result(input) {}
                 
                 bool result;
@@ -422,7 +422,7 @@ namespace InstructionManagement_Sets
             
             struct UserRemoveDevice : public InstructionResult<DeviceManagerUserInstructionType>
             {
-                UserRemoveDevice(bool input)
+                explicit UserRemoveDevice(bool input)
                 : InstructionResult(DeviceManagerUserInstructionType::REMOVE_DEVICE), result(input) {}
                 
                 bool result;
@@ -430,7 +430,7 @@ namespace InstructionManagement_Sets
             
             struct UserResetDevicePassword : public InstructionResult<DeviceManagerUserInstructionType>
             {
-                UserResetDevicePassword(bool input)
+                explicit UserResetDevicePassword(bool input)
                 : InstructionResult(DeviceManagerUserInstructionType::RESET_DEVICE_PASSWORD), result(input) {}
                 
                 bool result;
@@ -438,7 +438,7 @@ namespace InstructionManagement_Sets
             
             struct UserUpdateConnectionInfo : public InstructionResult<DeviceManagerUserInstructionType>
             {
-                UserUpdateConnectionInfo(bool input)
+                explicit UserUpdateConnectionInfo(bool input)
                 : InstructionResult(DeviceManagerUserInstructionType::UPDATE_CONNECTION_INFO), result(input) {}
                 
                 bool result;
@@ -446,7 +446,7 @@ namespace InstructionManagement_Sets
             
             struct UserUpdateGeneralInfo : public InstructionResult<DeviceManagerUserInstructionType>
             {
-                UserUpdateGeneralInfo(bool input)
+                explicit UserUpdateGeneralInfo(bool input)
                 : InstructionResult(DeviceManagerUserInstructionType::UPDATE_GENERAL_INFO), result(input) {}
                 
                 bool result;
@@ -454,7 +454,7 @@ namespace InstructionManagement_Sets
             
             struct UserLockDevice : public InstructionResult<DeviceManagerUserInstructionType>
             {
-                UserLockDevice(bool input)
+                explicit UserLockDevice(bool input)
                 : InstructionResult(DeviceManagerUserInstructionType::LOCK_DEVICE), result(input) {}
                 
                 bool result;
@@ -462,7 +462,7 @@ namespace InstructionManagement_Sets
             
             struct UserUnlockDevice : public InstructionResult<DeviceManagerUserInstructionType>
             {
-                UserUnlockDevice(bool input)
+                explicit UserUnlockDevice(bool input)
                 : InstructionResult(DeviceManagerUserInstructionType::UNLOCK_DEVICE), result(input) {}
                 
                 bool result;
@@ -470,7 +470,7 @@ namespace InstructionManagement_Sets
             
             struct UserResetFailedAuthenticationAttempts : public InstructionResult<DeviceManagerUserInstructionType>
             {
-                UserResetFailedAuthenticationAttempts(bool input)
+                explicit UserResetFailedAuthenticationAttempts(bool input)
                 : InstructionResult(DeviceManagerUserInstructionType::RESET_FAILED_AUTHENTICATION_ATTEMPTS), result(input) {}
                 
                 bool result;

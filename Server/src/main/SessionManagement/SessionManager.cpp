@@ -449,7 +449,7 @@ void SyncServer_Core::SessionManager::reauthenticateSession
 
     if(!sessionData->second->waitingForReauthentication)
     {
-        throw std::logic_error("SessionManager::reauthenticateSession(user) > Session ["
+        throw std::logic_error("SessionManager::reauthenticateSession(device) > Session ["
                                + Convert::toString(session)
                                + "] is not eligible for re-authentication.");
     }
@@ -818,7 +818,8 @@ void SyncServer_Core::SessionManager::expirationHandler()
                             + bptime::seconds(inactiveSessionExpirationTime);
 
                     nextHandlerInvocation =
-                            (currentSessionData.second->tokenExpirationTime < sessionExpirationTime)
+                            (currentSessionData.second->tokenExpirationTime < sessionExpirationTime
+                             || currentSessionData.second->data->isSessionPersistent())
                             ? currentSessionData.second->tokenExpirationTime
                             : sessionExpirationTime;
                 }
@@ -845,7 +846,7 @@ void SyncServer_Core::SessionManager::expirationHandler()
         else
             --currentScheduledExpirationHandlers;
     }
-
+    
     for(InternalSessionID currentSessionID : expiredSessionsForReauthentication)
         onReauthenticationRequired(currentSessionID);
 

@@ -354,7 +354,7 @@ namespace SecurityManagement_Types
              * 
              * @param sourceComponent reference to the component making the request (source)
              */
-            SymmetricCryptoDataGenerationRequest
+            explicit SymmetricCryptoDataGenerationRequest
             (const Securable & sourceComponent)
             : SymmetricCryptoDataGenerationRequest
               (sourceComponent, true, true, SymmetricCipherType::INVALID,

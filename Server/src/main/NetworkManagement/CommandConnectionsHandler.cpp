@@ -194,14 +194,12 @@ void NetworkManagement_Handlers::CommandConnectionsHandler::manageRemoteConnecti
         return;
     }
 
-    UnknownPendingConnectionData * connectionData =
-            new UnknownPendingConnectionData{connection, INVALID_DEVICE_ID};
+    UnknownPendingConnectionDataPtr connectionData =
+            UnknownPendingConnectionDataPtr(new UnknownPendingConnectionData{connection, INVALID_DEVICE_ID});
 
     {
         boost::lock_guard<boost::mutex> dataLock(connectionDataMutex);
-        unknownPendingConnections.insert(
-            std::pair<ConnectionID, UnknownPendingConnectionDataPtr>(
-                connectionID, UnknownPendingConnectionDataPtr(connectionData)));
+        unknownPendingConnections.insert(std::pair<ConnectionID, UnknownPendingConnectionDataPtr>(connectionID, connectionData));
     }
 
     //attaches the pending connection event handlers
@@ -303,7 +301,7 @@ NetworkManagement_Handlers::CommandConnectionsHandler::createPendingConnectionDa
         case KeyExchangeType::EC_DH:
         {
             ecdhCryptoData = ECDHCryptoDataContainerPtr(
-                    ECDHCryptoDataContainer::getContainerFromPublicKey(
+                    ECDHCryptoDataContainer::getContainerPtrFromPublicKey(
                         deviceData->getRawPublicKey()));
         } break;
 
@@ -319,34 +317,31 @@ NetworkManagement_Handlers::CommandConnectionsHandler::createPendingConnectionDa
 
     boost::lock_guard<boost::mutex> connectionDataLock(connectionDataMutex);
 
-    PendingConnectionData * data = new PendingConnectionData
-    {
-        asymCryptoHandler,                                  //asymmetric crypto handler (if supplied; otherwise, ECDH crypto data should be set)
-        SymmetricCryptoHandlerPtr(),                        //empty content encryption key (CEK) handler pointer (set at a later point)
-        ecdhCryptoData,                                     //ECDH crypto data (if supplied; otherwise, the asymmetric crypto data should be set)
-        ConnectionSetupState::INITIATED,                    //connection state
-        securityManager.getDefaultSymmetricCipher(),        //CEK cipher type
-        securityManager.getDefaultSymmetricCipherMode(),    //CEK cipher mode
-        EMPTY_PLAINTEXT_DATA,                               //empty request signature data (set at a later point)
-        INVALID_INTERNAL_SESSION_ID,                        //session ID (set at a later point)
-        deviceData,                                         //device data
-        nullptr,                                            //raw pointer to the last pending data sent
-        connectionID,                                       //connection ID
-        ConnectionPtr(),                                    //empty connection pointer (set at a later point)
-        boost::signals2::connection(),                      //empty event connection (onDataReceived)
-        boost::signals2::connection(),                      //empty event connection (onDisconnect)
-        boost::signals2::connection()                       //empty event connection (onWriteResultRecieved)
-    };
-
-    auto result = pendingConnections.insert(std::pair<DeviceID, PendingConnectionDataPtr>
-                                            (
-                                                device, 
-                                                PendingConnectionDataPtr(data)
-                                            ));
+    PendingConnectionDataPtr newPendingData = PendingConnectionDataPtr(
+            new PendingConnectionData
+            {
+                asymCryptoHandler,                                  //asymmetric crypto handler (if supplied; otherwise, ECDH crypto data should be set)
+                SymmetricCryptoHandlerPtr(),                        //empty content encryption key (CEK) handler pointer (set at a later point)
+                ecdhCryptoData,                                     //ECDH crypto data (if supplied; otherwise, the asymmetric crypto data should be set)
+                ConnectionSetupState::INITIATED,                    //connection state
+                securityManager.getDefaultSymmetricCipher(),        //CEK cipher type
+                securityManager.getDefaultSymmetricCipherMode(),    //CEK cipher mode
+                EMPTY_PLAINTEXT_DATA,                               //empty request signature data (set at a later point)
+                INVALID_INTERNAL_SESSION_ID,                        //session ID (set at a later point)
+                deviceData,                                         //device data
+                nullptr,                                            //raw pointer to the last pending data sent
+                connectionID,                                       //connection ID
+                ConnectionPtr(),                                    //empty connection pointer (set at a later point)
+                boost::signals2::connection(),                      //empty event connection (onDataReceived)
+                boost::signals2::connection(),                      //empty event connection (onDisconnect)
+                boost::signals2::connection()                       //empty event connection (onWriteResultRecieved)
+            });
+            
+    auto result = pendingConnections.insert(std::pair<DeviceID, PendingConnectionDataPtr>(device, newPendingData));
 
     if(result.second)
     {
-        return result.first->second;
+        return newPendingData;
     }
     else
     {
@@ -1335,7 +1330,9 @@ void NetworkManagement_Handlers::CommandConnectionsHandler::terminateConnection
         pendingConnectionData->second->onDataReceivedEventConnection.disconnect();
         pendingConnectionData->second->onDisconnectEventConnection.disconnect();
         pendingConnectionData->second->onWriteResultReceivedEventConnection.disconnect();
-        pendingConnectionData->second->connection->disconnect();
+        if(pendingConnectionData->second->connection)
+            pendingConnectionData->second->connection->disconnect();
+        
         pendingConnections.erase(pendingConnectionData);
     }
 
@@ -1351,7 +1348,8 @@ void NetworkManagement_Handlers::CommandConnectionsHandler::terminateConnection
         establishedConnectionData->second->onDataReceivedEventConnection.disconnect();
         establishedConnectionData->second->onDisconnectEventConnection.disconnect();
         establishedConnectionData->second->onWriteResultReceivedEventConnection.disconnect();
-        establishedConnectionData->second->connection->disconnect();
+        if(establishedConnectionData->second->connection)
+            establishedConnectionData->second->connection->disconnect();
         
         establishedConnections.erase(establishedConnectionData);
     }

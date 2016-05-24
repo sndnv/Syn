@@ -39,10 +39,17 @@ namespace SecurityManagement_Crypto
              * 
              * @param length the length of the generated password
              * @throw runtime_error if a password could not be generated
+             * @throw invalid_argument if a password length of 0 is supplied
              * @return the generated password
              */
             static const std::string getRandomASCIIPassword(unsigned int length)
             {
+                if(length == 0)
+                {
+                    throw std::invalid_argument("PasswordGenerator::getRandomASCIIPassword >"
+                            " Password length of 0 is not valid.");
+                }
+                
                 static const std::string charsetASCII = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,./;'[]<>?:{}|\\\"`~!@#$%^&*()_+";
                 CryptoPP::AutoSeededRandomPool rng;
                 
@@ -70,6 +77,7 @@ namespace SecurityManagement_Crypto
              * @param validationFunction password validation function
              * @param maxAttempts the maximum number of attempts to be made to generate a password
              * @throw runtime_error if a valid password could not be generated
+             * @throw invalid_argument if a password length of 0 is supplied
              * @return the generated password
              */
             static const std::string getValidRandomASCIIPassword
@@ -77,6 +85,12 @@ namespace SecurityManagement_Crypto
              std::function<PasswordData (const std::string & rawPassword)> validationFunction,
              unsigned int maxAttempts = 10)
             {
+                if(length == 0)
+                {
+                    throw std::invalid_argument("PasswordGenerator::getValidRandomASCIIPassword >"
+                            " Password length of 0 is not valid.");
+                }
+                
                 static const std::string charsetASCII = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,./;'[]<>?:{}|\\\"`~!@#$%^&*()_+";
                 CryptoPP::AutoSeededRandomPool rng;
                 

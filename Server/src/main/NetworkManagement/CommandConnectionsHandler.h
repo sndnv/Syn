@@ -159,12 +159,12 @@ namespace NetworkManagement_Handlers
             CommandConnectionsHandler(const CommandConnectionsHandler&) = delete;
             CommandConnectionsHandler& operator=(const CommandConnectionsHandler&) = delete;
             
-            std::string getSourceName() const
+            std::string getSourceName() const override
             {
                 return "CommandConnectionsHandler";
             }
             
-            bool registerLoggingHandler(const std::function<void(LogSeverity, const std::string &)> handler)
+            bool registerLoggingHandler(const std::function<void(LogSeverity, const std::string &)> handler) override
             {
                 if(!dbLogHandler)
                 {

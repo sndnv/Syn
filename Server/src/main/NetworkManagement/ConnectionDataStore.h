@@ -361,4 +361,3 @@ namespace NetworkManagement_Handlers
 }
 
 #endif	/* CONNECTIONDATASTORE_H */
-
