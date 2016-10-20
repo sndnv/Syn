@@ -19,8 +19,7 @@
 #define	SECURITY_MANAGEMENT_TYPES_H
 
 #include <string>
-#include <limits>
-#include <vector>
+#include <climits>
 #include <cryptopp/config.h>
 #include <cryptopp/eccrypto.h>
 #include <cryptopp/rsa.h>

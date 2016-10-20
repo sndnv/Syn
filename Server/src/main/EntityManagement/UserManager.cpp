@@ -16,13 +16,16 @@
  */
 
 #include "UserManager.h"
+#include <vector>
+#include <boost/thread/lock_guard.hpp>
+#include "../Utilities/Strings/Common.h"
 
 namespace Convert = Utilities::Strings;
 namespace Instructions = InstructionManagement_Sets::UserManagerInstructions;
 namespace InstructionResults = InstructionManagement_Sets::UserManagerInstructions::Results;
 
 EntityManagement::UserManager::UserManager
-(const UserManagerParameters & params,  Utilities::FileLogger * debugLogger)
+(const UserManagerParameters & params,  Utilities::FileLoggerPtr debugLogger)
 : debugLogger(debugLogger), databaseManager(params.databaseManager),
   securityManager(params.securityManager), instructionsReceived(0), instructionsProcessed(0)
 {}
@@ -34,8 +37,6 @@ EntityManagement::UserManager::~UserManager()
     boost::lock_guard<boost::mutex> instructionDataLock(instructionDataMutex);
 
     authorizationTokens.clear();
-
-    debugLogger = nullptr;
 }
 
 void EntityManagement::UserManager::postAuthorizationToken

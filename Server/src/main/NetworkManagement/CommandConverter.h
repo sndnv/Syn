@@ -22,9 +22,6 @@
 
 #include <boost/unordered_map.hpp>
 
-#include "../Utilities/Strings/Common.h"
-#include "../Utilities/Strings/Instructions.h"
-#include "../Utilities/Strings/Security.h"
 #include "../Common/Types.h"
 #include "../InstructionManagement/Types/Types.h"
 #include "../InstructionManagement/Sets/InstructionSet.h"
@@ -56,9 +53,6 @@ using NetworkManagement_Protocols::Command;
 using NetworkManagement_Protocols::Response;
 using NetworkManagement_Protocols::Response_Status;
 using NetworkManagement_Protocols::LifeCycleCommand_OpenDataConnection;
-
-namespace Convert = Utilities::Strings;
-namespace Results = InstructionManagement_Sets::NetworkManagerInstructions::Results;
 
 namespace NetworkManagement_Handlers
 {

@@ -22,7 +22,6 @@
 #include <vector>
 #include <deque>
 
-#include <boost/thread/lock_guard.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/unordered_map.hpp>
 #include <boost/date_time/posix_time/ptime.hpp>
@@ -307,7 +306,7 @@ namespace StorageManagement_Pools
              * @throw invalid_argument if a streaming data pool is supplied but it does not
              * support output streams
              */
-            PoolAggregator(PoolAggregatorInitParameters parameters, Utilities::FileLogger * debugLogger = nullptr);
+            PoolAggregator(const PoolAggregatorInitParameters & parameters, Utilities::FileLoggerPtr debugLogger = Utilities::FileLoggerPtr());
             
             /**
              * Constructs a new aggregator object from existing configuration data.
@@ -318,7 +317,7 @@ namespace StorageManagement_Pools
              * @throw invalid_argument if invalid configuration parameters are found or
              * if a streaming data pool is supplied but it does not support output streams
              */
-            PoolAggregator(const PoolAggregatorLoadParameters parameters, Utilities::FileLogger * debugLogger = nullptr);
+            PoolAggregator(const PoolAggregatorLoadParameters & parameters, Utilities::FileLoggerPtr debugLogger = Utilities::FileLoggerPtr());
             
             /**
              * Clears all data structures and discards all pending operations.
@@ -494,7 +493,7 @@ namespace StorageManagement_Pools
              * the target pool set in the parameter already has link with the 
              * specified source pool, or if the source pool cannot be found
              */
-            void addPoolLink(PoolID sourcePool, const LinkParameters params);
+            void addPoolLink(PoolID sourcePool, const LinkParameters & params);
             
             /**
              * Removes the link associated with the specified source and target pools.
@@ -732,8 +731,8 @@ namespace StorageManagement_Pools
                 Timestamp processingTime;
             };
             
-            mutable Utilities::FileLogger * debugLogger; //logger for debugging
-            Utilities::ThreadPool threadPool;            //threads for handling storage actions
+            mutable Utilities::FileLoggerPtr debugLogger;   //logger for debugging
+            Utilities::ThreadPool threadPool;               //threads for handling storage actions
             
             bool completeRetrieve;        //denotes whether a retrieve operation will attempts to get data from any pool or fail on the first exception
             bool completeDiscard;         //denotes whether a discard operation will attempt to delete data from all pools or fail on the first exception
@@ -932,9 +931,9 @@ namespace StorageManagement_Pools
              * 
              * @param message the message to be logged
              */
-            void logDebugMessage(const std::string message) const
+            void logDebugMessage(const std::string & message) const
             {
-                if(debugLogger != nullptr)
+                if(debugLogger)
                     debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "PoolAggregator " + message);
             }
     };

@@ -16,6 +16,8 @@
  */
 
 #include "ConnectionDataStore.h"
+#include <boost/thread/lock_guard.hpp>
+#include "../Utilities/Strings/Common.h"
 
 NetworkManagement_Handlers::ConnectionDataStore::~ConnectionDataStore()
 {

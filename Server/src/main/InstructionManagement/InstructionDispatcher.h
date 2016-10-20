@@ -21,13 +21,10 @@
 #include <vector>
 #include <string>
 #include <boost/unordered_map.hpp>
-#include <boost/thread/future.hpp>
 #include "../Common/Types.h"
 #include "Types/Types.h"
 #include "Sets/InstructionSet.h"
 
-#include "../Utilities/Strings/Common.h"
-#include "../Utilities/Strings/Instructions.h"
 #include "../Utilities/FileLogger.h"
 
 #include "Interfaces/InstructionSource.h"
@@ -44,7 +41,6 @@ using InstructionManagement_Sets::InstructionSet;
 using InstructionManagement_Sets::InstructionSetPtr;
 using InstructionManagement_Sets::InstructionBasePtr;
 using InstructionManagement_Sets::InstructionSetBasePtr;
-using InstructionManagement_Sets::InstructionResultFuture;
 using InstructionManagement_Types::InstructionSetType;
 using InstructionManagement_Types::InstructionSourceID;
 using InstructionManagement_Types::INVALID_INSTRUCTION_SOURCE_ID;
@@ -93,7 +89,7 @@ namespace SyncServer_Core
              * @param parameters the dispatcher's configuration data
              * @param debugLogger logger for debugging, if any
              */
-            InstructionDispatcher(InstructionDispatcherParameters parameters, Utilities::FileLogger * debugLogger = nullptr);
+            InstructionDispatcher(InstructionDispatcherParameters parameters, Utilities::FileLoggerPtr debugLogger = Utilities::FileLoggerPtr());
             
             /**
              * Clears the source and target data structures.
@@ -220,7 +216,7 @@ namespace SyncServer_Core
         private:
             //Configuration
             std::vector<InstructionSetType> expectedSetTypes;
-            Utilities::FileLogger * debugLogger;
+            Utilities::FileLoggerPtr debugLogger;
             std::function<void(LogSeverity, const std::string &)> dbLogHandler;//database log handler
             
             //Targets
@@ -252,7 +248,7 @@ namespace SyncServer_Core
                 if(dbLogHandler)
                     dbLogHandler(severity, message);
                 
-                if(debugLogger != nullptr)
+                if(debugLogger)
                     debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "InstructionDispatcher " + message);
             }
     };

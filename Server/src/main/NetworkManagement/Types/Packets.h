@@ -19,9 +19,7 @@
 #define	PACKETS_H
 
 #include <stdexcept>
-#include <vector>
 #include "Types.h"
-#include "../../Common/Types.h"
 
 using Common_Types::Byte;
 using Common_Types::ByteData;

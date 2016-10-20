@@ -18,10 +18,7 @@
 #ifndef COMPRESSIONHANDLER_H
 #define	COMPRESSIONHANDLER_H
 
-#include <boost/asio.hpp>
-#include <lz4/lz4.h>
 #include "../../Common/Types.h"
-#include "../Strings/Common.h"
 
 using Common_Types::ByteData;
 

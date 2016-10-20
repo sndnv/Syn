@@ -19,7 +19,6 @@
 #define	LOGDATACONTAINER_H
 
 #include <string>
-#include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/shared_ptr.hpp>
 #include "DataContainer.h"
 #include "../Types/Types.h"

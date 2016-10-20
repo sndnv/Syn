@@ -16,6 +16,7 @@
  */
 
 #include "DebugDAL.h"
+#include <boost/regex.hpp>
 
 DatabaseManagement_DALs::DebugDAL::DebugDAL(std::string logPath, std::string dataPath, DatabaseObjectType dbType)
     : logger(logPath, 8*1024*1024, Utilities::FileLogSeverity::Debug), dataFilePath(dataPath), dalType(dbType), nextIntID(0)

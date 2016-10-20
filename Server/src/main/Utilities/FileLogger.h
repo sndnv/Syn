@@ -22,9 +22,8 @@
 #include <queue>
 #include <atomic>
 #include <fstream>
-#include <cstdio>
-#include <boost/unordered_map.hpp>
-#include <boost/date_time/gregorian/gregorian_types.hpp>
+#include <boost/shared_ptr.hpp>
+#include <boost/scoped_ptr.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/thread.hpp>
 
@@ -136,7 +135,7 @@ namespace Utilities
             std::ofstream fileStream;                       //output stream for the log file
             
             //Thread management
-            boost::thread * mainThread;                     //main thread object
+            boost::scoped_ptr<boost::thread> mainThread;    //main thread object
             boost::mutex threadMutex;                       //main thread mutex
             boost::condition_variable threadLockCondition;  //thread condition variable
             std::atomic<bool> stopLogger{false};            //atomic variable for denoting the state of the logger
@@ -160,6 +159,7 @@ namespace Utilities
              */
             void mainLoggerThread();
     };
+    typedef boost::shared_ptr<FileLogger> FileLoggerPtr;
 }
 #endif	/* FILELOGGER_H */
 

@@ -21,7 +21,7 @@
 #include <string>
 #include <boost/shared_ptr.hpp>
 #include <boost/any.hpp>
-#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/random_generator.hpp>
 #include "DataContainer.h"
 #include "../Types/Types.h"
 

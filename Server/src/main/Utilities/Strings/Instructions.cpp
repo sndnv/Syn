@@ -16,8 +16,33 @@
  */
 
 #include "Instructions.h"
+#include <boost/unordered_map.hpp>
 
-using Maps = Utilities::Strings::InstructionsMaps;
+struct InstructionsMaps
+{
+    static const boost::unordered_map<InstructionSetType, std::string> instructionSetTypeToString;
+    static const boost::unordered_map<std::string, InstructionSetType> stringToInstructionSetType;
+    static const boost::unordered_map<TestInstructionType, std::string> testInstructionTypeToString;
+    static const boost::unordered_map<std::string, TestInstructionType> stringToTestInstructionType;
+
+    static const boost::unordered_map<DatabaseManagerInstructionType, std::string> databaseManagerInstructionTypeToString;
+    static const boost::unordered_map<std::string, DatabaseManagerInstructionType> stringToDatabaseManagerInstructionType;
+    static const boost::unordered_map<SessionManagerInstructionType, std::string> sessionManagerInstructionTypeToString;
+    static const boost::unordered_map<std::string, SessionManagerInstructionType> stringToSessionManagerInstructionType;
+    static const boost::unordered_map<UserManagerAdminInstructionType, std::string> userManagerAdminInstructionTypeToString;
+    static const boost::unordered_map<std::string, UserManagerAdminInstructionType> stringToUserManagerAdminInstructionType;
+    static const boost::unordered_map<UserManagerSelfInstructionType, std::string> userManagerSelfInstructionTypeToString;
+    static const boost::unordered_map<std::string, UserManagerSelfInstructionType> stringToUserManagerSelfInstructionType;
+    static const boost::unordered_map<DeviceManagerAdminInstructionType, std::string> deviceManagerAdminInstructionTypeToString;
+    static const boost::unordered_map<std::string, DeviceManagerAdminInstructionType> stringToDeviceManagerAdminInstructionType;
+    static const boost::unordered_map<DeviceManagerUserInstructionType, std::string> deviceManagerUserInstructionTypeToString;
+    static const boost::unordered_map<std::string, DeviceManagerUserInstructionType> stringToDeviceManagerUserInstructionType;
+    static const boost::unordered_map<DatabaseLoggerInstructionType, std::string> databaseLoggerInstructionTypeToString;
+    static const boost::unordered_map<std::string, DatabaseLoggerInstructionType> stringToDatabaseLoggerInstructionType;
+    static const boost::unordered_map<NetworkManagerConnectionLifeCycleInstructionType, std::string> networkManagerConnectionLifeCycleInstructionTypeToString;
+    static const boost::unordered_map<std::string, NetworkManagerConnectionLifeCycleInstructionType> stringToNetworkManagerConnectionLifeCycleInstructionType;
+};
+using Maps = InstructionsMaps;
 
 const boost::unordered_map<InstructionSetType, std::string> Maps::instructionSetTypeToString
 {

@@ -16,13 +16,29 @@
  */
 
 #include "NetworkManager.h"
+#include <boost/thread/lock_guard.hpp>
+#include "../Utilities/Strings/Common.h"
+#include "../Utilities/Strings/Instructions.h"
 
 namespace Convert = Utilities::Strings;
 namespace Instructions = InstructionManagement_Sets::NetworkManagerInstructions;
 namespace InstructionResults = InstructionManagement_Sets::NetworkManagerInstructions::Results;
 
+//Protocols
+#include "../../../external/protobuf/BaseComm.pb.h"
+
+using NetworkManagement_Protocols::ConnectionSetupRequestSignature;
+using NetworkManagement_Protocols::CommandConnectionSetupRequest;
+using NetworkManagement_Protocols::CommandConnectionSetupResponse;
+using NetworkManagement_Protocols::CommandConnectionSetupRequestData;
+using NetworkManagement_Protocols::DataConnectionSetupRequest;
+using NetworkManagement_Protocols::DataConnectionSetupResponse;
+using NetworkManagement_Protocols::Command;
+using NetworkManagement_Protocols::Response;
+using NetworkManagement_Protocols::Response_Status;
+
 SyncServer_Core::NetworkManager::NetworkManager
-(const NetworkManagerParameters & params, Utilities::FileLogger * debugLogger)
+(const NetworkManagerParameters & params, Utilities::FileLoggerPtr debugLogger)
 : networkingThreadPool(params.networkThreadPoolSize, debugLogger),
   instructionsThreadPool(params.instructionsThreadPoolSize, debugLogger),
   debugLogger(debugLogger),
@@ -175,8 +191,6 @@ SyncServer_Core::NetworkManager::~NetworkManager()
     dataConnectionManagers.clear();
     commandConnectionManagers.clear();
     initConnectionManagers.clear();
-
-    debugLogger = nullptr;
 }
 
 void SyncServer_Core::NetworkManager::postAuthorizationToken(const AuthorizationTokenPtr token)

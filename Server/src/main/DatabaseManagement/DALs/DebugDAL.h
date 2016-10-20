@@ -21,15 +21,12 @@
 #include <deque>
 #include <string>
 #include <atomic>
-#include <iostream>
-#include <fstream>
-#include <boost/regex.hpp>
+#include <iosfwd>
 #include <boost/any.hpp>
 #include <boost/thread.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <boost/unordered_map.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/uuid/uuid.hpp>
 #include <boost/tokenizer.hpp>
 #include <queue>
 #include "../../Utilities/Tools.h"
@@ -114,7 +111,6 @@ using std::getline;
 
 using Utilities::FileLogger;
 using Utilities::FileLogSeverity;
-
 
 namespace DatabaseManagement_DALs
 {

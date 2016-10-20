@@ -35,15 +35,15 @@ SCENARIO("A user manager is created and can process instructions",
             Utilities::FileLogSeverity::Debug
         };
 
-        Utilities::FileLogger logger(loggerParams);
+        Utilities::FileLoggerPtr logger(new Utilities::FileLogger(loggerParams));
         
         auto dbManager = Testing::Fixtures::createDatabaseManager();
         std::vector<InstructionManagement_Types::InstructionSetType> dispatcherSets;
         dispatcherSets.push_back(InstructionManagement_Types::InstructionSetType::USER_MANAGER_ADMIN);
         dispatcherSets.push_back(InstructionManagement_Types::InstructionSetType::USER_MANAGER_SELF);
-        auto dispatcher = Testing::Fixtures::createInstructionDispatcher(dispatcherSets, &logger);
-        auto secManager = Testing::Fixtures::createSecurityManager(dispatcher, dbManager, &logger);
-        auto sessManager = Testing::Fixtures::createSessionManager(dbManager, secManager, &logger);
+        auto dispatcher = Testing::Fixtures::createInstructionDispatcher(dispatcherSets, logger);
+        auto secManager = Testing::Fixtures::createSecurityManager(dispatcher, dbManager, logger);
+        auto sessManager = Testing::Fixtures::createSessionManager(dbManager, secManager, logger);
         
         UserManager::UserManagerParameters mgrParams
         {
@@ -54,7 +54,7 @@ SCENARIO("A user manager is created and can process instructions",
         SecurityManagement_Rules::MinNameLength * userNameRule = new SecurityManagement_Rules::MinNameLength(3);
         secManager->addUserNameRule(userNameRule);
 
-        UserManager userManager(mgrParams, &logger);
+        UserManager userManager(mgrParams, logger);
         secManager->registerSecurableComponent(userManager);
         dispatcher->registerInstructionTarget<UserManagerAdminInstructionType>(userManager);
         dispatcher->registerInstructionTarget<UserManagerSelfInstructionType>(userManager);

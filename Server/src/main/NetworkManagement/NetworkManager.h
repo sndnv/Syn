@@ -21,16 +21,11 @@
 #include <vector>
 #include <string>
 #include <deque>
-#include <algorithm>
 
-#include <cryptopp/dh.h>
 #include <boost/thread/mutex.hpp>
-#include <boost/thread/lock_guard.hpp>
 #include <boost/unordered_map.hpp>
 
 #include "../Common/Types.h"
-#include "../Utilities/Strings/Common.h"
-#include "../Utilities/Strings/Instructions.h"
 #include "../Utilities/FileLogger.h"
 #include "../Utilities/ThreadPool.h"
 #include "../SecurityManagement/Crypto/Handlers.h"
@@ -63,9 +58,6 @@
 #include "Connections/ConnectionManager.h"
 
 #include "../InstructionManagement/Sets/NetworkManagerInstructionSet.h"
-
-//Protocols
-#include "../../../external/protobuf/BaseComm.pb.h"
 
 //Exceptions
 using SecurityManagement_Types::InvalidAuthorizationTokenException;
@@ -140,17 +132,6 @@ using InstructionManagement_Types::NetworkManagerUserInstructionType;
 using InstructionManagement_Types::NetworkManagerStateInstructionType;
 using InstructionManagement_Types::NetworkManagerConnectionLifeCycleInstructionType;
 using InstructionManagement_Types::NetworkManagerConnectionBridgingInstructionType;
-
-//Protocols
-using NetworkManagement_Protocols::ConnectionSetupRequestSignature;
-using NetworkManagement_Protocols::CommandConnectionSetupRequest;
-using NetworkManagement_Protocols::CommandConnectionSetupResponse;
-using NetworkManagement_Protocols::CommandConnectionSetupRequestData;
-using NetworkManagement_Protocols::DataConnectionSetupRequest;
-using NetworkManagement_Protocols::DataConnectionSetupResponse;
-using NetworkManagement_Protocols::Command;
-using NetworkManagement_Protocols::Response;
-using NetworkManagement_Protocols::Response_Status;
 
 namespace SyncServer_Core
 {
@@ -294,7 +275,7 @@ namespace SyncServer_Core
              * @param params the manager configuration
              * @param debugLogger pointer to an initialised <code>FileLogger</code> (if any)
              */
-            NetworkManager(const NetworkManagerParameters & params, Utilities::FileLogger * debugLogger = nullptr);
+            NetworkManager(const NetworkManagerParameters & params, Utilities::FileLoggerPtr debugLogger = Utilities::FileLoggerPtr());
             
             /**
              * Stops all networking activity and clears all related data.
@@ -459,7 +440,7 @@ namespace SyncServer_Core
         private:
             Utilities::ThreadPool networkingThreadPool;     //thread pool for networking tasks
             Utilities::ThreadPool instructionsThreadPool;   //thread pool for processing instructions
-            Utilities::FileLogger * debugLogger; //logger for debugging
+            Utilities::FileLoggerPtr debugLogger; //logger for debugging
             std::function<void (LogSeverity, const std::string &)> dbLogHandler; //database log handler
             
             //Required Managers
@@ -922,7 +903,7 @@ namespace SyncServer_Core
                 if(dbLogHandler)
                     dbLogHandler(severity, message);
                 
-                if(debugLogger != nullptr)
+                if(debugLogger)
                     debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "NetworkManager " + message);
             }
     };

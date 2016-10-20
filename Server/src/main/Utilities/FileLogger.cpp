@@ -16,19 +16,12 @@
  */
 
 #include "FileLogger.h"
+#include <cstdio>
 
 Utilities::FileLogger::FileLogger(std::string fullFilePath, unsigned long maximumFileSize, FileLogSeverity minimumSeverity)
-{
-    filePath = fullFilePath;
-    maxFileSize = maximumFileSize;
-    minSeverity = minimumSeverity;
-    
-    fileLogSeverityToInt(minimumSeverity);
-    fileLogSeverityToInt(minSeverity);
-    
-    //starts the logger thread
-    mainThread = new boost::thread(&Utilities::FileLogger::mainLoggerThread, this);
-}
+: minSeverity(minimumSeverity), maxFileSize(maximumFileSize), filePath(fullFilePath),
+  mainThread(new boost::thread(&Utilities::FileLogger::mainLoggerThread, this))
+{}
 
 Utilities::FileLogger::FileLogger(FileLoggerParameters parameters)
 : FileLogger(parameters.logFilePath, parameters.maximumFileSize, parameters.minimumSeverity)
@@ -43,7 +36,6 @@ Utilities::FileLogger::~FileLogger()
     }
     
     mainThread->join();
-    delete mainThread;
 }
 
 void Utilities::FileLogger::logMessage(FileLogSeverity severity, std::string message)

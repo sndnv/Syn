@@ -20,17 +20,13 @@
 
 #include <map>
 #include <string>
-#include <vector>
 #include <deque>
-#include <iostream>
-#include <winsock2.h> //TODO - remove/impl htonl()
+#include <iosfwd>
 
 #include <boost/filesystem.hpp>
-#include <boost/thread/lock_guard.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/unordered_map.hpp>
 #include <boost/system/error_code.hpp>
-#include <boost/lexical_cast.hpp>
 
 #include "../../Common/Types.h"
 #include "../Types/Types.h"
@@ -307,11 +303,7 @@ namespace StorageManagement_Pools
              * 
              * @throw runtime_error if the specified ID was not found or if the pool is not in the correct state/mode
              */
-            void discardData(StoredDataID id, bool erase = false) override
-            {
-                boost::lock_guard<boost::mutex> fileLock(fileMutex);
-                discardDataWithoutLock(id, erase);
-            }
+            void discardData(StoredDataID id, bool erase = false) override;
             
             /**
              * Clears all information associated with the data in the pool.

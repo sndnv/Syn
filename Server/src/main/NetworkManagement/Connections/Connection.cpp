@@ -18,7 +18,7 @@
 #include "Connection.h"
 
 NetworkManagement_Connections::Connection::Connection
-(boost::shared_ptr<boost::asio::io_service> service, ConnectionParamters connectionParams, boost::asio::streambuf * externalReadBuffer, Utilities::FileLogger * debugLogger)
+(boost::shared_ptr<boost::asio::io_service> service, ConnectionParamters connectionParams, boost::asio::streambuf * externalReadBuffer, Utilities::FileLoggerPtr debugLogger)
 : debugLogger(debugLogger), writeStrand(connectionParams.socket->get_io_service()),
   readStrand(connectionParams.socket->get_io_service()), networkService(service), socket(connectionParams.socket),
   connectionID(connectionParams.connectionID), localPeerType(connectionParams.localPeerType),
@@ -42,7 +42,7 @@ NetworkManagement_Connections::Connection::Connection
 
 NetworkManagement_Connections::Connection::Connection
 (boost::shared_ptr<boost::asio::io_service> service, ConnectionParamters connectionParams, ConnectionRequest requestParams,
- boost::asio::streambuf * externalReadBuffer, Utilities::FileLogger * debugLogger)
+ boost::asio::streambuf * externalReadBuffer, Utilities::FileLoggerPtr debugLogger)
 : debugLogger(debugLogger), writeStrand(connectionParams.socket->get_io_service()),
   readStrand(connectionParams.socket->get_io_service()), networkService(service), socket(connectionParams.socket),
   connectionID(connectionParams.connectionID), localPeerType(connectionParams.localPeerType),
@@ -67,8 +67,7 @@ NetworkManagement_Connections::Connection::Connection
 
 NetworkManagement_Connections::Connection::~Connection()
 {
-    debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "Connection / " + Convert::toString(connectionType) 
-        + " (~) [" + Convert::toString(connectionID) + "] > Destruction initiated.");
+    logMessage(LogSeverity::Debug, "(~) Destruction initiated.");
     
     disconnect();
     socket.reset();
@@ -82,10 +81,7 @@ NetworkManagement_Connections::Connection::~Connection()
     if(!isExternalReadBufferUsed)
         delete readBuffer;
     
-    debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "Connection / " + Convert::toString(connectionType)
-        + " (~) [" + Convert::toString(connectionID) + "] > Destruction completed.");
-    
-    debugLogger = nullptr;
+    logMessage(LogSeverity::Debug, "(~) Destruction completed.");
 }
 
 void NetworkManagement_Connections::Connection::disconnect()
@@ -99,15 +95,9 @@ void NetworkManagement_Connections::Connection::disconnect()
     socket->shutdown(boost::asio::ip::tcp::socket::shutdown_both, errorCode);
     
     if(errorCode)
-    {
-        debugLogger->logMessage(Utilities::FileLogSeverity::Error, "Connection / " + Convert::toString(connectionType)
-            + " (Disconnect) [" + Convert::toString(connectionID) + "] > Error encountered during socket shutdown: [" + errorCode.message() + "]");
-    }
+        logMessage(LogSeverity::Error, "(disconnect) Error encountered during socket shutdown: [" + errorCode.message() + "]");
     else
-    {
-        debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "Connection / " + Convert::toString(connectionType)
-            + " (Disconnect) [" + Convert::toString(connectionID) + "] > Socket shutdown completed.");
-    }
+        logMessage(LogSeverity::Debug, "(disconnect) Socket shutdown completed.");
     
     onDisconnectEvent();
     canBeDestroyedEvent();
@@ -118,8 +108,7 @@ void NetworkManagement_Connections::Connection::disconnect()
     onWriteResultReceived.disconnect_all_slots();
     canBeDestroyed.disconnect_all_slots();
     
-    debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "Connection / " + Convert::toString(connectionType)
-        + " (Disconnect) [" + Convert::toString(connectionID) + "] > Disconnected.");
+    logMessage(LogSeverity::Debug, "(disconnect) Disconnected.");
 }
 
 void NetworkManagement_Connections::Connection::sendData(const ByteData & data)
@@ -161,9 +150,7 @@ void NetworkManagement_Connections::Connection::enableLifecycleEvents()
                 case EventType::WRITE_RESULT_RECEIVED:  { remainingEvents.push(currentEventID); erase = false; } break;
                 default:
                 {
-                    debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "Connection / "
-                        + Convert::toString(connectionType) + " (Enable Lifecycle Events) [" 
-                        + Convert::toString(connectionID) + "] > Unexpected event type encountered.");
+                    logMessage(LogSeverity::Debug, "(enableLifecycleEvents) Unexpected event type encountered.");
                 } break;
             }
             
@@ -195,9 +182,7 @@ void NetworkManagement_Connections::Connection::enableLifecycleEvents()
                 case EventType::CAN_BE_DESTROYED:       canBeDestroyed(connectionID, initiation); break;
                 default:
                 {
-                    debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "Connection / "
-                        + Convert::toString(connectionType) + " (Enable Lifecycle Events) ["
-                        + Convert::toString(connectionID) + "] > Unexpected event type encountered.");
+                    logMessage(LogSeverity::Debug, "(enableLifecycleEvents) Unexpected event type encountered.");
                 } break;
             }
         }
@@ -236,9 +221,7 @@ void NetworkManagement_Connections::Connection::enableDataEvents()
                 case EventType::CAN_BE_DESTROYED:       { remainingEvents.push(currentEventID); erase = false; } break;
                 default:
                 {
-                    debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "Connection / "
-                        + Convert::toString(connectionType) + " (Enable Data Events) ["
-                        + Convert::toString(connectionID) + "] > Unexpected event type encountered.");
+                    logMessage(LogSeverity::Debug, "(enableDataEvents) Unexpected event type encountered.");
                 } break;
             }
             
@@ -277,9 +260,7 @@ void NetworkManagement_Connections::Connection::enableDataEvents()
                 
                 default:
                 {
-                    debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "Connection / "
-                        + Convert::toString(connectionType) + " (Enable Data Events) ["
-                        + Convert::toString(connectionID) + "] > Unexpected event type encountered.");
+                    logMessage(LogSeverity::Debug, "(enableDataEvents) Unexpected event type encountered.");
                 } break;
             }
             
@@ -316,9 +297,7 @@ void NetworkManagement_Connections::Connection::initialReadRequestHandler
                                                           (boost::asio::buffers_begin(rawRequest)
                                                            + ConnectionRequest::BYTE_LENGTH)));
             
-            debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "Connection / "
-                + Convert::toString(connectionType) + " (Initial Read Request Handler) ["
-                + Convert::toString(connectionID) + "] > Request data received.");
+            logMessage(LogSeverity::Debug, "(initialReadRequestHandler) Request data received.");
             
             readBuffer->consume(ConnectionRequest::BYTE_LENGTH); //removes the incoming data from the buffer
             
@@ -333,9 +312,7 @@ void NetworkManagement_Connections::Connection::initialReadRequestHandler
             }
             else
             {
-                debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "Connection / "
-                    + Convert::toString(connectionType) + " (Initial Read Request Handler) ["
-                    + Convert::toString(connectionID) + "] > Invalid connection type requested.");
+                logMessage(LogSeverity::Debug, "(initialReadRequestHandler) Invalid connection type requested.");
                 
                 lastSubstate = ConnectionSubstate::FAILED;
                 disconnect();
@@ -343,11 +320,7 @@ void NetworkManagement_Connections::Connection::initialReadRequestHandler
         }
         catch(std::invalid_argument & ex)
         {
-            debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "Connection / "
-                + Convert::toString(connectionType) + " (Initial Read Request Handler) ["
-                + Convert::toString(connectionID) + "] > Invalid request data received: <"
-                + ex.what() + ">.");
-            
+            logMessage(LogSeverity::Debug, "(initialReadRequestHandler) Invalid request data received: <" + std::string(ex.what()) + ">.");
             lastSubstate = ConnectionSubstate::FAILED;
             disconnect();
         }
@@ -359,11 +332,7 @@ void NetworkManagement_Connections::Connection::initialReadRequestHandler
     }
     else
     {
-        debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "Connection / "
-            + Convert::toString(connectionType) + " (Initial Read Request Handler) ["
-            + Convert::toString(connectionID) + "] > Read error encountered: <"
-            + readError.message() + ">");
-        
+        logMessage(LogSeverity::Debug, "(initialReadRequestHandler) Read error encountered: <" + readError.message() + ">");
         lastSubstate = ConnectionSubstate::FAILED;
         disconnect();
     }
@@ -390,11 +359,7 @@ void NetworkManagement_Connections::Connection::initialWriteRequestHandler
     }
     else
     {
-        debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "Connection / "
-            + Convert::toString(connectionType) + " (Initial Write Request Handler) ["
-            + Convert::toString(connectionID) + "] > Write error encountered: <"
-            + writeError.message() + ">");
-        
+        logMessage(LogSeverity::Debug, "(initialWriteRequestHandler) Write error encountered: <" + writeError.message() + ">");
         lastSubstate = ConnectionSubstate::FAILED;
         disconnect();
     }
@@ -461,10 +426,7 @@ void NetworkManagement_Connections::Connection::readHandler
             }
             else if(header.payloadSize == 0)
             {//empty header was received
-                debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "Connection / "
-                    + Convert::toString(connectionType) + " (Read Handler) ["
-                    + Convert::toString(connectionID) + "] > Header with payload size '0' encountered.");
-                
+                logMessage(LogSeverity::Debug, "(readHandler) Header with payload size '0' encountered.");
                 isHeaderExpected = true;
                 queueNextRead(HeaderPacket::BYTE_LENGTH);
             }
@@ -510,20 +472,14 @@ void NetworkManagement_Connections::Connection::readHandler
             || readError == boost::asio::error::connection_reset
             || readError == boost::asio::error::connection_aborted)
     {
-        debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "Connection / "
-            + Convert::toString(connectionType) + " (Read Handler) ["
-            + Convert::toString(connectionID) + "] > Connection terminated by remote peer.");
+        logMessage(LogSeverity::Debug, "(readHandler) Connection terminated by remote peer.");
         
         lastSubstate = ConnectionSubstate::DROPPED;
         disconnect();
     }
     else
     {
-        debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "Connection / "
-            + Convert::toString(connectionType) + " (Read Handler) ["
-            + Convert::toString(connectionID) + "] > Read error encountered: <"
-            + readError.message() + ">.");
-        
+        logMessage(LogSeverity::Debug, "(readHandler) Read error encountered: <" + readError.message() + ">.");
         lastSubstate = ConnectionSubstate::FAILED;
         disconnect();
     }
@@ -560,21 +516,14 @@ void NetworkManagement_Connections::Connection::writeHandler
             || writeError == boost::asio::error::connection_reset
             || writeError == boost::asio::error::connection_aborted)
     {
-        debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "Connection / "
-            + Convert::toString(connectionType) + " (Write Handler) ["
-            + Convert::toString(connectionID) + "] > Connection terminated by remote peer (?).");
-        
+        logMessage(LogSeverity::Debug, "(writeHandler) Connection terminated by remote peer (?).");
         lastSubstate = ConnectionSubstate::DROPPED;
         onWriteResultReceivedEvent(false);
         disconnect();
     }
     else
     {
-        debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "Connection / "
-            + Convert::toString(connectionType) + " (Write Handler) ["
-            + Convert::toString(connectionID) + "] > Write error encountered: <"
-            + writeError.message() + ">.");
-        
+        logMessage(LogSeverity::Debug, "(writeHandler) Write error encountered: <" + writeError.message() + ">.");
         lastSubstate = ConnectionSubstate::FAILED;
         onWriteResultReceivedEvent(false);
         disconnect();

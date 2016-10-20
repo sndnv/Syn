@@ -26,8 +26,6 @@
 #include <boost/unordered_map.hpp>
 
 #include "../Common/Types.h"
-#include "../Utilities/Strings/Common.h"
-#include "../Utilities/Strings/Sessions.h"
 #include "../Utilities/FileLogger.h"
 #include "../Utilities/ThreadPool.h"
 #include "../SecurityManagement/SecurityManager.h"
@@ -84,9 +82,6 @@ using SessionManagement_Types::GetSessionsConstraintType;
 using SessionManagement_Types::INVALID_INTERNAL_SESSION_ID;
 using InstructionManagement_Types::SessionManagerInstructionType;
 
-namespace bptime = boost::posix_time;
-namespace Convert = Utilities::Strings;
-
 namespace SyncServer_Core
 {
     /**
@@ -127,7 +122,7 @@ namespace SyncServer_Core
              * 
              * @throw invalid_argument if the specified session data commit type is not valid
              */
-            SessionManager(const SessionManagerParameters & params, Utilities::FileLogger * debugLogger = nullptr);
+            SessionManager(const SessionManagerParameters & params, Utilities::FileLoggerPtr debugLogger = Utilities::FileLoggerPtr());
             
             /**
              * Clears all data structures, frees all memory associated with the
@@ -356,7 +351,7 @@ namespace SyncServer_Core
             };
             
             Utilities::ThreadPool threadPool;           //threads for handling request processing
-            mutable Utilities::FileLogger * debugLogger;//logger for debugging
+            mutable Utilities::FileLoggerPtr debugLogger; //logger for debugging
             std::function<void(LogSeverity, const std::string &)> dbLogHandler;//database log handler
             
             //Required Managers
@@ -446,7 +441,7 @@ namespace SyncServer_Core
                 if(dbLogHandler)
                     dbLogHandler(severity, message);
                 
-                if(debugLogger != nullptr)
+                if(debugLogger)
                     debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "SessionManager " + message);
             }
     };

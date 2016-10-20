@@ -16,8 +16,23 @@
  */
 
 #include "Storage.h"
+#include <boost/unordered_map.hpp>
 
-using Maps = Utilities::Strings::StorageMaps;
+struct StorageMaps
+{
+    static const boost::unordered_map<DataPoolType, std::string> dataPoolTypeToString;
+    static const boost::unordered_map<std::string, DataPoolType> stringToDataPoolType;
+    static const boost::unordered_map<PoolMode, std::string> poolModeToString;
+    static const boost::unordered_map<std::string, PoolMode> stringToPoolMode;
+    static const boost::unordered_map<PoolState, std::string> poolStateToString;
+    static const boost::unordered_map<std::string, PoolState> stringToPoolState;
+    static const boost::unordered_map<LinkActionType, std::string> linkActionTypeToString;
+    static const boost::unordered_map<std::string, LinkActionType> stringToLinkActionType;
+    static const boost::unordered_map<LinkActionConditionType, std::string> linkActionConditionTypeToString;
+    static const boost::unordered_map<std::string, LinkActionConditionType> stringToLinkActionConditionType;
+};
+
+using Maps = StorageMaps;
 
 const boost::unordered_map<DataPoolType, std::string> Maps::dataPoolTypeToString
 {

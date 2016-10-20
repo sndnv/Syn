@@ -20,9 +20,6 @@
 
 #include <string>
 #include <boost/any.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/unordered_map.hpp>
-#include "../../Utilities/Strings/Instructions.h"
 #include "InstructionSet.h"
 #include "../../Common/Types.h"
 #include "../../DatabaseManagement/Types/Types.h"

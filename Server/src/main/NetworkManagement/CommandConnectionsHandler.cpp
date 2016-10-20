@@ -16,30 +16,29 @@
  */
 
 #include "CommandConnectionsHandler.h"
+#include <boost/thread/lock_guard.hpp>
+
+//Protocols
+#include "../../../external/protobuf/BaseComm.pb.h"
+#include "Protocols/Utilities.h"
+using NetworkManagement_Protocols::ConnectionSetupRequestSignature;
+using NetworkManagement_Protocols::CommandConnectionSetupRequest;
+using NetworkManagement_Protocols::CommandConnectionSetupResponse;
+using NetworkManagement_Protocols::CommandConnectionSetupRequestData;
 
 NetworkManagement_Handlers::CommandConnectionsHandler::CommandConnectionsHandler
 (const CommandConnectionsHandlerParameters & params,
  std::function<DeviceDataContainerPtr (const DeviceID)> dataRetrievalHandler,
  std::function<const LocalPeerAuthenticationEntry & (const DeviceID &)> authDataRetrievalHandler,
  Securable & parent,
- Utilities::FileLogger * debugLogger)
+ Utilities::FileLoggerPtr debugLogger)
 : debugLogger(debugLogger), deviceDataRetrievalHandler(dataRetrievalHandler),
-  authenticationDataRetrievalHandler(authDataRetrievalHandler),
+  authenticationDataRetrievalHandler(authDataRetrievalHandler), active(true),
   parentNetworkManager(parent), securityManager(params.securityManager),
   sessionManager(params.sessionManager), localPeerID(params.localPeerID),
   localPeerCrypto(params.localPeerCrypto), localPeerECDHCryptoData(params.localPeerECDHCryptoData),
   requestSignatureSize(params.requestSignatureSize), keyExchange(params.keyExchange)
-{
-    active = true;
-    sendRequestsMade = 0;
-    sendRequestsConfirmed = 0;
-    sendRequestsFailed = 0;
-    totalDataObjectsReceived = 0;
-    validDataObjectsReceived = 0;
-    invalidDataObjectsReceived = 0;
-    connectionsEstablished = 0;
-    connectionsFailed = 0;
-}
+{}
 
 NetworkManagement_Handlers::CommandConnectionsHandler::~CommandConnectionsHandler()
 {

@@ -16,6 +16,12 @@
  */
 
 #include "CommandConverter.h"
+#include "../Utilities/Strings/Common.h"
+#include "../Utilities/Strings/Instructions.h"
+#include "../Utilities/Strings/Security.h"
+
+namespace Convert = Utilities::Strings;
+namespace Results = InstructionManagement_Sets::NetworkManagerInstructions::Results;
 
 NetworkManagement_Handlers::CommandConverter::CommandConverter()
 {

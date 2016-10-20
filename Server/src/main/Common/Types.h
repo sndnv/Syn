@@ -18,12 +18,10 @@
 #ifndef COMMON_TYPES_H
 #define	COMMON_TYPES_H
 
-#include <limits>
+#include <climits>
 #include <vector>
-#include <boost/uuid/uuid.hpp>
 #include <boost/uuid/nil_generator.hpp>
 #include <boost/shared_ptr.hpp>
-#include <boost/interprocess/smart_ptr/unique_ptr.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
 namespace Common_Types

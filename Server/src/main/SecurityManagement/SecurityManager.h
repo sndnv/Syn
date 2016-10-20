@@ -22,12 +22,9 @@
 #include <string>
 #include <deque>
 #include <vector>
-#include <boost/thread.hpp>
 #include <boost/unordered_map.hpp>
 
 #include "../Common/Types.h"
-#include "../Utilities/Strings/Security.h"
-#include "../Utilities/Strings/Common.h"
 #include "../Utilities/FileLogger.h"
 #include "../Utilities/ThreadPool.h"
 #include "../DatabaseManagement/DatabaseManager.h"
@@ -43,8 +40,6 @@
 #include "Interfaces/Securable.h"
 #include "Crypto/Containers.h"
 #include "Crypto/KeyGenerator.h"
-#include "Crypto/SaltGenerator.h"
-#include "Crypto/HashGenerator.h"
 #include "Rules/AuthorizationRules.h"
 #include "Rules/AuthenticationRules.h"
 
@@ -97,8 +92,6 @@ using SecurityManagement_Types::InsufficientUserAccessException;
 using SecurityManagement_Types::UserNotAuthenticatedException;
 
 //Crypto
-using SecurityManagement_Crypto::HashGenerator;
-using SecurityManagement_Crypto::SaltGenerator;
 using SecurityManagement_Crypto::KeyGenerator;
 using SecurityManagement_Crypto::SymmetricCryptoDataContainer;
 using SecurityManagement_Crypto::SymmetricCryptoDataContainerPtr;
@@ -122,8 +115,6 @@ using SecurityManagement_Types::INVALID_TOKEN_ID;
 using SecurityManagement_Types::INVALID_RANDOM_DATA_SIZE;
 
 using SecurityManagement_Interfaces::Securable;
-
-namespace Convert = Utilities::Strings;
 
 namespace SyncServer_Core
 {
@@ -283,7 +274,7 @@ namespace SyncServer_Core
              * algorithms are not valid, or if the specified authentication delay parameters
              * are not valid
              */
-            SecurityManager(const SecurityManagerParameters & params, Utilities::FileLogger * debugLogger = nullptr);
+            SecurityManager(const SecurityManagerParameters & params, Utilities::FileLoggerPtr debugLogger = Utilities::FileLoggerPtr());
             
             /**
              * Clears all data structures and frees all memory associated with the rules.
@@ -691,7 +682,7 @@ namespace SyncServer_Core
             };
             
             Utilities::ThreadPool threadPool;       //threads for handling request processing
-            Utilities::FileLogger * debugLogger;    //logger for debugging
+            Utilities::FileLoggerPtr debugLogger;   //logger for debugging
             std::function<void(LogSeverity, const std::string &)> dbLogHandler;//database log handler
             boost::mutex authDataMutex;             //authentication/authorization configuration mutex
             
@@ -953,7 +944,7 @@ namespace SyncServer_Core
                 if(dbLogHandler)
                     dbLogHandler(severity, message);
                 
-                if(debugLogger != nullptr)
+                if(debugLogger)
                     debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "SecurityManager " + message);
             }
     };

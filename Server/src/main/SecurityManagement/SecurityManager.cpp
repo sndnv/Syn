@@ -16,6 +16,14 @@
  */
 
 #include "SecurityManager.h"
+#include "../Utilities/Strings/Security.h"
+#include "../Utilities/Strings/Common.h"
+#include "Crypto/SaltGenerator.h"
+#include "Crypto/HashGenerator.h"
+
+using SecurityManagement_Crypto::HashGenerator;
+using SecurityManagement_Crypto::SaltGenerator;
+namespace Convert = Utilities::Strings;
 
 SyncServer_Core::SecurityManager::PasswordHashingParameters::PasswordHashingParameters
 (SaltSize userPassSalt, SaltSize devicePassSalt, HashAlgorithmType userPassHashAlgo, HashAlgorithmType devicePassHashAlgo)
@@ -32,7 +40,7 @@ SyncServer_Core::SecurityManager::PasswordHashingParameters::PasswordHashingPara
 }
 
 SyncServer_Core::SecurityManager::SecurityManager
-(const SecurityManagerParameters & params, Utilities::FileLogger * debugLogger)
+(const SecurityManagerParameters & params, Utilities::FileLoggerPtr debugLogger)
 : threadPool(params.threadPoolSize, debugLogger), debugLogger(debugLogger),
   databaseManager(params.databaseManager), instructionDispatcher(params.instructionDispatcher),
   maxUserDataEntries(params.maxUserDataEntries),
@@ -219,8 +227,6 @@ SyncServer_Core::SecurityManager::~SecurityManager()
         delete currentRule.second;
     
     devicePasswordRules.clear();
-    
-    debugLogger = nullptr;
 }
 
 void SyncServer_Core::SecurityManager::registerSecurableComponent(Securable & component)

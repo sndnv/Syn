@@ -32,11 +32,11 @@ SCENARIO("Connection managers are created and can handle incoming/outgoing conne
         Utilities::FileLoggerParameters sourceLoggerParams{"test_data/ConnectionManager_source.log", 32*1024*1024, Utilities::FileLogSeverity::Debug};
         Utilities::FileLoggerParameters targetLoggerParams{"test_data/ConnectionManager_target.log", 32*1024*1024, Utilities::FileLogSeverity::Debug};
         Utilities::FileLoggerParameters testPoolLoggerParams{"test_data/ConnectionManager_testPool.log", 32*1024*1024, Utilities::FileLogSeverity::Debug};
-        Utilities::FileLogger testPoolLogger(testPoolLoggerParams);
-        Utilities::FileLogger sourceLogger(sourceLoggerParams);
-        Utilities::FileLogger targetLogger(targetLoggerParams);
+        Utilities::FileLoggerPtr testPoolLogger(new Utilities::FileLogger(testPoolLoggerParams));
+        Utilities::FileLoggerPtr sourceLogger(new Utilities::FileLogger(sourceLoggerParams));
+        Utilities::FileLoggerPtr targetLogger(new Utilities::FileLogger(targetLoggerParams));
 
-        Utilities::ThreadPool testPool(2, &testPoolLogger);
+        Utilities::ThreadPool testPool(2, testPoolLogger);
 
         unsigned int connectionsToRequest = 1000;
         unsigned int maxWaitAttempts = 6;
@@ -72,8 +72,8 @@ SCENARIO("Connection managers are created and can handle incoming/outgoing conne
             512                         //BufferSize defaultReadBufferSize;
         };
 
-        ConnectionManager sourceManager(sourceParameters, &sourceLogger);
-        ConnectionManager targetManager(targetParameters, &targetLogger);
+        ConnectionManager sourceManager(sourceParameters, sourceLogger);
+        ConnectionManager targetManager(targetParameters, targetLogger);
 
         std::atomic<unsigned int> connectionsInitiated(0);
         std::atomic<unsigned int> connectionsAccepted(0);
@@ -111,11 +111,11 @@ SCENARIO("Connection managers are created and can handle incoming/outgoing conne
         {
             ++connectionsAccepted;
 
-            auto writeResultHandler = [connection, &dataSentCount, &testPool, &testPoolLogger](bool result)
+            auto writeResultHandler = [connection, &dataSentCount, &testPool, testPoolLogger](bool result)
             {
                 ++dataSentCount;
 
-                auto disconnectTask = [connection, &testPoolLogger]()
+                auto disconnectTask = [connection, testPoolLogger]()
                 {
                     try
                     {
@@ -124,7 +124,7 @@ SCENARIO("Connection managers are created and can handle incoming/outgoing conne
                     }
                     catch(std::exception & e)
                     {
-                        testPoolLogger.logMessage(FileLogSeverity::Debug, "Exception encountered for connection ["
+                        testPoolLogger->logMessage(FileLogSeverity::Debug, "Exception encountered for connection ["
                             + Utilities::Strings::toString(connection->getID()) + "] :[" + e.what() + "]");
                         throw;
                     }

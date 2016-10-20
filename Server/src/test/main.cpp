@@ -20,7 +20,7 @@
 #include <string>
 #include <vector>
 #include <cstdio>
-#include <ostream>
+#include <iosfwd>
 #include <cstdlib>
 #include <boost/filesystem.hpp>
 #include <boost/uuid/uuid_generators.hpp>

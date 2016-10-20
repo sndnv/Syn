@@ -11,5 +11,5 @@ Client/Server & Peer-to-peer system for transferring data between peers, with em
 - <b>Client:</b> Windows, Windows Phone, Linux, Android (C++11, core; C#, C++11, Java, depending on platform)
 
 <h4>Required External Libraries:</h4>
-- Boost (1.55.0)
+- Boost (1.62.0)
 - CryptoPP (5.6.2)

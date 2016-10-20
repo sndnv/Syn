@@ -16,8 +16,25 @@
  */
 
 #include "Network.h"
+#include <boost/unordered_map.hpp>
 
-using Maps = Utilities::Strings::NetworkMaps;
+struct NetworkMaps
+{
+    static const boost::unordered_map<PeerType, std::string> peerTypeToString;
+    static const boost::unordered_map<std::string, PeerType> stringToPeerType;
+    static const boost::unordered_map<ConnectionType, std::string> connectionTypeToString;
+    static const boost::unordered_map<std::string, ConnectionType> stringToConnectionType;
+    static const boost::unordered_map<ConnectionState, std::string> connectionStateToString;
+    static const boost::unordered_map<std::string, ConnectionState> stringToConnectionState;
+    static const boost::unordered_map<ConnectionSubstate, std::string> connectionSubstateToString;
+    static const boost::unordered_map<std::string, ConnectionSubstate> stringToConnectionSubstate;
+    static const boost::unordered_map<ConnectionInitiation, std::string> connectionInitiationToString;
+    static const boost::unordered_map<std::string, ConnectionInitiation> stringToConnectionInitiation;
+    static const boost::unordered_map<ConnectionSetupState, std::string> connectionSetupStateToString;
+    static const boost::unordered_map<std::string, ConnectionSetupState> stringToConnectionSetupState;
+};
+
+using Maps = NetworkMaps;
 
 const boost::unordered_map<PeerType, std::string> Maps::peerTypeToString
 {

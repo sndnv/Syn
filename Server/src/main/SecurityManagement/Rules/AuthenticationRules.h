@@ -19,7 +19,7 @@
 #define	AUTHENTICATIONRULES_H
 
 #include <string>
-#include <boost/regex.h>
+#include <boost/regex.hpp>
 #include "../Types/Types.h"
 #include "../../Utilities/Strings/Common.h"
 

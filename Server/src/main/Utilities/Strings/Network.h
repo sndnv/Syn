@@ -19,7 +19,6 @@
 #define	UTILITIES_STRINGS_NETWORK_H
 
 #include <string>
-#include <boost/unordered_map.hpp>
 #include "../../NetworkManagement/Types/Types.h"
 #include "../../NetworkManagement/Types/Packets.h"
 
@@ -35,22 +34,6 @@ namespace Utilities
 {
     namespace Strings
     {
-        struct NetworkMaps
-        {
-            static const boost::unordered_map<PeerType, std::string> peerTypeToString;
-            static const boost::unordered_map<std::string, PeerType> stringToPeerType;
-            static const boost::unordered_map<ConnectionType, std::string> connectionTypeToString;
-            static const boost::unordered_map<std::string, ConnectionType> stringToConnectionType;
-            static const boost::unordered_map<ConnectionState, std::string> connectionStateToString;
-            static const boost::unordered_map<std::string, ConnectionState> stringToConnectionState;
-            static const boost::unordered_map<ConnectionSubstate, std::string> connectionSubstateToString;
-            static const boost::unordered_map<std::string, ConnectionSubstate> stringToConnectionSubstate;
-            static const boost::unordered_map<ConnectionInitiation, std::string> connectionInitiationToString;
-            static const boost::unordered_map<std::string, ConnectionInitiation> stringToConnectionInitiation;
-            static const boost::unordered_map<ConnectionSetupState, std::string> connectionSetupStateToString;
-            static const boost::unordered_map<std::string, ConnectionSetupState> stringToConnectionSetupState;
-        };
-        
         std::string toString(PeerType var);
         std::string toString(ConnectionType var);
         std::string toString(ConnectionState var);

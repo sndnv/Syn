@@ -19,12 +19,10 @@
 #define	CONNECTION_H
 
 #include <string>
-
 #include <queue>
 #include <atomic>
 #include <boost/any.hpp>
 #include <boost/asio.hpp>
-#include <boost/variant.hpp>
 #include <boost/signals2.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/thread/mutex.hpp>
@@ -104,7 +102,7 @@ namespace NetworkManagement_Connections
             Connection(boost::shared_ptr<boost::asio::io_service> service,
                        ConnectionParamters connectionParams,
                        boost::asio::streambuf * externalReadBuffer = nullptr,
-                       Utilities::FileLogger * debugLogger = nullptr);
+                       Utilities::FileLoggerPtr debugLogger = Utilities::FileLoggerPtr());
             
             /**
              * Creates a new outgoing connection object with the specified configuration.
@@ -120,7 +118,7 @@ namespace NetworkManagement_Connections
                        ConnectionParamters connectionParams,
                        ConnectionRequest requestParams,
                        boost::asio::streambuf * externalReadBuffer = nullptr,
-                       Utilities::FileLogger * debugLogger = nullptr);
+                       Utilities::FileLoggerPtr debugLogger = Utilities::FileLoggerPtr());
             
             /**
              * Terminates the connection (if still active), removes all signal handlers and performs general cleanup.
@@ -314,7 +312,7 @@ namespace NetworkManagement_Connections
             TransferredDataAmount sent = 0;             //send data (in bytes); Note: header transmission is not included
             
             //Utils
-            Utilities::FileLogger * debugLogger;        //debugging logger
+            Utilities::FileLoggerPtr debugLogger;       //debugging logger
             boost::asio::io_service::strand writeStrand;//synchronisation strand for write operations
             boost::asio::io_service::strand readStrand; //synchronisation strand for read operations
             
@@ -521,6 +519,26 @@ namespace NetworkManagement_Connections
                 ++queuedEventID;
             }
             //</editor-fold>
+            
+            /**
+             * Logs the specified message, if the debug log handler is set.
+             * 
+             * Note: If a debugging file logger is assigned, the message is sent to it.
+             * 
+             * @param severity the severity associated with the message/event
+             * @param message the message to be logged
+             */
+            void logMessage(LogSeverity severity, const std::string & message) const
+            {
+                //TODO - add DB logger
+                
+                if(debugLogger)
+                {
+                    debugLogger->logMessage(
+                            Utilities::FileLogSeverity::Debug,
+                            "Connection [" + Convert::toString(connectionID) + "] / " + Convert::toString(connectionType) + " > " + message);
+                }
+            }
     };
     
     typedef boost::shared_ptr<NetworkManagement_Connections::Connection> ConnectionPtr;

@@ -16,6 +16,10 @@
  */
 
 #include "DiskDataPool.h"
+#include <boost/lexical_cast.hpp>
+#include <boost/thread/lock_guard.hpp>
+#include <winsock2.h> //TODO - remove/impl htonl()
+#include <iostream>
 
 const std::string StorageManagement_Pools::DiskDataPool::FILE_SIGNATURE = "DDP";
 
@@ -537,6 +541,12 @@ void StorageManagement_Pools::DiskDataPool::discardDataWithoutLock(StoredDataID 
     }
     else
         throw std::runtime_error("DiskDataPool::discardData() > Failed to discard the requested data; id not found.");
+}
+
+void StorageManagement_Pools::DiskDataPool::discardData(StoredDataID id, bool erase)
+{
+    boost::lock_guard<boost::mutex> fileLock(fileMutex);
+    discardDataWithoutLock(id, erase);
 }
 
 void StorageManagement_Pools::DiskDataPool::clearPool()

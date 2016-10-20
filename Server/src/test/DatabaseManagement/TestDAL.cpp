@@ -45,7 +45,7 @@ Testing::TestDAL::TestDAL(
             Utilities::FileLogSeverity::Debug
         };
 
-        debugLogger = new Utilities::FileLogger(loggerParams);
+        debugLogger = Utilities::FileLoggerPtr(new Utilities::FileLogger(loggerParams));
     }
 }
 
@@ -114,9 +114,6 @@ Testing::TestDAL::~TestDAL()
     logMessage(LogSeverity::Debug, "(~) > setID_calls \t\t\t\t " + Convert::toString(setID_calls));
     logMessage(LogSeverity::Debug, "(~) > getID_calls \t\t\t\t " + Convert::toString(getID_calls));
     logMessage(LogSeverity::Debug, "(~) > --- End of Stats ---");
-
-    delete debugLogger;
-    debugLogger = nullptr;
 }
 
 bool Testing::TestDAL::getObject(DatabaseRequestID requestID, boost::any constraintType, boost::any constraintValue)

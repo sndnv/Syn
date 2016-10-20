@@ -16,12 +16,16 @@
  */
 
 #include "SessionManager.h"
+#include "../Utilities/Strings/Common.h"
+#include "../Utilities/Strings/Sessions.h"
 
+namespace bptime = boost::posix_time;
+namespace Convert = Utilities::Strings;
 namespace Instructions = InstructionManagement_Sets::SessionManagerInstructions;
 namespace InstructionResults = InstructionManagement_Sets::SessionManagerInstructions::Results;
 
 SyncServer_Core::SessionManager::SessionManager
-(const SessionManagerParameters & params, Utilities::FileLogger * debugLogger)
+(const SessionManagerParameters & params, Utilities::FileLoggerPtr debugLogger)
 : threadPool(params.threadPoolSize, debugLogger), debugLogger(debugLogger),
   databaseManager(params.databaseManager), securityManager(params.securityManager),
   maxSessionsPerUser(params.maxSessionsPerUser), maxSessionsPerDevice(params.maxSessionsPerDevice),
@@ -84,8 +88,6 @@ SyncServer_Core::SessionManager::~SessionManager()
     //forces the thread pool to stop
     if(nextExpirationHandlerInvocation != INVALID_DATE_TIME)
         threadPool.stopThreadPool();
-
-    debugLogger = nullptr;
 }
 
 void SyncServer_Core::SessionManager::postAuthorizationToken(const AuthorizationTokenPtr token)
@@ -1165,7 +1167,7 @@ void SyncServer_Core::SessionManager::debugGetStateHandler
         boost::lock_guard<boost::mutex> globalSessionDataLock(globalSessionDataMutex);
         
         resultData += "threadPool size;" + Convert::toString(threadPool.getPoolSize()) + "\n";
-        resultData += std::string("debugLogger;") + ((debugLogger != nullptr) ? "defined\n" : "not defined\n");
+        resultData += std::string("debugLogger;") + (debugLogger ? "defined\n" : "not defined\n");
         resultData += "maxSessionsPerUser;" + Convert::toString(maxSessionsPerUser) + "\n";
         resultData += "maxSessionsPerDevice;" + Convert::toString(maxSessionsPerDevice) + "\n";
         resultData += "dataCommit;" + Convert::toString(dataCommit) + "\n";

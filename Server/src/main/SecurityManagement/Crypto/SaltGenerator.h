@@ -19,7 +19,6 @@
 #define	SALTGENERATOR_H
 
 #include <cryptopp/osrng.h>
-
 #include "../Types/Types.h"
 
 using SecurityManagement_Types::CryptoPPByte;

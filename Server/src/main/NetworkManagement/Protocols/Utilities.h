@@ -18,7 +18,6 @@
 #ifndef PROTOCOL_UTILITIES_H
 #define	PROTOCOL_UTILITIES_H
 
-#include <string>
 #include "../../SecurityManagement/Types/Types.h"
 #include "../../../../external/protobuf/BaseComm.pb.h"
 

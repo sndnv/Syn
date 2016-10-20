@@ -19,7 +19,6 @@
 #define	VECTORDATACONTAINER_H
 
 #include <vector>
-#include <boost/shared_ptr.hpp>
 #include "DataContainer.h"
 #include "../Types/Types.h"
 

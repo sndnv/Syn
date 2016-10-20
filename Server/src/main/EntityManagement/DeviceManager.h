@@ -17,14 +17,12 @@
 
 #ifndef ENTITY_MANAGEMENT_DEVICES_H
 #define	ENTITY_MANAGEMENT_DEVICES_H
+
 #include <string>
-#include <vector>
 
 #include <boost/thread/mutex.hpp>
-#include <boost/thread/lock_guard.hpp>
 
 #include "../Common/Types.h"
-#include "../Utilities/Strings/Common.h"
 #include "../Utilities/FileLogger.h"
 #include "../SecurityManagement/SecurityManager.h"
 #include "../SecurityManagement/Types/SecurityTokens.h"
@@ -113,7 +111,7 @@ namespace EntityManagement
              * @param params the manager configuration
              * @param debugLogger pointer to an initialised <code>FileLogger</code> (if any)
              */
-            DeviceManager(const DeviceManagerParameters & params,  Utilities::FileLogger * debugLogger = nullptr);
+            DeviceManager(const DeviceManagerParameters & params,  Utilities::FileLoggerPtr debugLogger = Utilities::FileLoggerPtr());
 
             /**
              * Clears all data structures.
@@ -154,7 +152,7 @@ namespace EntityManagement
             }
             
         private:
-            Utilities::FileLogger * debugLogger;//logger for debugging
+            Utilities::FileLoggerPtr debugLogger;//logger for debugging
             std::function<void(LogSeverity, const std::string &)> dbLogHandler;//database log handler
             
             //Required Managers
@@ -342,7 +340,7 @@ namespace EntityManagement
                 if(dbLogHandler)
                     dbLogHandler(severity, message);
                 
-                if(debugLogger != nullptr)
+                if(debugLogger)
                     debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "DeviceManager " + message);
             }
     };

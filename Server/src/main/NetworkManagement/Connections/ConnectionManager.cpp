@@ -16,23 +16,20 @@
  */
 
 #include "ConnectionManager.h"
+#include <boost/date_time/posix_time/posix_time.hpp>
 
 NetworkManagement_Connections::ConnectionManager::ConnectionManager
-(ConnectionManagerParameters parameters,  Utilities::FileLogger * debugLogger)
-: managerType(parameters.managerType), localPeerType(parameters.localPeerType),
+(ConnectionManagerParameters parameters,  Utilities::FileLoggerPtr debugLogger)
+: debugLogger(debugLogger), managerType(parameters.managerType), localPeerType(parameters.localPeerType),
   listeningAddress(parameters.listeningAddress), listeningPort(parameters.listeningPort),
   maxActiveConnections(parameters.maxActiveConnections),
   connectionRequestTimeout(parameters.connectionRequestTimeout),
   defaultReadBufferSize(parameters.defaultReadBufferSize),
   localEndpoint(boost::asio::ip::address::from_string(parameters.listeningAddress), listeningPort), 
   networkService(new boost::asio::io_service()), connectionAcceptor(*networkService, localEndpoint),
+  disconnectedConnectionsThread(new boost::thread(&NetworkManagement_Connections::ConnectionManager::disconnectedConnectionsThreadHandler, this)),
   poolWork(new boost::asio::io_service::work(*networkService))
 {
-    this->debugLogger = debugLogger;
-    
-    disconnectedConnectionsThread = 
-            new boost::thread(&NetworkManagement_Connections::ConnectionManager::disconnectedConnectionsThreadHandler, this);
-    
     for(unsigned long i = 0; i < parameters.initialThreadPoolSize; i++)
         threadGroup.create_thread(boost::bind(&NetworkManagement_Connections::ConnectionManager::poolThreadHandler, this));
     
@@ -42,8 +39,7 @@ NetworkManagement_Connections::ConnectionManager::ConnectionManager
 
 NetworkManagement_Connections::ConnectionManager::~ConnectionManager()
 {
-    debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "ConnectionManager / "
-        + Convert::toString(managerType) + " (~) Destruction initiated.");
+    logMessage(LogSeverity::Debug, "(~) Destruction initiated.");
     
     stopManager = true;
     connectionAcceptor.close();
@@ -56,22 +52,17 @@ NetworkManagement_Connections::ConnectionManager::~ConnectionManager()
     outgoingConnections.clear();
     
     poolWork.reset();
-    debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "ConnectionManager / "
-        + Convert::toString(managerType) + " (~) Waiting for all threads to terminate.");
+    logMessage(LogSeverity::Debug, "(~) Waiting for all threads to terminate.");
     
     threadGroup.join_all();
     
-    debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "ConnectionManager / "
-        + Convert::toString(managerType) + " (~) All threads terminated.");
+    logMessage(LogSeverity::Debug, "(~) All threads terminated.");
     
     newDataLockCondition.notify_all();
     disconnectedConnectionsThread->join();
-    delete disconnectedConnectionsThread;
     
     onConnectionCreated.disconnect_all_slots();
     onConnectionInitiationFailed.disconnect_all_slots();
-    
-    debugLogger = nullptr;
 }
 
 void NetworkManagement_Connections::ConnectionManager::initiateNewConnection
@@ -145,8 +136,7 @@ void NetworkManagement_Connections::ConnectionManager::createLocalConnection
     }
     else
     {
-        debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "ConnectionManager / "
-            + Convert::toString(managerType) + " (Create Local Connection) Error encountered during connection <"
+        logMessage(LogSeverity::Debug, "(createLocalConnection) Error encountered during connection <"
             + Convert::toString(connectionID) + "> creation: " + error.message());
         
         onConnectionInitiationFailed(error);
@@ -226,16 +216,14 @@ void NetworkManagement_Connections::ConnectionManager::timeoutConnection
 
         if(!timeoutError)
         {
-            debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "ConnectionManager / "
-                + Convert::toString(managerType) + " (Timeout Connection) [" + Convert::toString(connectionID)
+            logMessage(LogSeverity::Debug, "(timeoutConnection) [" + Convert::toString(connectionID)
                 + "] > The remote peer failed to send the request data in time.>");
             
             currentConnectionData.first->disconnect(); //terminates the connection
         }
         else
         {
-            debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "ConnectionManager / "
-                + Convert::toString(managerType) + " (Timeout Connection) [" + Convert::toString(connectionID)
+            logMessage(LogSeverity::Debug, "(timeoutConnection) [" + Convert::toString(connectionID)
                 + "] > Timeout error encountered: <" + timeoutError.message() + ">");
         }
 
@@ -265,14 +253,12 @@ void NetworkManagement_Connections::ConnectionManager::destroyConnection
                         queueConnectionForDestruction(outgoingConnections[connectionID]);
                         outgoingConnections.erase(connectionID);
 
-                        debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "ConnectionManager / "
-                            + Convert::toString(managerType) + " (Destroy Connection) Outgoing connection <"
+                        logMessage(LogSeverity::Debug, "(destroyConnection) Outgoing connection <"
                             + Convert::toString(connectionID) + "> removed.");
                     }
                     else
                     {
-                        debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "ConnectionManager / "
-                            + Convert::toString(managerType) + " (Destroy Connection) Outgoing connection <"
+                        logMessage(LogSeverity::Debug, "(destroyConnection) Outgoing connection <"
                             + Convert::toString(connectionID) + "> not found in table.");
                     }
                     
@@ -297,14 +283,12 @@ void NetworkManagement_Connections::ConnectionManager::destroyConnection
                         queueConnectionForDestruction(incomingConnections[connectionID]);
                         incomingConnections.erase(connectionID);
 
-                        debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "ConnectionManager / "
-                            + Convert::toString(managerType) + " (Destroy Connection) Incoming connection <"
+                        logMessage(LogSeverity::Debug, "(destroyConnection) Incoming connection <"
                             + Convert::toString(connectionID) + "> removed.");
                     }
                     else
                     {
-                        debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "ConnectionManager / "
-                            + Convert::toString(managerType) + " (Destroy Connection) Incoming connection <"
+                        logMessage(LogSeverity::Debug, "(destroyConnection) Incoming connection <"
                             + Convert::toString(connectionID) + "> not found in table.");
                     }
                     
@@ -317,8 +301,7 @@ void NetworkManagement_Connections::ConnectionManager::destroyConnection
         
         default:
         {
-            debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "ConnectionManager / "
-                + Convert::toString(managerType) + " (Destroy Connection) Invalid connection <"
+            logMessage(LogSeverity::Debug, "(destroyConnection) Invalid connection <"
                 + Convert::toString(connectionID) + "> initiation encountered.");
         } break;
     }
@@ -364,8 +347,7 @@ void NetworkManagement_Connections::ConnectionManager::onConnectHandler
                 }
                 else
                 {//the timer has expired
-                    debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "ConnectionManager / "
-                        + Convert::toString(managerType) + " (On Connect Handler) ["
+                    logMessage(LogSeverity::Debug, "(onConnectHandler) ["
                         + Convert::toString(connectionID) + "] > Connection expired.");
                     
                     return;
@@ -393,8 +375,7 @@ void NetworkManagement_Connections::ConnectionManager::onConnectHandler
         
         default:
         {
-            debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "ConnectionManager / "
-                + Convert::toString(managerType) + " (On Connect Handler) Invalid connection <"
+            logMessage(LogSeverity::Debug, "(onConnectHandler) Invalid connection <"
                 + Convert::toString(connectionID) + "> initiation encountered.");
         } break;
     }
@@ -405,8 +386,7 @@ void NetworkManagement_Connections::ConnectionManager::poolThreadHandler()
     if(stopManager)
         return;
     
-    debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "ConnectionManager / "
-        + Convert::toString(managerType) + " (Pool Thread Handler) Thread <"
+    logMessage(LogSeverity::Debug, "(poolThreadHandler) Thread <"
         + Convert::toString(boost::this_thread::get_id()) + "> started.");
 
     while(!stopManager)
@@ -417,14 +397,12 @@ void NetworkManagement_Connections::ConnectionManager::poolThreadHandler()
         }
         catch(std::exception & ex)
         {
-            debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "ConnectionManager / "
-                + Convert::toString(managerType) + " (Pool Thread Handler) Exception encountered in thread <"
+            logMessage(LogSeverity::Debug, "(poolThreadHandler) Exception encountered in thread <"
                 + Convert::toString(boost::this_thread::get_id()) + ">: [" + ex.what() + "]");
         }
     }
     
-    debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "ConnectionManager / "
-        + Convert::toString(managerType) + " (Pool Thread Handler) Thread <"
+    logMessage(LogSeverity::Debug, "(poolThreadHandler) Thread <"
         + Convert::toString(boost::this_thread::get_id()) + "> stopped.");
 }
 
@@ -439,8 +417,7 @@ void NetworkManagement_Connections::ConnectionManager::queueConnectionForDestruc
 
 void NetworkManagement_Connections::ConnectionManager::disconnectedConnectionsThreadHandler()
 {
-    debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "ConnectionManager / "
-        + Convert::toString(managerType) + " (Disconnect Manager Thread) > Started.");
+    logMessage(LogSeverity::Debug, "(disconnectedConnectionsThreadHandler) > Started.");
     
     while(!stopManager)
     {
@@ -448,8 +425,7 @@ void NetworkManagement_Connections::ConnectionManager::disconnectedConnectionsTh
         
         if(disconnectedConnections.size() > 0)
         {
-            debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "ConnectionManager / "
-                + Convert::toString(managerType) + " (Disconnect Manager Thread) > Working with <"
+            logMessage(LogSeverity::Debug, "(disconnectedConnectionsThreadHandler) > Working with <"
                 + Convert::toString(disconnectedConnections.size()) + "> connections.");
             
             std::vector<ConnectionPtr> remainingConnections;
@@ -460,8 +436,7 @@ void NetworkManagement_Connections::ConnectionManager::disconnectedConnectionsTh
                     remainingConnections.push_back(currentConnection);
             }
             
-            debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "ConnectionManager / "
-                + Convert::toString(managerType) + " (Disconnect Manager Thread) > Waiting for <"
+            logMessage(LogSeverity::Debug, "(disconnectedConnectionsThreadHandler) > Waiting for <"
                 + Convert::toString(remainingConnections.size()) + "> connections with pending handlers.");
             
             disconnectedConnections.clear();
@@ -472,21 +447,16 @@ void NetworkManagement_Connections::ConnectionManager::disconnectedConnectionsTh
             
             while(!stopManager && timedLockCondition.timed_wait(queueLock, nextWakeup))
             {
-                debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "ConnectionManager / "
-                    + Convert::toString(managerType) + " (Disconnect Manager Thread) >"
-                    " Exited wait without timer expiration.");
+                logMessage(LogSeverity::Debug, "(disconnectedConnectionsThreadHandler) > Exited wait without timer expiration.");
             }
         }
         else
         {
-            debugLogger->logMessage(Utilities::FileLogSeverity::Error, "ConnectionManager / "
-                + Convert::toString(managerType) + " (Disconnect Manager Thread) > No connections found;"
-                " thread will sleep until more are added.");
+            logMessage(LogSeverity::Error, "(disconnectedConnectionsThreadHandler) > No connections found; thread will sleep until more are added.");
             
             newDataLockCondition.wait(queueLock);
         }
     }
     
-    debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "ConnectionManager / "
-        + Convert::toString(managerType) + " (Disconnect Manager Thread) > Stopped.");
+    logMessage(LogSeverity::Debug, "(disconnectedConnectionsThreadHandler) > Stopped.");
 }

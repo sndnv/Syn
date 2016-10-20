@@ -17,22 +17,12 @@
 
 #include "DALCache.h"
 
-SyncServer_Core::DatabaseManagement::DALCache::DALCache(DALPtr childDAL, Utilities::FileLogger& parentLogger, DALCacheParameters parameters)
+SyncServer_Core::DatabaseManagement::DALCache::DALCache(DALPtr childDAL, Utilities::FileLoggerPtr parentLogger, DALCacheParameters parameters)
+: dal(childDAL), alwaysEvict(parameters.alwaysEvictObjects), clearObjectAge(parameters.alwaysClearObjectAge),
+  cacheEnabled(true), cacheSize(parameters.maximumCacheSize), cacheType(dal->getType()),
+  maxCommitTime(parameters.maximumCommitTime), maxCommitUpdates(parameters.maximumCommitUpdates),
+  minCommitUpdates(parameters.minimumCommitUpdates), debugLogger(parentLogger)
 {
-    dal = childDAL;
-    logger = &parentLogger;
-    
-    //TODO - move to initializer list
-    alwaysEvict = parameters.alwaysEvictObjects;
-    clearObjectAge = parameters.alwaysClearObjectAge;
-    cacheSize = parameters.maximumCacheSize;
-    maxCommitTime = parameters.maximumCommitTime;
-    maxCommitUpdates = parameters.maximumCommitUpdates;
-    minCommitUpdates = parameters.minimumCommitUpdates;
-    
-    cacheEnabled = true;
-    cacheType = dal->getType();
-    
     onSuccessConnection = dal->onSuccessEventAttach(boost::bind(&DatabaseManagement::DALCache::onSuccessHandler, this, _1, _2, _3));
     onFailureConnection = dal->onFailureEventAttach(boost::bind(&DatabaseManagement::DALCache::onFailureHandler, this, _1, _2, _3));
     
@@ -42,7 +32,7 @@ SyncServer_Core::DatabaseManagement::DALCache::DALCache(DALPtr childDAL, Utiliti
 
 SyncServer_Core::DatabaseManagement::DALCache::~DALCache()
 {
-    logger->logMessage(Utilities::FileLogSeverity::Debug, "DatabaseManager::DALCache / " + Convert::toString(cacheType) + " (~) > Destruction initiated.");
+    logMessage(LogSeverity::Debug, "(~) Destruction initiated.");
     stopCache = true;
     forceCommit = true;
     
@@ -80,7 +70,6 @@ SyncServer_Core::DatabaseManagement::DALCache::~DALCache()
     
     dal->disconnect();
     dal = nullptr;
-    logger = nullptr;
 }
 
 bool SyncServer_Core::DatabaseManagement::DALCache::getObject(DatabaseRequestID requestID, boost::any constraintType, boost::any constraintValue)
@@ -90,9 +79,9 @@ bool SyncServer_Core::DatabaseManagement::DALCache::getObject(DatabaseRequestID 
     
     addRequest(requestID, RequestType::SELECT, constraintType, constraintValue);
     
-    logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + "(Get Object) > Sending notification to main thread.");
+    logMessage(LogSeverity::Debug, "(Get Object) Sending notification to main thread.");
     requestsThreadLockCondition.notify_all();
-    logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (Get Object) > Notification to main thread sent.");
+    logMessage(LogSeverity::Debug, "(Get Object) Notification to main thread sent.");
 
     return true;
 }
@@ -105,7 +94,7 @@ bool SyncServer_Core::DatabaseManagement::DALCache::putObject(DatabaseRequestID 
     bool result = false;
     if(isObjectInCache(inputData->getContainerID()))
     {
-        logger->logMessage(Utilities::FileLogSeverity::Error, "DALCache / " + Convert::toString(cacheType) + " (Insert Object) > [" + Convert::toString(requestID) + "]: Object with ID <" + Convert::toString(inputData->getContainerID()) + "> already exists.");
+        logMessage(LogSeverity::Error, "(putObject) [" + Convert::toString(requestID) + "]: Object with ID <" + Convert::toString(inputData->getContainerID()) + "already exists.");
         addRequest(requestID, RequestType::SEND_FAILURE_EVENT, inputData, 0);
     }
     else
@@ -114,9 +103,9 @@ bool SyncServer_Core::DatabaseManagement::DALCache::putObject(DatabaseRequestID 
         result = true;
     }
     
-    logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (Insert Object) > Sending notification to main thread.");
+    logMessage(LogSeverity::Debug, "(putObject) Sending notification to main thread.");
     requestsThreadLockCondition.notify_all();
-    logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (Insert Object) > Notification to main thread sent.");
+    logMessage(LogSeverity::Debug, "(putObject) Notification to main thread sent.");
     return result;
 }
 
@@ -133,13 +122,13 @@ bool SyncServer_Core::DatabaseManagement::DALCache::updateObject(DatabaseRequest
     }
     else
     {
-        logger->logMessage(Utilities::FileLogSeverity::Error, "DALCache / " + Convert::toString(cacheType) + " (Update Object) > [" + Convert::toString(requestID) + "]: Object with ID <" + Convert::toString(inputData->getContainerID()) + "> not found in cache.");
+        logMessage(LogSeverity::Error, "(updateObject) [" + Convert::toString(requestID) + "]: Object with ID <" + Convert::toString(inputData->getContainerID()) + "not found in cache.");
         addRequest(requestID, RequestType::SEND_FAILURE_EVENT, inputData, 0);
     }
     
-    logger->logMessage(Utilities::FileLogSeverity::Debug, "DALQueue / " + Convert::toString(cacheType) + " (Update Object) > Sending notification to main thread.");
+    logMessage(LogSeverity::Debug, "(updateObject) Sending notification to main thread.");
     requestsThreadLockCondition.notify_all();
-    logger->logMessage(Utilities::FileLogSeverity::Debug, "DALQueue / " + Convert::toString(cacheType) + " (Update Object) > Notification to main thread sent.");
+    logMessage(LogSeverity::Debug, "(updateObject) Notification to main thread sent.");
     return result;
 }
 
@@ -156,13 +145,13 @@ bool SyncServer_Core::DatabaseManagement::DALCache::removeObject(DatabaseRequest
     }
     else
     {
-        logger->logMessage(Utilities::FileLogSeverity::Error, "DALCache / " + Convert::toString(cacheType) + " (Remove Object) > [" + Convert::toString(requestID) + "]: Object with ID <" + Convert::toString(id) + "> not found in cache.");
+        logMessage(LogSeverity::Error, "(removeObject) [" + Convert::toString(requestID) + "]: Object with ID <" + Convert::toString(id) + "not found in cache.");
         addRequest(requestID, RequestType::SEND_FAILURE_EVENT, id, cacheType);
     }
     
-    logger->logMessage(Utilities::FileLogSeverity::Debug, "DALQueue / " + Convert::toString(cacheType) + " (Remove Object) > Sending notification to requests thread.");
+    logMessage(LogSeverity::Debug, "(removeObject) Sending notification to requests thread.");
     requestsThreadLockCondition.notify_all();
-    logger->logMessage(Utilities::FileLogSeverity::Debug, "DALQueue / " + Convert::toString(cacheType) + " (Remove Object) > Notification to requests thread sent.");
+    logMessage(LogSeverity::Debug, "(removeObject) Notification to requests thread sent.");
     return result;
 }
 
@@ -175,15 +164,15 @@ bool SyncServer_Core::DatabaseManagement::DALCache::commitCache()
     {
         forceCommit = true;
         
-        logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (Commit Cache) > Sending notification to requests thread.");
+        logMessage(LogSeverity::Debug, "(commitCache) Sending notification to requests thread.");
         cacheThreadLockCondition.notify_all();
-        logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (Commit Cache) > Notification to requests thread sent.");
+        logMessage(LogSeverity::Debug, "(commitCache) Notification to requests thread sent.");
         
         return true;
     }
     else
     {
-        logger->logMessage(Utilities::FileLogSeverity::Error, "DALCache / " + Convert::toString(cacheType) + " (Commit Cache) > Commit disabled.");
+        logMessage(LogSeverity::Error, "(commitCache) Commit disabled.");
         return false;
     }
 }
@@ -194,9 +183,9 @@ bool SyncServer_Core::DatabaseManagement::DALCache::rollbackCache()
         return false;
     
     {
-        logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (Rollback Cache) > Entering cache critical section.");
+        logMessage(LogSeverity::Debug, "(rollbackCache) Entering cache critical section.");
         boost::lock_guard<boost::mutex> cacheLock(cacheThreadMutex);
-        logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (Rollback Cache) > Cache critical section entered.");
+        logMessage(LogSeverity::Debug, "(rollbackCache) Cache critical section entered.");
         
         if(uncommittedObjects.size() > 0)
         {
@@ -209,11 +198,11 @@ bool SyncServer_Core::DatabaseManagement::DALCache::rollbackCache()
                         objectAgeTable.erase(currentObject.first);
                 }
                 else
-                    logger->logMessage(Utilities::FileLogSeverity::Error, "DALCache / " + Convert::toString(cacheType) + " (Rollback Cache) > Failed to evict object from cache during rollback; object is in use <" + Convert::toString(currentObject.first) + ">.");
+                    logMessage(LogSeverity::Error, "(rollbackCache) Failed to evict object from cache during rollback; object is in use <" + Convert::toString(currentObject.first) + ">.");
             }
         }
         
-        logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (Rollback Cache) > Exiting cache critical section.");
+        logMessage(LogSeverity::Debug, "(rollbackCache) Exiting cache critical section.");
     }
     
     return true;
@@ -237,9 +226,9 @@ bool SyncServer_Core::DatabaseManagement::DALCache::enableCommit()
     {
         commitDisabled = false;
         
-        logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (Enable Commit) > Sending notification to requests thread.");
+        logMessage(LogSeverity::Debug, "(enableCommit) Sending notification to requests thread.");
         cacheThreadLockCondition.notify_all();
-        logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (Enable Commit) > Notification to requests thread sent.");
+        logMessage(LogSeverity::Debug, "(enableCommit) Notification to requests thread sent.");
         
         return true;
     }
@@ -252,9 +241,9 @@ bool SyncServer_Core::DatabaseManagement::DALCache::setParameters(DALCacheParame
     if(stopCache)
         return false;
     
-    logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (Set Parameters) > Entering critical section.");
+    logMessage(LogSeverity::Debug, "(setParameters) Entering critical section.");
     boost::lock_guard<boost::mutex> cacheLock(cacheThreadMutex);
-    logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (Set Parameters) > Critical section entered.");
+    logMessage(LogSeverity::Debug, "(setParameters) Critical section entered.");
 
     alwaysEvict = parameters.alwaysEvictObjects;
     clearObjectAge = parameters.alwaysClearObjectAge;
@@ -263,7 +252,7 @@ bool SyncServer_Core::DatabaseManagement::DALCache::setParameters(DALCacheParame
     maxCommitUpdates = parameters.maximumCommitUpdates;
     minCommitUpdates = parameters.minimumCommitUpdates;
 
-    logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (Set Parameters) > Exiting critical section.");
+    logMessage(LogSeverity::Debug, "(setParameters) Exiting critical section.");
     return true;
 }
 
@@ -284,8 +273,8 @@ SyncServer_Core::DatabaseManagement::DALCache::DALCacheInformation SyncServer_Co
             stopCache, cacheThreadRunning, requestsThreadRunning};
 }
 
-//WARN -> not thread safe
-//WARN -> commit objects before eviction
+//WARN -not thread safe
+//WARN -commit objects before eviction
 bool SyncServer_Core::DatabaseManagement::DALCache::evictObjects()
 {
     bool result = false;
@@ -327,7 +316,7 @@ bool SyncServer_Core::DatabaseManagement::DALCache::evictObjects()
             evictedObjectsNum++;
         }
         
-        logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (Evict Objects) > Evicted <" + Convert::toString(evictedObjectsNum) + "> object(s).");
+        logMessage(LogSeverity::Debug, "(evictObjects) Evicted <" + Convert::toString(evictedObjectsNum) + "object(s).");
         result = true;
     }
     else if(lruObject != nullptr)
@@ -336,38 +325,38 @@ bool SyncServer_Core::DatabaseManagement::DALCache::evictObjects()
         if(clearObjectAge)
             objectAgeTable.erase(*lruObject);
         
-        logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (Evict Objects) > Evicted LRU object.");
+        logMessage(LogSeverity::Debug, "(evictObjects) Evicted LRU object.");
         result = true;
     }
     else
-        logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (Evict Objects) > Failed to evict objects; no objects eligible found.");
+        logMessage(LogSeverity::Debug, "(evictObjects) Failed to evict objects; no objects eligible found.");
     
     return result;
 }
 
 void SyncServer_Core::DatabaseManagement::DALCache::cacheThread()
 {
-    logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (Cache Thread) > Started.");
+    logMessage(LogSeverity::Debug, "(cacheThread) Started.");
     cacheThreadRunning = true;
     
     while(!stopCache || forceCommit)
     {
-        logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (Cache Thread) > Acquiring cache lock.");
+        logMessage(LogSeverity::Debug, "(cacheThread) Acquiring cache lock.");
         boost::unique_lock<boost::mutex> cacheLock(cacheThreadMutex);
-        logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (Cache Thread) > Cache lock acquired.");
+        logMessage(LogSeverity::Debug, "(cacheThread) Cache lock acquired.");
         
         if(!cacheEnabled)
         {
-            logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (Cache Thread) > Cache disabled; thread will sleep until enabled.");
-            logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (Cache Thread) > Waiting on cache lock.");
+            logMessage(LogSeverity::Debug, "(cacheThread) Cache disabled; thread will sleep until enabled.");
+            logMessage(LogSeverity::Debug, "(cacheThread) Waiting on cache lock.");
             cacheThreadLockCondition.wait(cacheLock);
-            logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (Cache Thread) > Cache lock re-acquired after wait.");
+            logMessage(LogSeverity::Debug, "(cacheThread) Cache lock re-acquired after wait.");
         }
         else
         {
             if(uncommittedObjects.size() >= minCommitUpdates || forceCommit)
             {
-                logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (Cache Thread) > Working on <"+Convert::toString(uncommittedObjects.size())+"> uncommitted objects.");
+                logMessage(LogSeverity::Debug, "(cacheThread) Working on <"+Convert::toString(uncommittedObjects.size())+"uncommitted objects.");
                 unordered_map<DBObjectID, RequestType> failedCommits;
                 
                 for(std::pair<DBObjectID, RequestType> currentObject : uncommittedObjects)
@@ -397,7 +386,7 @@ void SyncServer_Core::DatabaseManagement::DALCache::cacheThread()
                             }
                         } break;
                         
-                        default: logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (Cache Thread) > Invalid request type found during cache commit."); break;
+                        default: logMessage(LogSeverity::Debug, "(cacheThread) Invalid request type found during cache commit."); break;
                     }
                     
                     if(!commitSuccessful)
@@ -406,7 +395,7 @@ void SyncServer_Core::DatabaseManagement::DALCache::cacheThread()
                         
                         boost::lock_guard<boost::mutex> pendingCommitRequestsLock(pendingCommitRequestsMutex);
                         pendingCommitRequests.erase(currentCommitRequest);
-                        logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (Cache Thread) > Failed to commit object <" + Convert::toString(currentObject.first) + ">.");
+                        logMessage(LogSeverity::Debug, "(cacheThread) Failed to commit object <" + Convert::toString(currentObject.first) + ">.");
                     }
                 }
 
@@ -418,47 +407,47 @@ void SyncServer_Core::DatabaseManagement::DALCache::cacheThread()
                 forceCommit = false;
             }
             else
-                logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (Cache Thread) > Skipping commit (not enough objects).");
+                logMessage(LogSeverity::Debug, "(cacheThread) Skipping commit (not enough objects).");
             
-            logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (Cache Thread) > EV ["+Convert::toString(cacheSize)+"] + ["+Convert::toString(cache.size())+"].");
+            logMessage(LogSeverity::Debug, "(cacheThread) EV ["+Convert::toString(cacheSize)+"] + ["+Convert::toString(cache.size())+"].");
             if(cacheSize > 0 && cache.size() >= cacheSize)
             {
-                logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (Cache Thread) > Eviction begin.");
+                logMessage(LogSeverity::Debug, "(cacheThread) Eviction begin.");
                 evictObjects();
             }
             else
-                logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (Cache Thread) > No eviction.");
+                logMessage(LogSeverity::Debug, "(cacheThread) No eviction.");
             
-            logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (Cache Thread) > Waiting on cache lock.");
+            logMessage(LogSeverity::Debug, "(cacheThread) Waiting on cache lock.");
             boost::system_time nextWakeup = boost::get_system_time() + boost::posix_time::seconds(maxCommitTime);
             while(!stopCache && cacheThreadLockCondition.timed_wait(cacheLock, nextWakeup) && uncommittedObjects.size() < maxCommitUpdates && !forceCommit)
-                logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (Cache Thread) > Exited wait without timer expiration.");
-            logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (Cache Thread) > Cache lock re-acquired after wait.");
+                logMessage(LogSeverity::Debug, "(cacheThread) Exited wait without timer expiration.");
+            logMessage(LogSeverity::Debug, "(cacheThread) Cache lock re-acquired after wait.");
         }
     }
     
     cacheThreadRunning = false;
-    logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (Cache Thread) > Stopped.");
+    logMessage(LogSeverity::Debug, "(cacheThread) Stopped.");
     
     return;
 }
 
 void SyncServer_Core::DatabaseManagement::DALCache::requestsThread()
 {
-    logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (Requests Thread) > Started.");
+    logMessage(LogSeverity::Debug, "(requestsThread) Started.");
     requestsThreadRunning = true;
     
     while(!stopCache)
     {
-        logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (Requests Thread) > Acquiring requests lock.");
+        logMessage(LogSeverity::Debug, "(requestsThread) Acquiring requests lock.");
         boost::unique_lock<boost::mutex> requestsLock(requestsThreadMutex);
-        logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (Requests Thread) > Requests lock acquired.");
+        logMessage(LogSeverity::Debug, "(requestsThread) Requests lock acquired.");
         
         if(pendingCacheRequests.size() == 0)
         {
-            logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (Requests Thread) > Waiting on requests lock.");
+            logMessage(LogSeverity::Debug, "(requestsThread) Waiting on requests lock.");
             requestsThreadLockCondition.wait(requestsLock);
-            logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (Requests Thread) > Requests lock re-acquired after wait.");
+            logMessage(LogSeverity::Debug, "(requestsThread) Requests lock re-acquired after wait.");
         }
         else
         {
@@ -477,9 +466,9 @@ void SyncServer_Core::DatabaseManagement::DALCache::requestsThread()
                         bool pendingRemoval = false;
                         
                         {
-                            logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (Requests Thread / SELECT) > Acquiring cache lock.");
+                            logMessage(LogSeverity::Debug, "(requestsThread / SELECT) Acquiring cache lock.");
                             boost::lock_guard<boost::mutex> cacheLock(cacheThreadMutex);
-                            logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (Requests Thread / SELECT) > Cache lock acquired.");
+                            logMessage(LogSeverity::Debug, "(requestsThread / SELECT) Cache lock acquired.");
 
                             if((cache.find(objectID) != cache.end()))
                             {
@@ -490,7 +479,7 @@ void SyncServer_Core::DatabaseManagement::DALCache::requestsThread()
                                     pendingRemoval = (uncommittedObjects[objectID] == RequestType::REMOVE);
                             }
 
-                            logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (Requests Thread / SELECT) > Cache lock released.");
+                            logMessage(LogSeverity::Debug, "(requestsThread / SELECT) Cache lock released.");
                         }
                         
                         if(inCache && !pendingRemoval)
@@ -507,7 +496,7 @@ void SyncServer_Core::DatabaseManagement::DALCache::requestsThread()
                         else
                         {
                             cacheHits++;
-                            logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (Requests Thread / SELECT) > Requested object found in cache but is pending removal.");
+                            logMessage(LogSeverity::Debug, "(requestsThread / SELECT) Requested object found in cache but is pending removal.");
                             onFailure(dalID, currentRequest, objectID);
                         }
                     }
@@ -526,14 +515,14 @@ void SyncServer_Core::DatabaseManagement::DALCache::requestsThread()
                     bool successful = false;
                     
                     {
-                        logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (Requests Thread / I;U) > Acquiring cache lock.");
+                        logMessage(LogSeverity::Debug, "(requestsThread / I;U) Acquiring cache lock.");
                         boost::lock_guard<boost::mutex> cacheLock(cacheThreadMutex);
-                        logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (Requests Thread / I;U) > Cache lock acquired.");
+                        logMessage(LogSeverity::Debug, "(requestsThread / I;U) Cache lock acquired.");
                         
                         if(uncommittedObjects.find(containerData->getContainerID()) != uncommittedObjects.end())
                         {
                             if(uncommittedObjects.at(containerData->getContainerID()) == RequestType::REMOVE)
-                                logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (Requests Thread / I;U) > Request failed; removal request is already pending <" + containerData->toString() + ">.");
+                                logMessage(LogSeverity::Debug, "(requestsThread / I;U) Request failed; removal request is already pending <" + containerData->toString() + ">.");
                             else //INSERT or UPDATE already pending; the current request can be discarded
                                 successful = true;
                         }
@@ -557,7 +546,7 @@ void SyncServer_Core::DatabaseManagement::DALCache::requestsThread()
                             successful = true;
                         }
                         
-                        logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (Requests Thread / I;U) > Cache lock released.");
+                        logMessage(LogSeverity::Debug, "(requestsThread / I;U) Cache lock released.");
                     }
                     
                     if(successful)
@@ -573,9 +562,9 @@ void SyncServer_Core::DatabaseManagement::DALCache::requestsThread()
                     DataContainerPtr container;
                     
                     {
-                        logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (Requests Thread / REMOVE) > Acquiring cache lock.");
+                        logMessage(LogSeverity::Debug, "(requestsThread / REMOVE) Acquiring cache lock.");
                         boost::lock_guard<boost::mutex> cacheLock(cacheThreadMutex);
-                        logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (Requests Thread / REMOVE) > Cache lock acquired.");
+                        logMessage(LogSeverity::Debug, "(requestsThread / REMOVE) Cache lock acquired.");
                         
                         container = cache.at(objectID);
 
@@ -584,7 +573,7 @@ void SyncServer_Core::DatabaseManagement::DALCache::requestsThread()
                             RequestType existingRequest = uncommittedObjects.at(objectID);
 
                             if(existingRequest == RequestType::REMOVE)
-                                logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (Requests Thread / REMOVE) > Object removal failed; removal request already pending <" + container->toString() + ">.");
+                                logMessage(LogSeverity::Debug, "(requestsThread / REMOVE) Object removal failed; removal request already pending <" + container->toString() + ">.");
                             else if(existingRequest == RequestType::INSERT)
                             {
                                 uncommittedObjects.erase(objectID);
@@ -609,7 +598,7 @@ void SyncServer_Core::DatabaseManagement::DALCache::requestsThread()
                             successful = true;
                         }
 
-                        logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (Requests Thread / REMOVE) > Cache lock released.");
+                        logMessage(LogSeverity::Debug, "(requestsThread / REMOVE) Cache lock released.");
                     }
                     
                     if(successful)
@@ -622,9 +611,9 @@ void SyncServer_Core::DatabaseManagement::DALCache::requestsThread()
                 {
                     DataContainerPtr containerData = boost::any_cast<DataContainerPtr>(currentRequestData->get<1>());
                     
-                    logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (Requests Thread / CACHE_OBJECT) > Acquiring cache lock.");
+                    logMessage(LogSeverity::Debug, "(requestsThread / CACHE_OBJECT) Acquiring cache lock.");
                     boost::lock_guard<boost::mutex> cacheLock(cacheThreadMutex);
-                    logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (Requests Thread / CACHE_OBJECT) > Cache lock acquired.");
+                    logMessage(LogSeverity::Debug, "(requestsThread / CACHE_OBJECT) Cache lock acquired.");
                     
                     std::vector<DataContainerPtr> containersToCache;
                     
@@ -645,7 +634,7 @@ void SyncServer_Core::DatabaseManagement::DALCache::requestsThread()
                             objectAgeTable[currentContainer->getContainerID()] = globalCacheAge;
                     }
                     
-                    logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (Requests Thread / CACHE_OBJECT) > Cache lock released.");
+                    logMessage(LogSeverity::Debug, "(requestsThread / CACHE_OBJECT) Cache lock released.");
                 } break;
                 
                 case RequestType::SEND_FAILURE_EVENT:
@@ -660,7 +649,7 @@ void SyncServer_Core::DatabaseManagement::DALCache::requestsThread()
                 
                 default:
                 {
-                    logger->logMessage(Utilities::FileLogSeverity::Error, "DALCache / " + Convert::toString(cacheType) + " (Requests Thread) > Unexpected request type encountered.");
+                    logMessage(LogSeverity::Error, "(requestsThread) Unexpected request type encountered.");
                     onFailure(dalID, currentRequest, DBObjectID());
                 } break;
             }
@@ -670,11 +659,11 @@ void SyncServer_Core::DatabaseManagement::DALCache::requestsThread()
             delete currentRequestData;
         }
         
-        logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (Requests Thread) > Data lock released.");
+        logMessage(LogSeverity::Debug, "(requestsThread) Data lock released.");
     }
     
     requestsThreadRunning = false;
-    logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (Requests Thread) > Stopped.");
+    logMessage(LogSeverity::Debug, "(requestsThread) Stopped.");
     return;
 }
 
@@ -684,40 +673,40 @@ void SyncServer_Core::DatabaseManagement::DALCache::onFailureHandler(DatabaseAbs
         return;
     
     {
-        logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (On Failure Handler) > Entering PENDING_COMMITS critical section for request/DAL <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
+        logMessage(LogSeverity::Debug, "(onFailureHandler) Entering PENDING_COMMITS critical section for request/DAL <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
         boost::lock_guard<boost::mutex> pendingCommitRequestsLock(pendingCommitRequestsMutex);
-        logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (On Failure Handler) > PENDING_COMMITS critical section entered for request/DAL <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
+        logMessage(LogSeverity::Debug, "(onFailureHandler) PENDING_COMMITS critical section entered for request/DAL <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
         
         auto commitRequest = pendingCommitRequests.find(requestID);
         if(commitRequest != pendingCommitRequests.end() && pendingCommitRequests[requestID] == id)
         {
-            logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (On Failure Handler) > Object commit failed for <" + Convert::toString(id) + "> / <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
+            logMessage(LogSeverity::Debug, "(onFailureHandler) Object commit failed for <" + Convert::toString(id) + "/ <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
             pendingCommitRequests.erase(commitRequest);
-            logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (On Failure Handler) > Exiting PENDING_COMMITS critical section for request/DAL <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
+            logMessage(LogSeverity::Debug, "(onFailureHandler) Exiting PENDING_COMMITS critical section for request/DAL <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
             return;
         }
         
-        logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (On Failure Handler) > Exiting PENDING_COMMITS critical section for request/DAL <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
+        logMessage(LogSeverity::Debug, "(onFailureHandler) Exiting PENDING_COMMITS critical section for request/DAL <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
     }
     
     {//ensures the locks are released as soon as they are not needed
-        logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (On Failure Handler) > Entering REQUESTS critical section for request/DAL <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
+        logMessage(LogSeverity::Debug, "(onFailureHandler) Entering REQUESTS critical section for request/DAL <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
         boost::lock_guard<boost::mutex> requestsLock(requestsThreadMutex);
-        logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (On Failure Handler) > REQUESTS critical section entered for request/DAL <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
+        logMessage(LogSeverity::Debug, "(onFailureHandler) REQUESTS critical section entered for request/DAL <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
 
         auto dalRequest = pendingDALRequests.find(requestID);
 
         if(dalRequest != pendingDALRequests.end())
             pendingDALRequests.erase(dalRequest);
         else
-            logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (On Failure Handler) > Unexpected response received <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
+            logMessage(LogSeverity::Debug, "(onFailureHandler) Unexpected response received <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
 
-        logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (On Failure Handler) > Exiting REQUESTS critical section for request/DAL <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
+        logMessage(LogSeverity::Debug, "(onFailureHandler) Exiting REQUESTS critical section for request/DAL <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
     }
     
-    logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (On Failure Handler) > Sending signal for request/DAL <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
+    logMessage(LogSeverity::Debug, "(onFailureHandler) Sending signal for request/DAL <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
     onFailure(dalID, requestID, id);
-    logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (On Failure Handler) > Signal sent for request/DAL <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
+    logMessage(LogSeverity::Debug, "(onFailureHandler) Signal sent for request/DAL <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
 }
 
 void SyncServer_Core::DatabaseManagement::DALCache::onSuccessHandler(DatabaseAbstractionLayerID dalID, DatabaseRequestID requestID, DataContainerPtr data)
@@ -726,25 +715,25 @@ void SyncServer_Core::DatabaseManagement::DALCache::onSuccessHandler(DatabaseAbs
         return;
     
     {//ensures the locks are released as soon as they are not needed
-        logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (On Success Handler) > Entering PENDING_COMMITS critical section for request/DAL <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
+        logMessage(LogSeverity::Debug, "(onSuccessHandler) Entering PENDING_COMMITS critical section for request/DAL <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
         boost::lock_guard<boost::mutex> pendingCommitRequestsLock(pendingCommitRequestsMutex);
-        logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (On Success Handler) > PENDING_COMMITS critical section entered for request/DAL <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
+        logMessage(LogSeverity::Debug, "(onSuccessHandler) PENDING_COMMITS critical section entered for request/DAL <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
 
         auto commitRequest = pendingCommitRequests.find(requestID);
         if(commitRequest != pendingCommitRequests.end() && pendingCommitRequests[requestID] == data->getContainerID())
         {
             pendingCommitRequests.erase(commitRequest);
-            logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (On Success Handler) > Exiting PENDING_COMMITS critical section for request/DAL <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
+            logMessage(LogSeverity::Debug, "(onSuccessHandler) Exiting PENDING_COMMITS critical section for request/DAL <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
             return;
         }
         
-        logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (On Success Handler) > Exiting PENDING_COMMITS critical section for request/DAL <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
+        logMessage(LogSeverity::Debug, "(onSuccessHandler) Exiting PENDING_COMMITS critical section for request/DAL <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
     }
     
     {//ensures the locks are released as soon as they are not needed
-        logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (On Success Handler) > Entering REQUESTS critical section for request/DAL <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
+        logMessage(LogSeverity::Debug, "(onSuccessHandler) Entering REQUESTS critical section for request/DAL <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
         boost::unique_lock<boost::mutex> requestsLock(requestsThreadMutex);
-        logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (On Success Handler) > REQUESTS critical section entered for request/DAL <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
+        logMessage(LogSeverity::Debug, "(onSuccessHandler) REQUESTS critical section entered for request/DAL <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
 
         auto dalRequest = pendingDALRequests.find(requestID);
         if(dalRequest != pendingDALRequests.end())
@@ -757,17 +746,17 @@ void SyncServer_Core::DatabaseManagement::DALCache::onSuccessHandler(DatabaseAbs
                 requestsLock.lock();
             }
             else
-                logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (On Success Handler) > Unexpected container received for response <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
+                logMessage(LogSeverity::Debug, "(onSuccessHandler) Unexpected container received for response <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
 
             pendingDALRequests.erase(dalRequest);
         }
         else
-            logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (On Success Handler) > Unexpected response received <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
+            logMessage(LogSeverity::Debug, "(onSuccessHandler) Unexpected response received <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
 
-        logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (On Success Handler) > Exiting REQUESTS critical section for request/DAL <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
+        logMessage(LogSeverity::Debug, "(onSuccessHandler) Exiting REQUESTS critical section for request/DAL <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
     }
     
-    logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (On Success Handler) > Sending signal for request/DAL <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
+    logMessage(LogSeverity::Debug, "(onSuccessHandler) Sending signal for request/DAL <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
     onSuccess(dalID, requestID, data);
-    logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " (On Success Handler) > Signal sent for request/DAL <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
+    logMessage(LogSeverity::Debug, "(onSuccessHandler) Signal sent for request/DAL <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
  }

@@ -18,7 +18,7 @@
 #ifndef NETWORK_MANAGEMENT_TYPES_H
 #define	NETWORK_MANAGEMENT_TYPES_H
 
-#include <boost/asio.hpp>
+#include <boost/asio/ip/tcp.hpp>
 #include <boost/shared_ptr.hpp>
 #include <stdlib.h>
 #include "../../Common/Types.h"

@@ -18,22 +18,16 @@
 #ifndef CONNECTIONDATASTORE_H
 #define	CONNECTIONDATASTORE_H
 
-#include <boost/shared_ptr.hpp>
 #include <boost/thread/mutex.hpp>
-#include <boost/thread/lock_guard.hpp>
 #include <boost/multi_index_container.hpp>
 #include <boost/multi_index/hashed_index.hpp>
 #include <boost/multi_index/member.hpp>
 #include <boost/multi_index/composite_key.hpp>
 
 #include "../Common/Types.h"
-#include "../Utilities/Strings/Common.h"
 #include "../Utilities/FileLogger.h"
-
 #include "../DatabaseManagement/Types/Types.h"
 #include "../DatabaseManagement/Containers/DeviceDataContainer.h"
-
-#include "../SecurityManagement/Crypto/Containers.h"
 #include "Types/Containers.h"
 
 using boost::multi_index_container;

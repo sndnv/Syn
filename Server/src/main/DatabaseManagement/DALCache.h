@@ -152,7 +152,7 @@ namespace SyncServer_Core
                  * @param parentLogger the file logger of the parent DatabaseManager
                  * @param parameters the cache configuration parameters
                  */
-                DALCache(DALPtr childDAL, Utilities::FileLogger& parentLogger, DALCacheParameters parameters);
+                DALCache(DALPtr childDAL, Utilities::FileLoggerPtr parentLogger, DALCacheParameters parameters);
 
                 /**
                  * Cache destructor.
@@ -271,7 +271,7 @@ namespace SyncServer_Core
                 unsigned long cacheMisses = 0;                      //total cache misses (objects were not found in the cache)
 
                 //Thread management
-                Utilities::FileLogger * logger;                         //parent file logger
+                Utilities::FileLoggerPtr debugLogger;                   //parent file logger
                 boost::thread * requestsThreadObject;                   //main requests thread
                 boost::thread * cacheThreadObject;                      //cache management thread
                 boost::mutex cacheThreadMutex;                          //cache mutex
@@ -337,18 +337,18 @@ namespace SyncServer_Core
                 void addRequest(DatabaseRequestID requestID, RequestType type, boost::any requestParameter, boost::any additionalParameter = 0)
                 {
                     tuple<RequestType, boost::any, boost::any> * data = new tuple<RequestType, boost::any, boost::any>(type, requestParameter, additionalParameter);
-                    logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache (Add Request) > Entering critical section.");
+                    logMessage(LogSeverity::Debug, "(addRequest) Entering critical section.");
                     boost::lock_guard<boost::mutex> requestsLock(requestsThreadMutex);
-                    logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache (Add Request) > Critical section entered.");
+                    logMessage(LogSeverity::Debug, "(addRequest) Critical section entered.");
 
                     pendingCacheRequests.push(requestID);
                     requestsData.insert(std::pair<DatabaseRequestID, tuple<RequestType, boost::any, boost::any>*>(requestID, data));
 
-                    logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache (Add Request) > Sending notification to requests thread.");
+                    logMessage(LogSeverity::Debug, "(addRequest) Sending notification to requests thread.");
                     requestsThreadLockCondition.notify_all();
-                    logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache (Add Request) > Notification to requests thread sent.");
+                    logMessage(LogSeverity::Debug, "(addRequest) Notification to requests thread sent.");
 
-                    logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache (Add Request) > Exiting critical section.");
+                    logMessage(LogSeverity::Debug, "(addRequest) Exiting critical section.");
                 }
 
                 /**
@@ -361,12 +361,26 @@ namespace SyncServer_Core
                  */
                 bool isObjectInCache(const DBObjectID id)
                 {
-                    logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache (Is Object In Cache) > Entering critical section.");
+                    logMessage(LogSeverity::Debug, "(isObjectInCache) Entering critical section.");
                     boost::lock_guard<boost::mutex> cacheLock(cacheThreadMutex);
-                    logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache (Is Object In Cache) > Critical section entered.");
+                    logMessage(LogSeverity::Debug, "(Is Object In Cache) Critical section entered.");
                     bool result = (cache.find(id) != cache.end());
-                    logger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache (Is Object In Cache) > Exiting critical section.");
+                    logMessage(LogSeverity::Debug, "(Is Object In Cache) Exiting critical section.");
                     return result;
+                }
+                
+                /**
+                 * Logs the specified message, if the log handler is set.
+                 * 
+                 * @param severity the severity associated with the message/event
+                 * @param message the message to be logged
+                 */
+                void logMessage(LogSeverity severity, const std::string & message) const
+                {
+                    //TODO - add DB logging
+
+                    if(debugLogger)
+                        debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "DALCache / " + Convert::toString(cacheType) + " > " + message);
                 }
         };
     }

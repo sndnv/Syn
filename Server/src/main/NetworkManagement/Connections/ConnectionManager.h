@@ -23,8 +23,8 @@
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
 #include <boost/signals2/signal.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/scoped_ptr.hpp>
 #include <boost/unordered_map.hpp>
 
 #include "../../Utilities/Strings/Common.h"
@@ -92,7 +92,7 @@ namespace NetworkManagement_Connections
              * @param parameters manager configuration data
              * @param debugLogger logger for debugging, if any
              */
-            ConnectionManager(ConnectionManagerParameters parameters, Utilities::FileLogger * debugLogger = nullptr);
+            ConnectionManager(ConnectionManagerParameters parameters, Utilities::FileLoggerPtr debugLogger = Utilities::FileLoggerPtr());
             
             /**
              * Stops all work on the networking IO service and terminates all connections.
@@ -164,7 +164,7 @@ namespace NetworkManagement_Connections
             
         private:
             std::atomic<RawConnectionID> newConnectionID{INVALID_RAW_CONNECTION_ID};
-            Utilities::FileLogger * debugLogger; //debugging logger
+            Utilities::FileLoggerPtr debugLogger; //debugging logger
             
             //Statistics
             std::atomic<unsigned long long> initiatedOutgoingConnections{0};   //number of initiated outgoing connections
@@ -203,9 +203,9 @@ namespace NetworkManagement_Connections
             boost::mutex disconnectedConnectionsMutex;      //mutex for disconnected connections data sync
             boost::condition_variable newDataLockCondition; //condition variable for waiting for more data
             boost::condition_variable timedLockCondition;   //condition variable for performing timed waits
-            boost::thread * disconnectedConnectionsThread;  //thread for handling connection destruction
+            boost::scoped_ptr<boost::thread> disconnectedConnectionsThread; //thread for handling connection destruction
             
-            boost::shared_ptr<boost::asio::io_service::work> poolWork; //thread pool work object
+            boost::scoped_ptr<boost::asio::io_service::work> poolWork; //thread pool work object
             boost::thread_group threadGroup; //thread pool management group
             
             std::atomic<bool> stopManager{false}; //denotes whether the manager is to be stopped or not
@@ -294,6 +294,26 @@ namespace NetworkManagement_Connections
             RawConnectionID getNewConnectionID()
             {
                 return ++newConnectionID;
+            }
+            
+            /**
+             * Logs the specified message, if the debug log handler is set.
+             * 
+             * Note: If a debugging file logger is assigned, the message is sent to it.
+             * 
+             * @param severity the severity associated with the message/event
+             * @param message the message to be logged
+             */
+            void logMessage(LogSeverity severity, const std::string & message) const
+            {
+                //TODO - add DB logger
+                
+                if(debugLogger)
+                {
+                    debugLogger->logMessage(
+                            Utilities::FileLogSeverity::Debug,
+                            "ConnectionManager / " + Convert::toString(managerType) + " > " + message);
+                }
             }
     };
     

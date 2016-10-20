@@ -19,7 +19,6 @@
 #define	UTILITIES_STRINGS_SESSIONS_H
 
 #include <string>
-#include <boost/unordered_map.hpp>
 #include "../../SessionManagement/Types/Types.h"
 
 using SessionManagement_Types::SessionDataCommitType;
@@ -28,13 +27,6 @@ namespace Utilities
 {
     namespace Strings
     {
-        struct SessionsMaps
-        {
-            static const boost::unordered_map<SessionDataCommitType, std::string> sessionDataCommitTypeToString;
-            static const boost::unordered_map<std::string, SessionDataCommitType> stringToSessionDataCommitType;
-        };
-        
-        
         std::string toString(SessionDataCommitType var);
         SessionDataCommitType toSessionDataCommitType(std::string var);
     }

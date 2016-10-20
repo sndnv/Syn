@@ -99,9 +99,9 @@ SCENARIO("Thread pools are created, managed and can process tasks", "[ThreadPool
     GIVEN("A ThreadPool with 4 threads")
     {
         Utilities::FileLoggerParameters loggerParams{"test_data/ThreadPool.log", 32*1024*1024, Utilities::FileLogSeverity::Debug};
-        Utilities::FileLogger logger(loggerParams);
+        Utilities::FileLoggerPtr logger(new Utilities::FileLogger(loggerParams));
         
-        Utilities::ThreadPool testPool(4, &logger);
+        Utilities::ThreadPool testPool(4, logger);
 
         CHECK(testPool.getPoolSize() == 4);
 

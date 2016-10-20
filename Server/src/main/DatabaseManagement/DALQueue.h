@@ -24,7 +24,6 @@
 #include <queue>
 #include <boost/any.hpp>
 #include <boost/thread.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/unordered_map.hpp>
 #include "Types/Types.h"
 #include "../Utilities/Tools.h"
@@ -135,7 +134,7 @@ namespace SyncServer_Core
                  * @param parentLogger the file logger of the parent DatabaseManager
                  * @param parameters the queue configuration parameters
                  */
-                DALQueue(DatabaseObjectType type, Utilities::FileLogger& parentLogger, DALQueueParameters parameters);
+                DALQueue(DatabaseObjectType type, Utilities::FileLoggerPtr parentLogger, DALQueueParameters parameters);
 
                 /**
                  * Queue destructor.
@@ -310,7 +309,7 @@ namespace SyncServer_Core
                 unsigned int maxConsecutiveWriteFailures;       //maximum number of consecutive write failures before a DAL is considered as failed
 
                 //Thread management
-                Utilities::FileLogger * logger;
+                Utilities::FileLoggerPtr debugLogger;
                 boost::thread * mainThread;                     //main thread object
                 mutable boost::mutex threadMutex;               //main thread mutex (for synchronising access to all the data structures of the queue)
                 boost::condition_variable threadLockCondition;  //condition variable for sleeping/notifying the main thread
@@ -363,6 +362,20 @@ namespace SyncServer_Core
                  * @param id the associated data
                  */
                 void onSuccessHandler(DatabaseAbstractionLayerID dalID, DatabaseRequestID requestID, DataContainerPtr id);
+                
+                /**
+                 * Logs the specified message, if the log handler is set.
+                 * 
+                 * @param severity the severity associated with the message/event
+                 * @param message the message to be logged
+                 */
+                void logMessage(LogSeverity severity, const std::string & message) const
+                {
+                    //TODO - add DB logging
+
+                    if(debugLogger)
+                        debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "DALQueue / " + Convert::toString(queueType) + " > " + message);
+                }
         };
     }
 }

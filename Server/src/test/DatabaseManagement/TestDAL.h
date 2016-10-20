@@ -170,10 +170,10 @@ namespace Testing
             boost::mutex dataMutex;
             boost::unordered_map<DBObjectID, DataContainerPtr> data;
             
-            Utilities::FileLogger * debugLogger;
+            Utilities::FileLoggerPtr debugLogger;
             void logMessage(LogSeverity severity, const std::string & message) const
             {
-                if(debugLogger != nullptr)
+                if(debugLogger)
                     debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "TestDAL " + message);
             }
     };

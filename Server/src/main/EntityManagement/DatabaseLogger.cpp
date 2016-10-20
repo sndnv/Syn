@@ -16,13 +16,16 @@
  */
 
 #include "DatabaseLogger.h"
+#include <vector>
+#include <boost/thread/lock_guard.hpp>
+#include "../Utilities/Strings/Common.h"
 
 namespace Convert = Utilities::Strings;
 namespace Instructions = InstructionManagement_Sets::DatabaseLoggerInstructions;
 namespace InstructionResults = InstructionManagement_Sets::DatabaseLoggerInstructions::Results;
 
 EntityManagement::DatabaseLogger::DatabaseLogger
-(const DatabaseLoggerParameters & params,  Utilities::FileLogger * debugLogger)
+(const DatabaseLoggerParameters & params,  Utilities::FileLoggerPtr debugLogger)
 : debugLogger(debugLogger), databaseManager(params.databaseManager),
   securityManager(params.securityManager), isDisabled(false),
   defaultMinSeverity(params.defaultMinSeverity), lastSourceID(0),
@@ -45,8 +48,6 @@ EntityManagement::DatabaseLogger::~DatabaseLogger()
     authorizationTokens.clear();
 
     sourcesMinLogSeverity.clear();
-
-    debugLogger = nullptr;
 }
 
 void EntityManagement::DatabaseLogger::postAuthorizationToken

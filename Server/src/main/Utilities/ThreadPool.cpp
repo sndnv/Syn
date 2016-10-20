@@ -16,8 +16,10 @@
  */
 
 #include "ThreadPool.h"
+#include <boost/uuid/random_generator.hpp>
+#include <boost/asio/deadline_timer.hpp>
 
-Utilities::ThreadPool::ThreadPool(unsigned long poolSize, Utilities::FileLogger * parentLogger)
+Utilities::ThreadPool::ThreadPool(unsigned long poolSize, Utilities::FileLoggerPtr parentLogger)
             : logger(parentLogger), poolID(boost::uuids::random_generator()()), poolWork(new boost::asio::io_service::work(threadService))
 {
     boost::lock_guard<boost::timed_mutex> threadsLock(threadDataMutex);
@@ -39,7 +41,6 @@ Utilities::ThreadPool::~ThreadPool()
     logMessage("Waiting for all threads to terminate.");
     threadGroup.join_all();
     logMessage("All threads terminated.");
-    logger = nullptr;
 }
 
 void Utilities::ThreadPool::assignTask(std::function<void(void)> task)

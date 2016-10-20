@@ -23,8 +23,6 @@
 #include <string>
 #include <boost/any.hpp>
 #include "Types/Types.h"
-#include "../Utilities/Strings/Common.h"
-#include "../Utilities/Strings/Database.h"
 #include "../Utilities/FileLogger.h"
 #include "Containers/DataContainer.h"
 #include "Containers/LogDataContainer.h"
@@ -45,8 +43,6 @@
 #include "../InstructionManagement/Sets/InstructionSet.h"
 #include "../InstructionManagement/Interfaces/InstructionTarget.h"
 #include "../InstructionManagement/Sets/DatabaseManagerInstructionSet.h"
-
-namespace Convert = Utilities::Strings;
 
 using std::string;
 using std::vector;
@@ -100,9 +96,6 @@ using SyncServer_Core::DatabaseManagement::DALQueue;
 
 using InstructionManagement_Sets::InstructionPtr;
 using InstructionManagement_Types::DatabaseManagerInstructionType;
-
-//TODO - remove
-using Utilities::FileLogSeverity;
 
 //TODO LIST
 // -> move from locking & waiting in Functions_* calls to futures & promises
@@ -295,7 +288,7 @@ namespace SyncServer_Core
             
         private:
             //File Logger
-            Utilities::FileLogger * logger;
+            Utilities::FileLoggerPtr debugLogger;
 
             //Database Manager Settings
             DALCache::DALCacheParameters defaultCacheParameters;  //default cache configuration
@@ -321,6 +314,20 @@ namespace SyncServer_Core
             Functions_Users       *  internal_Users;
             Functions_Logs        *  internal_Logs;
             Functions_Sessions    *  internal_Sessions;
+            
+            /**
+             * Logs the specified message, if the log handler is set.
+             * 
+             * @param severity the severity associated with the message/event
+             * @param message the message to be logged
+             */
+            void logMessage(LogSeverity severity, const std::string & message) const
+            {
+                //TODO - add DB logging
+                
+                if(debugLogger)
+                    debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "DatabaseManager " + message);
+            }
     };
 
     /** Container class for database access functions. */

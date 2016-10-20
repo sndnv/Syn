@@ -16,13 +16,16 @@
  */
 
 #include "DeviceManager.h"
+#include <vector>
+#include <boost/thread/lock_guard.hpp>
+#include "../Utilities/Strings/Common.h"
 
 namespace Convert = Utilities::Strings;
 namespace Instructions = InstructionManagement_Sets::DeviceManagerInstructions;
 namespace InstructionResults = InstructionManagement_Sets::DeviceManagerInstructions::Results;
 
 EntityManagement::DeviceManager::DeviceManager
-(const DeviceManagerParameters & params,  Utilities::FileLogger * debugLogger)
+(const DeviceManagerParameters & params,  Utilities::FileLoggerPtr debugLogger)
 : debugLogger(debugLogger), databaseManager(params.databaseManager),
   securityManager(params.securityManager), instructionsReceived(0), instructionsProcessed(0)
 {}
@@ -34,8 +37,6 @@ EntityManagement::DeviceManager::~DeviceManager()
     boost::lock_guard<boost::mutex> instructionDataLock(instructionDataMutex);
 
     authorizationTokens.clear();
-
-    debugLogger = nullptr;
 }
 
 void EntityManagement::DeviceManager::postAuthorizationToken

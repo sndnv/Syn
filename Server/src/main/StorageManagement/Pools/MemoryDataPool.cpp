@@ -16,6 +16,7 @@
  */
 
 #include "MemoryDataPool.h"
+#include <boost/thread/lock_guard.hpp>
 
 StorageManagement_Pools::MemoryDataPool::MemoryDataPool(MemoryDataPoolParameters parameters)
 {

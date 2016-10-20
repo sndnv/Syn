@@ -23,12 +23,10 @@
 
 #include <boost/shared_ptr.hpp>
 #include <boost/thread/mutex.hpp>
-#include <boost/thread/lock_guard.hpp>
 #include <boost/unordered_map.hpp>
 #include <boost/signals2.hpp>
 
 #include "../Common/Types.h"
-#include "../Utilities/Strings/Common.h"
 #include "../Utilities/FileLogger.h"
 
 #include "../DatabaseManagement/Types/Types.h"
@@ -39,17 +37,11 @@
 #include "../EntityManagement/Interfaces/DatabaseLoggingSource.h"
 
 #include "../SecurityManagement/SecurityManager.h"
-#include "../SecurityManagement/Crypto/SaltGenerator.h"
-#include "../SecurityManagement/Crypto/PasswordGenerator.h"
 #include "../SecurityManagement/Crypto/Containers.h"
 #include "../SecurityManagement/Crypto/Handlers.h"
 
 #include "Connections/Connection.h"
 #include "../EntityManagement/Interfaces/DatabaseLoggingSource.h"
-
-//Protocols
-#include "../../../external/protobuf/BaseComm.pb.h"
-#include "Protocols/Utilities.h"
 
 //Networking
 using NetworkManagement_Connections::ConnectionPtr;
@@ -77,8 +69,6 @@ using DatabaseManagement_Containers::DeviceDataContainerPtr;
 using SyncServer_Core::SecurityManager;
 using SecurityManagement_Crypto::AsymmetricCryptoHandlerPtr;
 using SecurityManagement_Crypto::ECDHCryptoDataContainerPtr;
-using SecurityManagement_Crypto::SaltGenerator;
-using SecurityManagement_Crypto::PasswordGenerator;
 using SecurityManagement_Crypto::SymmetricCryptoDataContainerPtr;
 using SecurityManagement_Crypto::SymmetricCryptoHandler;
 using SecurityManagement_Crypto::SymmetricCryptoHandlerPtr;
@@ -88,12 +78,6 @@ using SecurityManagement_Types::CiphertextData;
 using SecurityManagement_Types::MixedData;
 using SecurityManagement_Types::RandomData;
 using SecurityManagement_Types::LocalPeerAuthenticationEntry;
-
-//Protocols
-using NetworkManagement_Protocols::ConnectionSetupRequestSignature;
-using NetworkManagement_Protocols::InitConnectionAdditionalData;
-using NetworkManagement_Protocols::InitConnectionSetupRequest;
-using NetworkManagement_Protocols::InitConenctionSetupResponse;
 
 namespace NetworkManagement_Handlers
 {
@@ -144,7 +128,7 @@ namespace NetworkManagement_Handlers
                     Securable & parent,
                     std::function<PendingInitConnectionConfigPtr (const TransientConnectionID)> cfgRetrievalHandler,
                     std::function<void (const DeviceID & deviceID, const LocalPeerAuthenticationEntry &)> authDataAdditionHandler,
-                    Utilities::FileLogger * debugLogger = nullptr);
+                    Utilities::FileLoggerPtr debugLogger = Utilities::FileLoggerPtr());
             
             /**
              * Disconnects all connections, and performs clean up.
@@ -300,7 +284,7 @@ namespace NetworkManagement_Handlers
             };
             typedef boost::shared_ptr<UnknownConnectionData> UnknownConnectionDataPtr;
             
-            Utilities::FileLogger * debugLogger;                                    //logger for debugging
+            Utilities::FileLoggerPtr debugLogger;                                    //logger for debugging
             std::function<void (LogSeverity, const std::string &)> dbLogHandler;    //database log handler
             //handler for retrieving device configuration data from the parent network manager
             std::function<PendingInitConnectionConfigPtr (const TransientConnectionID)> deviceConfigRetrievalHandler;
@@ -340,8 +324,8 @@ namespace NetworkManagement_Handlers
             onSetupFailed;
             
             //Stats
-            std::atomic<StatCounter> setupsCompleted;
-            std::atomic<StatCounter> setupsFailed;
+            std::atomic<StatCounter> setupsCompleted{0};
+            std::atomic<StatCounter> setupsFailed{0};
             
             /**
              * Creates an entry for the specified connection in the local connections
@@ -544,7 +528,7 @@ namespace NetworkManagement_Handlers
                 if(dbLogHandler)
                     dbLogHandler(severity, message);
                 
-                if(debugLogger != nullptr)
+                if(debugLogger)
                     debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "InitialConnectionsHandler " + message);
             }
     };

@@ -16,6 +16,7 @@
  */
 
 #include "PoolAggregator.h"
+#include <boost/thread/lock_guard.hpp>
 
 bool StorageManagement_Pools::PoolAggregator::LinkParameters::operator==(const LinkParameters& other) const
 {
@@ -53,7 +54,7 @@ bool StorageManagement_Pools::PoolAggregator::PendingActionData::operator==(cons
 }
 
 StorageManagement_Pools::PoolAggregator::PoolAggregator
-(PoolAggregatorInitParameters parameters, Utilities::FileLogger * debugLogger)
+(const PoolAggregatorInitParameters & parameters, Utilities::FileLoggerPtr debugLogger)
 : debugLogger(debugLogger), threadPool(parameters.threadPoolSize, debugLogger),
   completeRetrieve(parameters.completeRetrieve), completeDiscard(parameters.completeDiscard),
   completePendingStore(parameters.completePendingStore), eraseOnDiscard(parameters.eraseOnDiscard),
@@ -102,7 +103,7 @@ StorageManagement_Pools::PoolAggregator::PoolAggregator
 }
 
 StorageManagement_Pools::PoolAggregator::PoolAggregator
-(const PoolAggregatorLoadParameters parameters, Utilities::FileLogger * debugLogger)
+(const PoolAggregatorLoadParameters & parameters, Utilities::FileLoggerPtr debugLogger)
 : debugLogger(debugLogger), threadPool(parameters.threadPoolSize),
   completeRetrieve(parameters.completeRetrieve), completeDiscard(parameters.completeDiscard),
   completePendingStore(parameters.completePendingStore), eraseOnDiscard(parameters.eraseOnDiscard),
@@ -237,8 +238,6 @@ StorageManagement_Pools::PoolAggregator::~PoolAggregator()
     
     if(cancelActionsOnShutdown)
         threadPool.stopThreadPool();
-
-    debugLogger = nullptr;
 }
 
 //<editor-fold defaultstate="collapsed" desc="DataPool Functions">
@@ -746,7 +745,7 @@ void StorageManagement_Pools::PoolAggregator::removePool(PoolID pool)
 }
 
 void StorageManagement_Pools::PoolAggregator::addPoolLink
-(PoolID sourcePool, const LinkParameters params)
+(PoolID sourcePool, const LinkParameters & params)
 {
     if(sourcePool == INVALID_POOL_ID)
     {

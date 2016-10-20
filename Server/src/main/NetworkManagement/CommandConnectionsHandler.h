@@ -19,18 +19,17 @@
 #define	COMMANDCONNECTIONSHANDLER_H
 
 #include <atomic>
-#include <vector>
 #include <string>
 #include <queue>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/thread/mutex.hpp>
-#include <boost/thread/lock_guard.hpp>
 #include <boost/unordered_map.hpp>
 #include <boost/signals2.hpp>
 
 #include "../Common/Types.h"
 #include "../Utilities/Strings/Common.h"
+#include "../Utilities/Strings/Security.h"
 #include "../Utilities/FileLogger.h"
 
 #include "../SecurityManagement/Types/SecurityRequests.h"
@@ -51,10 +50,6 @@
 
 #include "Connections/Connection.h"
 #include "../EntityManagement/Interfaces/DatabaseLoggingSource.h"
-
-//Protocols
-#include "../../../external/protobuf/BaseComm.pb.h"
-#include "Protocols/Utilities.h"
 
 //Networking
 using NetworkManagement_Connections::ConnectionPtr;
@@ -96,12 +91,6 @@ using SecurityManagement_Types::LocalPeerAuthenticationEntry;
 using SyncServer_Core::SessionManager;
 using SessionManagement_Types::InternalSessionID;
 using SessionManagement_Types::INVALID_INTERNAL_SESSION_ID;
-
-//Protocols
-using NetworkManagement_Protocols::ConnectionSetupRequestSignature;
-using NetworkManagement_Protocols::CommandConnectionSetupRequest;
-using NetworkManagement_Protocols::CommandConnectionSetupResponse;
-using NetworkManagement_Protocols::CommandConnectionSetupRequestData;
 
 namespace NetworkManagement_Handlers
 {
@@ -148,7 +137,7 @@ namespace NetworkManagement_Handlers
                     std::function<DeviceDataContainerPtr (const DeviceID)> dataRetrievalHandler,
                     std::function<const LocalPeerAuthenticationEntry & (const DeviceID &)> authDataRetrievalHandler,
                     Securable & parent,
-                    Utilities::FileLogger * debugLogger = nullptr);
+                    Utilities::FileLoggerPtr debugLogger = Utilities::FileLoggerPtr());
             
             /**
              * Disconnects all established and pending connections, and performs clean up.
@@ -365,7 +354,7 @@ namespace NetworkManagement_Handlers
             };
             typedef boost::shared_ptr<EstablishedConnectionData> EstablishedConnectionDataPtr;
             
-            Utilities::FileLogger * debugLogger;                                //logger for debugging
+            Utilities::FileLoggerPtr debugLogger;                                //logger for debugging
             std::function<void (LogSeverity, const std::string &)> dbLogHandler; //database log handler
             std::function<DeviceDataContainerPtr (const DeviceID)> deviceDataRetrievalHandler;
             std::function<const LocalPeerAuthenticationEntry & (const DeviceID &)> authenticationDataRetrievalHandler;
@@ -395,14 +384,14 @@ namespace NetworkManagement_Handlers
             boost::signals2::signal<void (const DeviceID, const ConnectionID)> onEstablishedConnectionClosed;
             
             //Stats
-            std::atomic<StatCounter> sendRequestsMade;             //outgoing data
-            std::atomic<StatCounter> sendRequestsConfirmed;        //outgoing data
-            std::atomic<StatCounter> sendRequestsFailed;           //outgoing data
-            std::atomic<StatCounter> totalDataObjectsReceived;     //incoming data
-            std::atomic<StatCounter> validDataObjectsReceived;     //incoming data
-            std::atomic<StatCounter> invalidDataObjectsReceived;   //incoming data
-            std::atomic<StatCounter> connectionsEstablished;       //number of connections successfully established
-            std::atomic<StatCounter> connectionsFailed;            //number of connections that could not be established
+            std::atomic<StatCounter> sendRequestsMade{0};           //outgoing data
+            std::atomic<StatCounter> sendRequestsConfirmed{0};      //outgoing data
+            std::atomic<StatCounter> sendRequestsFailed{0};         //outgoing data
+            std::atomic<StatCounter> totalDataObjectsReceived{0};   //incoming data
+            std::atomic<StatCounter> validDataObjectsReceived{0};   //incoming data
+            std::atomic<StatCounter> invalidDataObjectsReceived{0}; //incoming data
+            std::atomic<StatCounter> connectionsEstablished{0};     //number of connections successfully established
+            std::atomic<StatCounter> connectionsFailed{0};          //number of connections that could not be established
             
             /**
              * Verifies the supplied peer password and attempts to create a session.
@@ -630,7 +619,7 @@ namespace NetworkManagement_Handlers
                 if(dbLogHandler)
                     dbLogHandler(severity, message);
                 
-                if(debugLogger != nullptr)
+                if(debugLogger)
                     debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "CommandConnectionsHandler " + message);
             }
     };

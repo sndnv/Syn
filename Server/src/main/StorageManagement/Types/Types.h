@@ -18,8 +18,7 @@
 #ifndef STORAGE_MANAGEMENT_TYPES_H
 #define	STORAGE_MANAGEMENT_TYPES_H
 
-#include <limits>
-#include <boost/uuid/uuid.hpp>
+#include <climits>
 #include <boost/uuid/uuid_generators.hpp>
 
 namespace StorageManagement_Types

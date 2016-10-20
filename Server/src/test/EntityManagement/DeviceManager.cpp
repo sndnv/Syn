@@ -35,15 +35,15 @@ SCENARIO("A device manager is created and can process instructions",
             Utilities::FileLogSeverity::Debug
         };
 
-        Utilities::FileLogger logger(loggerParams);
+        Utilities::FileLoggerPtr logger(new Utilities::FileLogger(loggerParams));
         
         auto dbManager = Testing::Fixtures::createDatabaseManager();
         std::vector<InstructionManagement_Types::InstructionSetType> dispatcherSets;
         dispatcherSets.push_back(InstructionManagement_Types::InstructionSetType::DEVICE_MANAGER_ADMIN);
         dispatcherSets.push_back(InstructionManagement_Types::InstructionSetType::DEVICE_MANAGER_USER);
-        auto dispatcher = Testing::Fixtures::createInstructionDispatcher(dispatcherSets, &logger);
-        auto secManager = Testing::Fixtures::createSecurityManager(dispatcher, dbManager, &logger);
-        auto sessManager = Testing::Fixtures::createSessionManager(dbManager, secManager, &logger);
+        auto dispatcher = Testing::Fixtures::createInstructionDispatcher(dispatcherSets, logger);
+        auto secManager = Testing::Fixtures::createSecurityManager(dispatcher, dbManager, logger);
+        auto sessManager = Testing::Fixtures::createSessionManager(dbManager, secManager, logger);
         
         DeviceManager::DeviceManagerParameters mgrParams
         {
@@ -51,7 +51,7 @@ SCENARIO("A device manager is created and can process instructions",
             *secManager
         };
 
-        DeviceManager devManager(mgrParams, &logger);
+        DeviceManager devManager(mgrParams, logger);
         secManager->registerSecurableComponent(devManager);
         dispatcher->registerInstructionTarget<DeviceManagerAdminInstructionType>(devManager);
         dispatcher->registerInstructionTarget<DeviceManagerUserInstructionType>(devManager);

@@ -22,9 +22,7 @@
 #include <string>
 #include "FileLogger.h"
 #include <boost/thread.hpp>
-#include <boost/uuid/random_generator.hpp>
 #include <boost/uuid/uuid_io.hpp>
-#include <boost/asio/deadline_timer.hpp>
 #include <boost/asio/io_service.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/shared_ptr.hpp>
@@ -51,7 +49,7 @@ namespace Utilities
              * @param poolSize the initial number of threads to be created in the pool
              * @param parentLogger pointer to an initialised FileLogger (optional)
              */
-            ThreadPool(unsigned long poolSize, Utilities::FileLogger * parentLogger = nullptr);
+            ThreadPool(unsigned long poolSize, Utilities::FileLoggerPtr parentLogger = Utilities::FileLoggerPtr());
             
             /**
              * Destroys the pool and all associated threads.
@@ -127,7 +125,7 @@ namespace Utilities
             
         private:
             //Pool Configuration
-            Utilities::FileLogger * logger;
+            Utilities::FileLoggerPtr logger;
             boost::uuids::uuid poolID;
             
             //Task Management
@@ -154,7 +152,7 @@ namespace Utilities
              */
             void logMessage(std::string message)
             {
-                if(logger != nullptr)
+                if(logger)
                     logger->logMessage(Utilities::FileLogSeverity::Debug, "ThreadPool <" + boost::lexical_cast<std::string>(poolID) + "> > " + message);
             }
     };

@@ -24,7 +24,6 @@
 #include "../Interfaces/Securable.h"
 #include "../../InstructionManagement/Types/Types.h"
 #include "../../InstructionManagement/Sets/InstructionSet.h"
-#include "../Types/Types.h"
 
 using Common_Types::UserID;
 using Common_Types::INVALID_USER_ID;

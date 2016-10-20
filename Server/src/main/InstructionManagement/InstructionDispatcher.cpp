@@ -16,9 +16,11 @@
  */
 
 #include "InstructionDispatcher.h"
+#include "../Utilities/Strings/Common.h"
+#include "../Utilities/Strings/Instructions.h"
 
 SyncServer_Core::InstructionDispatcher::InstructionDispatcher
-(InstructionDispatcherParameters parameters, Utilities::FileLogger * logger)
+(InstructionDispatcherParameters parameters, Utilities::FileLoggerPtr logger)
         : expectedSetTypes(parameters.expectedSetTypes), debugLogger(logger)
 {
     logMessage(LogSeverity::Debug, "() > Dispatcher created.");
@@ -30,7 +32,6 @@ SyncServer_Core::InstructionDispatcher::~InstructionDispatcher()
     expectedSetTypes.clear();
     targetSets.clear();
     sources.clear();
-    debugLogger = nullptr;
 }
 
 void SyncServer_Core::InstructionDispatcher::registerInstructionSource(InstructionSource & source)

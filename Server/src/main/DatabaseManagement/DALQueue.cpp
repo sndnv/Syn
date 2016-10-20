@@ -16,22 +16,19 @@
  */
 
 #include "DALQueue.h"
+#include <boost/shared_ptr.hpp>
 
-SyncServer_Core::DatabaseManagement::DALQueue::DALQueue(DatabaseObjectType type, Utilities::FileLogger& parentLogger, DALQueueParameters parameters)
+SyncServer_Core::DatabaseManagement::DALQueue::DALQueue(DatabaseObjectType type, Utilities::FileLoggerPtr parentLogger, DALQueueParameters parameters)
+: queueType(type), dbMode(parameters.dbMode), failureAction(parameters.failureAction),
+  maxConsecutiveReadFailures(parameters.maximumReadFailures), maxConsecutiveWriteFailures(parameters.maximumWriteFailures), debugLogger(parentLogger)
 {
-    queueType = type;
-    dbMode = parameters.dbMode;
-    failureAction = parameters.failureAction;
-    maxConsecutiveReadFailures = parameters.maximumReadFailures;
-    maxConsecutiveWriteFailures = parameters.maximumWriteFailures;
     stopQueue = false;
-    logger = &parentLogger;
     mainThread = new boost::thread(&DatabaseManagement::DALQueue::mainQueueThread, this);
 }
 
 SyncServer_Core::DatabaseManagement::DALQueue::~DALQueue()
 {
-    logger->logMessage(Utilities::FileLogSeverity::Debug, "DALQueue / " + Convert::toString(queueType) + " (~) > Destruction initiated.");
+    logMessage(LogSeverity::Debug, "(~) Destruction initiated.");
     stopQueue = true;
     threadLockCondition.notify_all();
     
@@ -56,8 +53,6 @@ SyncServer_Core::DatabaseManagement::DALQueue::~DALQueue()
     std::queue<DatabaseRequestID>().swap(newRequests);
     pendingRequests.clear();
     requestsData.clear();
-    
-    logger = nullptr;
 }
 
 bool SyncServer_Core::DatabaseManagement::DALQueue::addDAL(DALPtr dal)
@@ -65,9 +60,9 @@ bool SyncServer_Core::DatabaseManagement::DALQueue::addDAL(DALPtr dal)
     if(stopQueue)
         return false;
     
-    logger->logMessage(Utilities::FileLogSeverity::Debug, "DALQueue / " + Convert::toString(queueType) + " (Add DAL) > Acquiring data lock.");
+    logMessage(LogSeverity::Debug, "(addDAL) Acquiring data lock.");
     boost::lock_guard<boost::mutex> dataLock(threadMutex);
-    logger->logMessage(Utilities::FileLogSeverity::Debug, "DALQueue / " + Convert::toString(queueType) + " (Add DAL) > Acquired data lock.");
+    logMessage(LogSeverity::Debug, "(addDAL) Acquired data lock.");
     
     if(dal->getID() == DatabaseManagement_Types::INVALID_DAL_ID || dals.find(dal->getID()) == dals.end())
     {
@@ -85,16 +80,16 @@ bool SyncServer_Core::DatabaseManagement::DALQueue::addDAL(DALPtr dal)
         
         if(dalIDs.size() == 1)
         {
-            logger->logMessage(Utilities::FileLogSeverity::Debug, "DALQueue / " + Convert::toString(queueType) + " (Add DAL) > Sending notification to main thread.");
+            logMessage(LogSeverity::Debug, "(addDAL) Sending notification to main thread.");
             threadLockCondition.notify_all();
-            logger->logMessage(Utilities::FileLogSeverity::Debug, "DALQueue / " + Convert::toString(queueType) + " (Add DAL) > Notification to main thread sent.");
+            logMessage(LogSeverity::Debug, "(addDAL) Notification to main thread sent.");
         }
         
         return true;
     }
     else
     {
-        logger->logMessage(Utilities::FileLogSeverity::Error, "DALQueue / " + Convert::toString(queueType) + " (Add DAL) > The requested DatabaseAbstractionLayer is already in the DALs table.");
+        logMessage(LogSeverity::Error, "(addDAL) The requested DatabaseAbstractionLayer is already in the DALs table.");
         return false;
     }
 }
@@ -106,9 +101,9 @@ bool SyncServer_Core::DatabaseManagement::DALQueue::removeDAL(const DALPtr dal)
     
     bool result = false;
     
-    logger->logMessage(Utilities::FileLogSeverity::Debug, "DALQueue / " + Convert::toString(queueType) + " (Remove DAL) > Acquiring data lock.");
+    logMessage(LogSeverity::Debug, "(removeDAL) Acquiring data lock.");
     boost::lock_guard<boost::mutex> dataLock(threadMutex);
-    logger->logMessage(Utilities::FileLogSeverity::Debug, "DALQueue / " + Convert::toString(queueType) + " (Remove DAL) > Acquired data lock.");
+    logMessage(LogSeverity::Debug, "(removeDAL) Acquired data lock.");
     DatabaseAbstractionLayerID dalID = dal->getID();
     if(dals.find(dalID) != dals.end())
     {
@@ -123,9 +118,9 @@ bool SyncServer_Core::DatabaseManagement::DALQueue::removeDAL(const DALPtr dal)
         result = true;
     }
     else
-        logger->logMessage(Utilities::FileLogSeverity::Error, "DALQueue / " + Convert::toString(queueType) + " (Remove DAL) > The requested DatabaseAbstractionLayer was not found in the DALs table.");
+        logMessage(LogSeverity::Error, "(removeDAL) The requested DatabaseAbstractionLayer was not found in the DALs table.");
     
-    logger->logMessage(Utilities::FileLogSeverity::Debug, "DALQueue / " + Convert::toString(queueType) + " (Remove DAL) > Data lock released.");
+    logMessage(LogSeverity::Debug, "(removeDAL) Data lock released.");
     return result;
 }
 
@@ -134,16 +129,16 @@ bool SyncServer_Core::DatabaseManagement::DALQueue::setParameters(DALQueueParame
     if(stopQueue)
         return false;
     
-    logger->logMessage(Utilities::FileLogSeverity::Debug, "DALQueue / " + Convert::toString(queueType) + " (Set Parameters) > Acquiring data lock.");
+    logMessage(LogSeverity::Debug, "(setParameters) Acquiring data lock.");
     boost::lock_guard<boost::mutex> dataLock(threadMutex);
-    logger->logMessage(Utilities::FileLogSeverity::Debug, "DALQueue / " + Convert::toString(queueType) + " (Set Parameters) > Acquired data lock.");
+    logMessage(LogSeverity::Debug, "(setParameters) Acquired data lock.");
     
     dbMode = parameters.dbMode;
     failureAction = parameters.failureAction;
     maxConsecutiveReadFailures = parameters.maximumReadFailures;
     maxConsecutiveWriteFailures = parameters.maximumWriteFailures;
     
-    logger->logMessage(Utilities::FileLogSeverity::Debug, "DALQueue / " + Convert::toString(queueType) + " (Set Parameters) > Data lock released.");
+    logMessage(LogSeverity::Debug, "(setParameters) > Data lock released.");
     
     return true;
 }
@@ -160,9 +155,9 @@ bool SyncServer_Core::DatabaseManagement::DALQueue::setCacheParameters(DatabaseA
     
     bool result = false;
     
-    logger->logMessage(Utilities::FileLogSeverity::Debug, "DALQueue / " + Convert::toString(queueType) + " (Set Cache Parameters) > Acquiring data lock.");
+    logMessage(LogSeverity::Debug, "(setCacheParameters) Acquiring data lock.");
     boost::lock_guard<boost::mutex> dataLock(threadMutex);
-    logger->logMessage(Utilities::FileLogSeverity::Debug, "DALQueue / " + Convert::toString(queueType) + " (Set Cache Parameters) > Acquired data lock.");
+    logMessage(LogSeverity::Debug, "(setCacheParameters) Acquired data lock.");
     
     if(dals.find(cacheID) != dals.end())
     {
@@ -171,12 +166,12 @@ bool SyncServer_Core::DatabaseManagement::DALQueue::setCacheParameters(DatabaseA
         if(cache)
             result = cache->setParameters(parameters);
         else
-            logger->logMessage(Utilities::FileLogSeverity::Debug, "DALQueue / " + Convert::toString(queueType) + " (Set Cache Parameters) > Operation failed; the requested ID does not refer to a DALCache object <" + Convert::toString(cacheID) + ">.");
+            logMessage(LogSeverity::Debug, "(setCacheParameters) Operation failed; the requested ID does not refer to a DALCache object <" + Convert::toString(cacheID) + ">.");
     }
     else
-        logger->logMessage(Utilities::FileLogSeverity::Debug, "DALQueue / " + Convert::toString(queueType) + " (Set Cache Parameters) > Operation failed; the requested cache ID was not found <" + Convert::toString(cacheID) + ">.");
+        logMessage(LogSeverity::Debug, "(setCacheParameters) Operation failed; the requested cache ID was not found <" + Convert::toString(cacheID) + ">.");
     
-    logger->logMessage(Utilities::FileLogSeverity::Debug, "DALQueue / " + Convert::toString(queueType) + " (Set Cache Parameters) > Data lock released.");
+    logMessage(LogSeverity::Debug, "(setCacheParameterss) Data lock released.");
     
     return result;
 }
@@ -188,9 +183,9 @@ DALCache::DALCacheParameters SyncServer_Core::DatabaseManagement::DALQueue::getC
     if(stopQueue)
         return result;
     
-    logger->logMessage(Utilities::FileLogSeverity::Debug, "DALQueue / " + Convert::toString(queueType) + " (Get Cache Parameters) > Acquiring data lock.");
+    logMessage(LogSeverity::Debug, "(getCacheParameters) Acquiring data lock.");
     boost::lock_guard<boost::mutex> dataLock(threadMutex);
-    logger->logMessage(Utilities::FileLogSeverity::Debug, "DALQueue / " + Convert::toString(queueType) + " (Get Cache Parameters) > Acquired data lock.");
+    logMessage(LogSeverity::Debug, "(getCacheParameters) Acquired data lock.");
     
     if(dals.find(cacheID) != dals.end())
     {
@@ -199,12 +194,12 @@ DALCache::DALCacheParameters SyncServer_Core::DatabaseManagement::DALQueue::getC
         if(cache)
             result = cache->getParameters();
         else
-            logger->logMessage(Utilities::FileLogSeverity::Debug, "DALQueue / " + Convert::toString(queueType) + " (Get Cache Parameters) > Operation failed; the requested ID does not refer to a DALCache object <" + Convert::toString(cacheID) + ">.");
+            logMessage(LogSeverity::Debug, "(getCacheParameters) Operation failed; the requested ID does not refer to a DALCache object <" + Convert::toString(cacheID) + ">.");
     }
     else
-        logger->logMessage(Utilities::FileLogSeverity::Debug, "DALQueue / " + Convert::toString(queueType) + " (Get Cache Parameters) > Operation failed; the requested cache ID was not found <" + Convert::toString(cacheID) + ">.");
+        logMessage(LogSeverity::Debug, "(getCacheParameters) Operation failed; the requested cache ID was not found <" + Convert::toString(cacheID) + ">.");
     
-    logger->logMessage(Utilities::FileLogSeverity::Debug, "DALQueue / " + Convert::toString(queueType) + " (Get Cache Parameters) > Data lock released.");
+    logMessage(LogSeverity::Debug, "(getCacheParameters) Data lock released.");
     
     return result;
 }
@@ -217,9 +212,9 @@ SyncServer_Core::DatabaseManagement::DALQueue::DALQueueInformation SyncServer_Co
 
 std::vector<SyncServer_Core::DatabaseManagement::DALCache::DALCacheInformation> SyncServer_Core::DatabaseManagement::DALQueue::getCachesInformation() const
 {
-    logger->logMessage(Utilities::FileLogSeverity::Debug, "DALQueue / " + Convert::toString(queueType) + " (Get Caches Information) > Acquiring data lock.");
+    logMessage(LogSeverity::Debug, "(getCachesInformation) Acquiring data lock.");
     boost::lock_guard<boost::mutex> dataLock(threadMutex);
-    logger->logMessage(Utilities::FileLogSeverity::Debug, "DALQueue / " + Convert::toString(queueType) + " (Get Caches Information) > Acquired data lock.");
+    logMessage(LogSeverity::Debug, "(getCachesInformation) Acquired data lock.");
     
     std::vector<SyncServer_Core::DatabaseManagement::DALCache::DALCacheInformation> result;
     
@@ -237,9 +232,9 @@ std::vector<SyncServer_Core::DatabaseManagement::DALCache::DALCacheInformation> 
 
 std::vector<SyncServer_Core::DatabaseManagement::DALQueue::DALInformation> SyncServer_Core::DatabaseManagement::DALQueue::getDALsInformation() const
 {
-    logger->logMessage(Utilities::FileLogSeverity::Debug, "DALQueue / " + Convert::toString(queueType) + " (Get DALs Information) > Acquiring data lock.");
+    logMessage(LogSeverity::Debug, "(getDALsInformation) Acquiring data lock.");
     boost::lock_guard<boost::mutex> dataLock(threadMutex);
-    logger->logMessage(Utilities::FileLogSeverity::Debug, "DALQueue / " + Convert::toString(queueType) + " (Get DALs Information) > Acquired data lock.");
+    logMessage(LogSeverity::Debug, "(getDALsInformation) Acquired data lock.");
     
     std::vector<SyncServer_Core::DatabaseManagement::DALQueue::DALInformation> result;
     
@@ -259,43 +254,43 @@ DatabaseRequestID SyncServer_Core::DatabaseManagement::DALQueue::addRequestToQue
         return DatabaseManagement_Types::INVALID_DATABASE_REQUEST_ID;
     
     tuple<RequestType, boost::any, boost::any> * data = new tuple<RequestType, boost::any, boost::any>(type, requestParameter, additionalParameter);
-    logger->logMessage(Utilities::FileLogSeverity::Debug, "DALQueue / " + Convert::toString(queueType) + " (Add Request To Queue) > Entering critical section.");
+    logMessage(LogSeverity::Debug, "(addRequestToQueue) Entering critical section.");
     boost::lock_guard<boost::mutex> dataLock(threadMutex);
-    logger->logMessage(Utilities::FileLogSeverity::Debug, "DALQueue / " + Convert::toString(queueType) + " (Add Request To Queue) > Critical section entered.");
+    logMessage(LogSeverity::Debug, "(addRequestToQueue) Critical section entered.");
     newRequests.push(nextRequestID);
     requestsData.insert(std::pair<DatabaseRequestID, tuple<RequestType, boost::any, boost::any>*>(nextRequestID, data));
     nextRequestID++;
     
-    logger->logMessage(Utilities::FileLogSeverity::Debug, "DALQueue / " + Convert::toString(queueType) + " (Add Request To Queue) > Sending notification to main thread.");
+    logMessage(LogSeverity::Debug, "(addRequestToQueue) Sending notification to main thread.");
     threadLockCondition.notify_all();
-    logger->logMessage(Utilities::FileLogSeverity::Debug, "DALQueue / " + Convert::toString(queueType) + " (Add Request To Queue) > Notification to main thread sent.");
+    logMessage(LogSeverity::Debug, "(addRequestToQueue) Notification to main thread sent.");
 
     return (nextRequestID - 1);
 }
 
 void SyncServer_Core::DatabaseManagement::DALQueue::mainQueueThread()
 {
-    logger->logMessage(Utilities::FileLogSeverity::Debug, "DALQueue / " + Convert::toString(queueType) + " (Main Thread) > Started.");
+    logMessage(LogSeverity::Debug, "(mainQueueThread) Started.");
     threadRunning = true;
     
     while(!stopQueue)
     {
-        logger->logMessage(Utilities::FileLogSeverity::Debug, "DALQueue / " + Convert::toString(queueType) + " (Main Thread) > Acquiring data lock.");
+        logMessage(LogSeverity::Debug, "(mainQueueThread) Acquiring data lock.");
         boost::unique_lock<boost::mutex> dataLock(threadMutex);
-        logger->logMessage(Utilities::FileLogSeverity::Debug, "DALQueue / " + Convert::toString(queueType) + " (Main Thread) > Data lock acquired.");
+        logMessage(LogSeverity::Debug, "(mainQueueThread) Data lock acquired.");
         
         if(dals.size() == 0)
         {
-            logger->logMessage(Utilities::FileLogSeverity::Error, "DALQueue / " + Convert::toString(queueType) + " (Main Thread) > No DALs found; thread will sleep until a DAL is added.");
-            logger->logMessage(Utilities::FileLogSeverity::Debug, "DALQueue / " + Convert::toString(queueType) + " (Main Thread) > Waiting on data lock.");
+            logMessage(LogSeverity::Error, "(mainQueueThread) No DALs found; thread will sleep until a DAL is added.");
+            logMessage(LogSeverity::Debug, "(mainQueueThread) Waiting on data lock.");
             threadLockCondition.wait(dataLock);
-            logger->logMessage(Utilities::FileLogSeverity::Debug, "DALQueue / " + Convert::toString(queueType) + " (Main Thread) > Data lock re-acquired after wait.");
+            logMessage(LogSeverity::Debug, "(mainQueueThread) Data lock re-acquired after wait.");
         }
         else if(newRequests.size() == 0)
         {
-            logger->logMessage(Utilities::FileLogSeverity::Debug, "DALQueue / " + Convert::toString(queueType) + " (Main Thread) > Waiting on data lock.");
+            logMessage(LogSeverity::Debug, "(mainQueueThread) Waiting on data lock.");
             threadLockCondition.wait(dataLock);
-            logger->logMessage(Utilities::FileLogSeverity::Debug, "DALQueue / " + Convert::toString(queueType) + " (Main Thread) > Data lock re-acquired after wait.");
+            logMessage(LogSeverity::Debug, "(mainQueueThread) Data lock re-acquired after wait.");
         }
         else
         {
@@ -303,10 +298,10 @@ void SyncServer_Core::DatabaseManagement::DALQueue::mainQueueThread()
                 dbMode = newMode;
             
             unsigned int numberOfNewRequests = newRequests.size();
-            logger->logMessage(Utilities::FileLogSeverity::Debug, "DALQueue / " + Convert::toString(queueType) + " (Main Thread) > Starting work on <" + Convert::toString(numberOfNewRequests) + "> new requests.");
+            logMessage(LogSeverity::Debug, "(mainQueueThread) Starting work on <" + Convert::toString(numberOfNewRequests) + "> new requests.");
             for(unsigned int i = 0; i < numberOfNewRequests; i++)
             {
-                logger->logMessage(Utilities::FileLogSeverity::Debug, "DALQueue / " + Convert::toString(queueType) + " (Main Thread) > Working with request <" + Convert::toString(i) + ">.");
+                logMessage(LogSeverity::Debug, "(mainQueueThread) Working with request <" + Convert::toString(i) + ">.");
                 DatabaseRequestID currentRequest = newRequests.front();
                 tuple<RequestType, boost::any, boost::any> * currentRequestData = requestsData[currentRequest];
                 vector<DatabaseAbstractionLayerID> pendingDALs;
@@ -332,7 +327,7 @@ void SyncServer_Core::DatabaseManagement::DALQueue::mainQueueThread()
                         }
                         else
                         {
-                            logger->logMessage(Utilities::FileLogSeverity::Error, "DALQueue / " + Convert::toString(queueType) + " (Main Thread) > Unexpected DB operation mode encountered on SELECT request.");
+                            logMessage(LogSeverity::Error, "(mainQueueThread) Unexpected DB operation mode encountered on SELECT request.");
                         }
                     } break;
                     
@@ -353,7 +348,7 @@ void SyncServer_Core::DatabaseManagement::DALQueue::mainQueueThread()
                         }
                         else
                         {
-                            logger->logMessage(Utilities::FileLogSeverity::Error, "DALQueue / " + Convert::toString(queueType) + " (Main Thread) > Unexpected DB operation mode encountered on INSERT request.");
+                            logMessage(LogSeverity::Error, "(mainQueueThread) Unexpected DB operation mode encountered on INSERT request.");
                         }
                     } break;
                         
@@ -374,7 +369,7 @@ void SyncServer_Core::DatabaseManagement::DALQueue::mainQueueThread()
                         }
                         else
                         {
-                            logger->logMessage(Utilities::FileLogSeverity::Error, "DALQueue / " + Convert::toString(queueType) + " (Main Thread) > Unexpected DB operation mode encountered on UPDATE request.");
+                            logMessage(LogSeverity::Error, "(mainQueueThread) Unexpected DB operation mode encountered on UPDATE request.");
                         }
                     } break;
                     
@@ -395,30 +390,30 @@ void SyncServer_Core::DatabaseManagement::DALQueue::mainQueueThread()
                         }
                         else
                         {
-                            logger->logMessage(Utilities::FileLogSeverity::Error, "DALQueue / " + Convert::toString(queueType) + " (Main Thread) > Unexpected DB operation mode encountered on DELETE request.");
+                            logMessage(LogSeverity::Error, "(mainQueueThread) Unexpected DB operation mode encountered on DELETE request.");
                         }
                     } break;
                     
                     default:
                     {
-                        logger->logMessage(Utilities::FileLogSeverity::Error, "DALQueue / " + Convert::toString(queueType) + " (Main Thread) > Unexpected request type encountered for new request.");
+                        logMessage(LogSeverity::Error, "(mainQueueThread) Unexpected request type encountered for new request.");
                     } break;
                 }
                 
                 pendingRequests.insert(std::pair<DatabaseRequestID, vector<DatabaseAbstractionLayerID>>(currentRequest, pendingDALs));
                 newRequests.pop();
                 
-                logger->logMessage(Utilities::FileLogSeverity::Debug, "DALQueue / " + Convert::toString(queueType) + " (Main Thread) > Done with request <" + Convert::toString(i) + ">.");
+                logMessage(LogSeverity::Debug, "(mainQueueThread) Done with request <" + Convert::toString(i) + ">.");
             }
             
-            logger->logMessage(Utilities::FileLogSeverity::Debug, "DALQueue / " + Convert::toString(queueType) + " (Main Thread) > Work on new requests finished.");
+            logMessage(LogSeverity::Debug, "(mainQueueThread) Work on new requests finished.");
         }
         
-        logger->logMessage(Utilities::FileLogSeverity::Debug, "DALQueue / " + Convert::toString(queueType) + " (Main Thread) > Data lock released.");
+        logMessage(LogSeverity::Debug, "(mainQueueThread) Data lock released.");
     }
     
     threadRunning = false;
-    logger->logMessage(Utilities::FileLogSeverity::Debug, "DALQueue / " + Convert::toString(queueType) + " (Main Thread) > Stopped.");
+    logMessage(LogSeverity::Debug, "(mainQueueThread) Stopped.");
     return;
 }
 
@@ -431,9 +426,9 @@ void SyncServer_Core::DatabaseManagement::DALQueue::onFailureHandler(DatabaseAbs
     unsigned int writeFailures = 0;
     
     {//ensures the locks are released as soon as they are not needed
-        logger->logMessage(Utilities::FileLogSeverity::Debug, "DALQueue / " + Convert::toString(queueType) + " (On Failure Handler) > Entering critical section for request/DAL <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
+        logMessage(LogSeverity::Debug, "(onFailureHandler) Entering critical section for request/DAL <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
         boost::lock_guard<boost::mutex> dataLock(threadMutex);
-        logger->logMessage(Utilities::FileLogSeverity::Debug, "DALQueue / " + Convert::toString(queueType) + " (On Failure Handler) > Critical section entered for request/DAL <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
+        logMessage(LogSeverity::Debug, "(onFailureHandler) Critical section entered for request/DAL <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
         
         if(requestsData[requestID]->get<0>() == RequestType::SELECT)
         {
@@ -450,7 +445,7 @@ void SyncServer_Core::DatabaseManagement::DALQueue::onFailureHandler(DatabaseAbs
         
         if((readFailures >= maxConsecutiveReadFailures || writeFailures >= maxConsecutiveWriteFailures) && failureAction != DatabaseFailureAction::IGNORE_FAILURE)
         {
-            logger->logMessage(Utilities::FileLogSeverity::Debug, "DALQueue / " + Convert::toString(queueType) + " (On Failure Handler) > Read/write failure detected during request/DAL <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
+            logMessage(LogSeverity::Debug, "(onFailureHandler) Read/write failure detected during request/DAL <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
             
             switch(failureAction)
             {
@@ -478,7 +473,7 @@ void SyncServer_Core::DatabaseManagement::DALQueue::onFailureHandler(DatabaseAbs
                 case DatabaseFailureAction::INITIATE_RECONNECT:
                 {
                     //TODO - implement
-                    logger->logMessage(Utilities::FileLogSeverity::Warning, "DALQueue / " + Convert::toString(queueType) + " (On Failure Handler) > INITIATE_RECONNECT failure action not implemented; request/DAL <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
+                    logMessage(LogSeverity::Warning, "(onFailureHandler) INITIATE_RECONNECT failure action not implemented; request/DAL <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
                 } break;
 
                 case DatabaseFailureAction::PUSH_TO_BACK:
@@ -492,7 +487,7 @@ void SyncServer_Core::DatabaseManagement::DALQueue::onFailureHandler(DatabaseAbs
 
                 default:
                 {
-                    logger->logMessage(Utilities::FileLogSeverity::Error, "DALQueue / " + Convert::toString(queueType) + " (On Failure Handler) > Unexpected DB failure action encountered.");
+                    logMessage(LogSeverity::Error, "(onFailureHandler) Unexpected DB failure action encountered.");
                 } break;
             }
         }
@@ -504,12 +499,12 @@ void SyncServer_Core::DatabaseManagement::DALQueue::onFailureHandler(DatabaseAbs
         delete requestsData[requestID];
         requestsData.erase(requestID);
         
-        logger->logMessage(Utilities::FileLogSeverity::Debug, "DALQueue / " + Convert::toString(queueType) + " (On Failure Handler) > Exiting critical section for request/DAL <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
+        logMessage(LogSeverity::Debug, "(onFailureHandler) Exiting critical section for request/DAL <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
     }
     
-    logger->logMessage(Utilities::FileLogSeverity::Debug, "DALQueue / " + Convert::toString(queueType) + " (On Failure Handler) > Sending signal for request/DAL <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
+    logMessage(LogSeverity::Debug, "(onFailureHandler) Sending signal for request/DAL <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
     onFailure(requestID, id);
-    logger->logMessage(Utilities::FileLogSeverity::Debug, "DALQueue / " + Convert::toString(queueType) + " (On Failure Handler) > Signal sent for request/DAL <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
+    logMessage(LogSeverity::Debug, "(onFailureHandler) Signal sent for request/DAL <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
 }
 
 void SyncServer_Core::DatabaseManagement::DALQueue::onSuccessHandler(DatabaseAbstractionLayerID dalID, DatabaseRequestID requestID, DataContainerPtr data)
@@ -518,9 +513,9 @@ void SyncServer_Core::DatabaseManagement::DALQueue::onSuccessHandler(DatabaseAbs
         return;
     
     {
-        logger->logMessage(Utilities::FileLogSeverity::Debug, "DALQueue / " + Convert::toString(queueType) + " (On Success Handler) > Entering critical section for request/DAL <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
+        logMessage(LogSeverity::Debug, "(onFailureHandler) Entering critical section for request/DAL <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
         boost::lock_guard<boost::mutex> dataLock(threadMutex);
-        logger->logMessage(Utilities::FileLogSeverity::Debug, "DALQueue / " + Convert::toString(queueType) + " (On Success Handler) > Critical section entered for request/DAL <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
+        logMessage(LogSeverity::Debug, "(onFailureHandler) Critical section entered for request/DAL <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
         
         if(requestsData[requestID]->get<0>() == RequestType::SELECT)
         {
@@ -540,10 +535,10 @@ void SyncServer_Core::DatabaseManagement::DALQueue::onSuccessHandler(DatabaseAbs
         delete requestsData[requestID];
         requestsData.erase(requestID);
         
-        logger->logMessage(Utilities::FileLogSeverity::Debug, "DALQueue / " + Convert::toString(queueType) + " (On Success Handler) > Exiting critical section for request/DAL <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
+        logMessage(LogSeverity::Debug, "(onFailureHandler) Exiting critical section for request/DAL <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
     }
     
-    logger->logMessage(Utilities::FileLogSeverity::Debug, "DALQueue / " + Convert::toString(queueType) + " (On Success Handler) > Sending signal for request/DAL <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
+    logMessage(LogSeverity::Debug, "(onFailureHandler) Sending signal for request/DAL <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
     onSuccess(requestID, data);
-    logger->logMessage(Utilities::FileLogSeverity::Debug, "DALQueue / " + Convert::toString(queueType) + " (On Success Handler) > Signal sent for request/DAL <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
+    logMessage(LogSeverity::Debug, "(onFailureHandler) Signal sent for request/DAL <" + Convert::toString(requestID) + "/" + Convert::toString(dalID) + ">.");
 }

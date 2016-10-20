@@ -40,11 +40,11 @@ SCENARIO("A security manager is created, managed and can process requests",
             Utilities::FileLogSeverity::Debug
         };
 
-        Utilities::FileLogger logger(loggerParams);
+        Utilities::FileLoggerPtr logger(new Utilities::FileLogger(loggerParams));
         
         SyncServer_Core::InstructionDispatcher * dispatcher = Testing::Fixtures::createInstructionDispatcher();
         SyncServer_Core::DatabaseManager * dbManager = Testing::Fixtures::createDatabaseManager();
-        SyncServer_Core::SecurityManager * testManager = Testing::Fixtures::createSecurityManager(dispatcher, dbManager, &logger);
+        SyncServer_Core::SecurityManager * testManager = Testing::Fixtures::createSecurityManager(dispatcher, dbManager, logger);
         
         PasswordData user1_pass(testManager->hashUserPassword("passw0rd"));
         PasswordData device1_pass(testManager->hashDevicePassword("PassW0rd1"));
@@ -317,11 +317,11 @@ SCENARIO("A security manager rejects invalid requests",
             Utilities::FileLogSeverity::Debug
         };
 
-        Utilities::FileLogger logger(loggerParams);
+        Utilities::FileLoggerPtr logger(new Utilities::FileLogger(loggerParams));
         
         SyncServer_Core::InstructionDispatcher * dispatcher = Testing::Fixtures::createInstructionDispatcher();
         SyncServer_Core::DatabaseManager * dbManager = Testing::Fixtures::createDatabaseManager();
-        SyncServer_Core::SecurityManager * testManager = Testing::Fixtures::createSecurityManager(dispatcher, dbManager, &logger);
+        SyncServer_Core::SecurityManager * testManager = Testing::Fixtures::createSecurityManager(dispatcher, dbManager, logger);
         
         PasswordData user1_pass(testManager->hashUserPassword("passw0rd"));
         PasswordData user2_pass(testManager->hashUserPassword("passw1rd"));

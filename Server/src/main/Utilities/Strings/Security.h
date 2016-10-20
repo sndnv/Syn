@@ -19,7 +19,6 @@
 #define	UTILITIES_STRINGS_SECURITY_H
 
 #include <string>
-#include <boost/unordered_map.hpp>
 #include "../../SecurityManagement/Types/Types.h"
 
 using SecurityManagement_Types::SecurableComponentType;
@@ -35,26 +34,6 @@ namespace Utilities
 {
     namespace Strings
     {
-        struct SecurityMaps
-        {
-            static const boost::unordered_map<SecurableComponentType, std::string> securableComponentTypeToString;
-            static const boost::unordered_map<std::string, SecurableComponentType> stringToSecurableComponentType;
-            static const boost::unordered_map<CacheEvictionType, std::string> cacheEvictionTypeToString;
-            static const boost::unordered_map<std::string, CacheEvictionType> stringToCacheEvictionType;
-            static const boost::unordered_map<HashAlgorithmType, std::string> hashAlgorithmTypeToString;
-            static const boost::unordered_map<std::string, HashAlgorithmType> stringToHashAlgorithmType;
-            static const boost::unordered_map<SymmetricCipherType, std::string> symmetricCipherTypeToString;
-            static const boost::unordered_map<std::string, SymmetricCipherType> stringToSymmetricCipherType;
-            static const boost::unordered_map<AuthenticatedSymmetricCipherModeType, std::string> authenticatedSymmetricCipherModeTypeToString;
-            static const boost::unordered_map<std::string, AuthenticatedSymmetricCipherModeType> stringToAuthenticatedSymmetricCipherModeType;
-            static const boost::unordered_map<AsymmetricCipherType, std::string> asymmetricCipherTypeToString;
-            static const boost::unordered_map<std::string, AsymmetricCipherType> stringToAsymmetricCipherType;
-            static const boost::unordered_map<KeyExchangeType, std::string> keyExchangeTypeToString;
-            static const boost::unordered_map<std::string, KeyExchangeType> stringToKeyExchangeType;
-            static const boost::unordered_map<EllipticCurveType, std::string> ellipticCurveTypeToString;
-            static const boost::unordered_map<std::string, EllipticCurveType> stringToEllipticCurveType;
-        };
-        
         std::string toString(SecurableComponentType var);
         std::string toString(CacheEvictionType var);
         std::string toString(HashAlgorithmType var);

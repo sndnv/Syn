@@ -38,14 +38,14 @@ SCENARIO("A database logger is created, registers logging sources and can proces
             Utilities::FileLogSeverity::Debug
         };
 
-        Utilities::FileLogger logger(loggerParams);
+        Utilities::FileLoggerPtr logger(new Utilities::FileLogger(loggerParams));
         
         auto dbManager = Testing::Fixtures::createDatabaseManager();
         std::vector<InstructionManagement_Types::InstructionSetType> dispatcherSets;
         dispatcherSets.push_back(InstructionManagement_Types::InstructionSetType::DATABASE_LOGGER);
-        auto dispatcher = Testing::Fixtures::createInstructionDispatcher(dispatcherSets, &logger);
-        auto secManager = Testing::Fixtures::createSecurityManager(dispatcher, dbManager, &logger);
-        auto sessManager = Testing::Fixtures::createSessionManager(dbManager, secManager, &logger);
+        auto dispatcher = Testing::Fixtures::createInstructionDispatcher(dispatcherSets, logger);
+        auto secManager = Testing::Fixtures::createSecurityManager(dispatcher, dbManager, logger);
+        auto sessManager = Testing::Fixtures::createSessionManager(dbManager, secManager, logger);
         
         DatabaseLogger::DatabaseLoggerParameters dbLoggerParams
         {
@@ -54,7 +54,7 @@ SCENARIO("A database logger is created, registers logging sources and can proces
             LogSeverity::Debug
         };
 
-        DatabaseLogger dbLogger(dbLoggerParams, &logger);
+        DatabaseLogger dbLogger(dbLoggerParams, logger);
         secManager->registerSecurableComponent(dbLogger);
         dispatcher->registerInstructionTarget<DatabaseLoggerInstructionType>(dbLogger);
         

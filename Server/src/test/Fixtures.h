@@ -146,7 +146,7 @@ namespace Testing
 
             static SyncServer_Core::InstructionDispatcher * createInstructionDispatcher(
                 std::vector<InstructionManagement_Types::InstructionSetType> expectedSets,
-                Utilities::FileLogger * logger = nullptr)
+                Utilities::FileLoggerPtr logger = Utilities::FileLoggerPtr())
             {
                 expectedSets.push_back(InstructionManagement_Types::InstructionSetType::TEST);
 
@@ -163,13 +163,13 @@ namespace Testing
                 return dispatcher;
             }
             
-            static SyncServer_Core::InstructionDispatcher * createInstructionDispatcher(Utilities::FileLogger * logger = nullptr)
+            static SyncServer_Core::InstructionDispatcher * createInstructionDispatcher(Utilities::FileLoggerPtr logger = Utilities::FileLoggerPtr())
             {
                 return createInstructionDispatcher(std::vector<InstructionManagement_Types::InstructionSetType>(), logger);
             }
 
             static SyncServer_Core::SecurityManager *
-            createSecurityManager(SyncServer_Core::InstructionDispatcher * dispatcher, SyncServer_Core::DatabaseManager * dbManager, Utilities::FileLogger * logger)
+            createSecurityManager(SyncServer_Core::InstructionDispatcher * dispatcher, SyncServer_Core::DatabaseManager * dbManager, Utilities::FileLoggerPtr logger)
             {
                 SyncServer_Core::SecurityManager::PasswordHashingParameters hashingParams
                 (
@@ -260,7 +260,7 @@ namespace Testing
             createSessionManager(
                 SyncServer_Core::DatabaseManager * dbManager,
                 SyncServer_Core::SecurityManager * secManager,
-                Utilities::FileLogger * logger)
+                Utilities::FileLoggerPtr logger)
             {
                 SyncServer_Core::SessionManager::SessionManagerParameters params
                 {
@@ -298,7 +298,7 @@ namespace Testing
                 SecurityManagement_Crypto::LocalAuthenticationDataStore * authStore,
                 NetworkManagement_Types::DeviceIPSettings ipSettings,
                 KeyGenerator & keyGenerator,
-                Utilities::FileLogger * logger)
+                Utilities::FileLoggerPtr logger)
             {
                 DeviceID masterID = boost::uuids::random_generator()();
                 

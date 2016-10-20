@@ -38,12 +38,12 @@ SCENARIO("A session manager is created and can manage sessions",
             Utilities::FileLogSeverity::Debug
         };
 
-        Utilities::FileLogger secLogger(loggerParams_1), sessLogger(loggerParams_2);
+        Utilities::FileLoggerPtr secLogger(new Utilities::FileLogger(loggerParams_1)), sessLogger(new Utilities::FileLogger(loggerParams_2));
         
         SyncServer_Core::InstructionDispatcher * dispatcher = Testing::Fixtures::createInstructionDispatcher();
         SyncServer_Core::DatabaseManager * dbManager = Testing::Fixtures::createDatabaseManager();
-        SyncServer_Core::SecurityManager * secManager = Testing::Fixtures::createSecurityManager(dispatcher, dbManager, &secLogger);
-        SyncServer_Core::SessionManager * testManager = Testing::Fixtures::createSessionManager(dbManager, secManager, &sessLogger);
+        SyncServer_Core::SecurityManager * secManager = Testing::Fixtures::createSecurityManager(dispatcher, dbManager, secLogger);
+        SyncServer_Core::SessionManager * testManager = Testing::Fixtures::createSessionManager(dbManager, secManager, sessLogger);
         
         std::string user1_rawPass = "passw0rd", device1_rawPass = "PassW0rd1";
         
@@ -147,12 +147,12 @@ SCENARIO("A session manager rejects invalid session requests",
             Utilities::FileLogSeverity::Debug
         };
 
-        Utilities::FileLogger secLogger(loggerParams_1), sessLogger(loggerParams_2);
+        Utilities::FileLoggerPtr secLogger(new Utilities::FileLogger(loggerParams_1)), sessLogger(new Utilities::FileLogger(loggerParams_2));
         
         SyncServer_Core::InstructionDispatcher * dispatcher = Testing::Fixtures::createInstructionDispatcher();
         SyncServer_Core::DatabaseManager * dbManager = Testing::Fixtures::createDatabaseManager();
-        SyncServer_Core::SecurityManager * secManager = Testing::Fixtures::createSecurityManager(dispatcher, dbManager, &secLogger);
-        SyncServer_Core::SessionManager * testManager = Testing::Fixtures::createSessionManager(dbManager, secManager, &sessLogger);
+        SyncServer_Core::SecurityManager * secManager = Testing::Fixtures::createSecurityManager(dispatcher, dbManager, secLogger);
+        SyncServer_Core::SessionManager * testManager = Testing::Fixtures::createSessionManager(dbManager, secManager, sessLogger);
         
         std::string user1_rawPass = "passw0rd", device1_rawPass = "PassW0rd1";
         

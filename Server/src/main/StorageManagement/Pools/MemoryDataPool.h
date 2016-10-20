@@ -19,7 +19,6 @@
 #define	MEMORYDATAPOOL_H
 
 #include <stdexcept>
-#include <boost/thread/lock_guard.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/unordered_map.hpp>
 

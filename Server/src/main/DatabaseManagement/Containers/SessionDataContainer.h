@@ -18,9 +18,7 @@
 #ifndef SESSIONDATACONTAINER_H
 #define	SESSIONDATACONTAINER_H
 
-#include <queue>
 #include <string>
-#include <vector>
 #include <boost/uuid/random_generator.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/shared_ptr.hpp>

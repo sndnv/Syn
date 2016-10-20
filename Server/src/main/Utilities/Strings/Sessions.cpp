@@ -16,8 +16,15 @@
  */
 
 #include "Sessions.h"
+#include <boost/unordered_map.hpp>
 
-using Maps = Utilities::Strings::SessionsMaps;
+struct SessionsMaps
+{
+    static const boost::unordered_map<SessionDataCommitType, std::string> sessionDataCommitTypeToString;
+    static const boost::unordered_map<std::string, SessionDataCommitType> stringToSessionDataCommitType;
+};
+        
+using Maps = SessionsMaps;
 
 const boost::unordered_map<SessionDataCommitType, std::string> Maps::sessionDataCommitTypeToString
 {

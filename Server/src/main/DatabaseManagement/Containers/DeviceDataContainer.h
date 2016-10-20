@@ -19,7 +19,6 @@
 #define	DEVICEDATACONTAINER_H
 
 #include <string>
-#include <typeinfo>
 #include <boost/shared_ptr.hpp>
 #include <boost/uuid/random_generator.hpp>
 #include "DataContainer.h"

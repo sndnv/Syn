@@ -16,26 +16,27 @@
  */
 
 #include "DataConnectionsHandler.h"
+#include <boost/thread/lock_guard.hpp>
+#include "../Utilities/Strings/Common.h"
+#include "../SecurityManagement/Crypto/SaltGenerator.h"
+
+//Protocols
+#include "../../../external/protobuf/BaseComm.pb.h"
+#include "Protocols/Utilities.h"
+
+using NetworkManagement_Protocols::ConnectionSetupRequestSignature;
+using NetworkManagement_Protocols::DataConnectionSetupRequest;
+using NetworkManagement_Protocols::DataConnectionSetupResponse;
 
 NetworkManagement_Handlers::DataConnectionsHandler::DataConnectionsHandler
 (const DataConnectionsHandlerParameters & params,
  std::function<PendingDataConnectionConfigPtr (const DeviceID, const TransientConnectionID)> cfgRetrievalHandler,
  std::function<const LocalPeerAuthenticationEntry & (const DeviceID &)> authDataRetrievalHandler,
- Utilities::FileLogger * debugLogger)
+ Utilities::FileLoggerPtr debugLogger)
 : debugLogger(debugLogger), compressor(params.compressionAccelerationLevel, params.maxDataSize),
   deviceConfigRetrievalHandler(cfgRetrievalHandler), authenticationDataRetrievalHandler(authDataRetrievalHandler),
-  localPeerID(params.localPeerID), requestSignatureSize(params.requestSignatureSize), maxDataSize(params.maxDataSize)
-{
-    active = true;
-    sendRequestsMade = 0;
-    sendRequestsConfirmed = 0;
-    sendRequestsFailed = 0;
-    totalDataObjectsReceived = 0;
-    validDataObjectsReceived = 0;
-    invalidDataObjectsReceived = 0;
-    connectionsEstablished = 0;
-    connectionsFailed = 0;
-}
+  active(true), localPeerID(params.localPeerID), requestSignatureSize(params.requestSignatureSize), maxDataSize(params.maxDataSize)
+{}
 
 NetworkManagement_Handlers::DataConnectionsHandler::~DataConnectionsHandler()
 {
@@ -544,7 +545,7 @@ CiphertextData * NetworkManagement_Handlers::DataConnectionsHandler::generateCon
 (const DeviceID remotePeerID, ConnectionDataPtr remotePeerData)
 {
     //builds the request signature data
-    RandomData signatureData(SaltGenerator::getRandomSalt(requestSignatureSize));
+    RandomData signatureData(SecurityManagement_Crypto::SaltGenerator::getRandomSalt(requestSignatureSize));
     ConnectionSetupRequestSignature requestSignature;
     requestSignature.set_signature_size(requestSignatureSize);
     requestSignature.set_signature_data(signatureData.BytePtr(), requestSignatureSize);

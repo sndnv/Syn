@@ -19,18 +19,15 @@
 #define	DATACONNECTIONSHANDLER_H
 
 #include <atomic>
-#include <vector>
 #include <string>
 #include <queue>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/thread/mutex.hpp>
-#include <boost/thread/lock_guard.hpp>
 #include <boost/unordered_map.hpp>
 #include <boost/signals2.hpp>
 
 #include "../Common/Types.h"
-#include "../Utilities/Strings/Common.h"
 #include "../Utilities/FileLogger.h"
 #include "../Utilities/Compression/CompressionHandler.h"
 
@@ -41,16 +38,11 @@
 #include "Types/Containers.h"
 #include "../EntityManagement/Interfaces/DatabaseLoggingSource.h"
 
-#include "../SecurityManagement/Crypto/SaltGenerator.h"
 #include "../SecurityManagement/Crypto/Containers.h"
 #include "../SecurityManagement/Crypto/Handlers.h"
 
 #include "Connections/Connection.h"
 #include "../EntityManagement/Interfaces/DatabaseLoggingSource.h"
-
-//Protocols
-#include "../../../external/protobuf/BaseComm.pb.h"
-#include "Protocols/Utilities.h"
 
 //Networking
 using NetworkManagement_Connections::ConnectionPtr;
@@ -73,7 +65,6 @@ using Common_Types::EMPTY_BYTE_DATA;
 using DatabaseManagement_Containers::DeviceDataContainerPtr;
 
 //Security
-using SecurityManagement_Crypto::SaltGenerator;
 using SecurityManagement_Crypto::SymmetricCryptoDataContainerPtr;
 using SecurityManagement_Crypto::SymmetricCryptoHandler;
 using SecurityManagement_Crypto::SymmetricCryptoHandlerPtr;
@@ -84,11 +75,6 @@ using SecurityManagement_Types::MixedData;
 using SecurityManagement_Types::RandomData;
 using SecurityManagement_Types::RandomDataSize;
 using SecurityManagement_Types::LocalPeerAuthenticationEntry;
-
-//Protocols
-using NetworkManagement_Protocols::ConnectionSetupRequestSignature;
-using NetworkManagement_Protocols::DataConnectionSetupRequest;
-using NetworkManagement_Protocols::DataConnectionSetupResponse;
 
 //Compression
 using Utilities::Compression::CompressionHandler;
@@ -130,7 +116,7 @@ namespace NetworkManagement_Handlers
                     const DataConnectionsHandlerParameters & params,
                     std::function<PendingDataConnectionConfigPtr (const DeviceID, const TransientConnectionID)> cfgRetrievalHandler,
                     std::function<const LocalPeerAuthenticationEntry & (const DeviceID &)> authDataRetrievalHandler,
-                    Utilities::FileLogger * debugLogger = nullptr);
+                    Utilities::FileLoggerPtr debugLogger = Utilities::FileLoggerPtr());
 
             /**
              * Disconnects all connections and performs clean up.
@@ -309,9 +295,9 @@ namespace NetworkManagement_Handlers
             };
             typedef boost::shared_ptr<ConnectionData> ConnectionDataPtr;
             
-            Utilities::FileLogger * debugLogger;                                //logger for debugging
+            Utilities::FileLoggerPtr debugLogger;                                //logger for debugging
             std::function<void (LogSeverity, const std::string &)> dbLogHandler; //database log handler
-            CompressionHandler compressor;                                      //data compression handler
+            CompressionHandler compressor;                                       //data compression handler
             std::function<PendingDataConnectionConfigPtr (const DeviceID, const TransientConnectionID)> deviceConfigRetrievalHandler;
             std::function<const LocalPeerAuthenticationEntry & (const DeviceID &)> authenticationDataRetrievalHandler;
             
@@ -332,14 +318,14 @@ namespace NetworkManagement_Handlers
             boost::signals2::signal<void (const DeviceID, const ConnectionID)> onEstablishedConnectionClosed;
             
             //Stats
-            std::atomic<StatCounter> sendRequestsMade;             //outgoing data
-            std::atomic<StatCounter> sendRequestsConfirmed;        //outgoing data
-            std::atomic<StatCounter> sendRequestsFailed;           //outgoing data
-            std::atomic<StatCounter> totalDataObjectsReceived;     //incoming data
-            std::atomic<StatCounter> validDataObjectsReceived;     //incoming data
-            std::atomic<StatCounter> invalidDataObjectsReceived;   //incoming data
-            std::atomic<StatCounter> connectionsEstablished;       //number of connections successfully established
-            std::atomic<StatCounter> connectionsFailed;            //number of connections that could not be established
+            std::atomic<StatCounter> sendRequestsMade{0};           //outgoing data
+            std::atomic<StatCounter> sendRequestsConfirmed{0};      //outgoing data
+            std::atomic<StatCounter> sendRequestsFailed{0};         //outgoing data
+            std::atomic<StatCounter> totalDataObjectsReceived{0};   //incoming data
+            std::atomic<StatCounter> validDataObjectsReceived{0};   //incoming data
+            std::atomic<StatCounter> invalidDataObjectsReceived{0}; //incoming data
+            std::atomic<StatCounter> connectionsEstablished{0};     //number of connections successfully established
+            std::atomic<StatCounter> connectionsFailed{0};          //number of connections that could not be established
             
             /**
              * Creates a new connection data object based on the supplied data.
@@ -584,7 +570,7 @@ namespace NetworkManagement_Handlers
                 if(dbLogHandler)
                     dbLogHandler(severity, message);
                 
-                if(debugLogger != nullptr)
+                if(debugLogger)
                     debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "DataConnectionsHandler " + message);
             }
     };

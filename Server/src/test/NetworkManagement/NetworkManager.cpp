@@ -73,13 +73,13 @@ SCENARIO("A network manager is created and can successfully handle connections",
             Utilities::FileLogSeverity::Debug
         };
 
-        Utilities::FileLogger
-                sourceSecurityLogger(securityLoggerParams_source),
-                targetSecurityLogger(securityLoggerParams_target),
-                sourceSessionLogger(sessionLoggerParams_source),
-                targetSessionLogger(sessionLoggerParams_target),
-                sourceNetworkLogger(networkLoggerParams_source),
-                targetNetworkLogger(networkLoggerParams_target);
+        Utilities::FileLoggerPtr
+                sourceSecurityLogger(new Utilities::FileLogger(securityLoggerParams_source)),
+                targetSecurityLogger(new Utilities::FileLogger(securityLoggerParams_target)),
+                sourceSessionLogger(new Utilities::FileLogger(sessionLoggerParams_source)),
+                targetSessionLogger(new Utilities::FileLogger(sessionLoggerParams_target)),
+                sourceNetworkLogger(new Utilities::FileLogger(networkLoggerParams_source)),
+                targetNetworkLogger(new Utilities::FileLogger(networkLoggerParams_target));
         
         std::vector<InstructionSetType> expectedInstructionSets;
         expectedInstructionSets.push_back(InstructionSetType::NETWORK_MANAGER_CONNECTION_LIFE_CYCLE);
@@ -87,10 +87,10 @@ SCENARIO("A network manager is created and can successfully handle connections",
         SyncServer_Core::InstructionDispatcher * sourceDispatcher = Testing::Fixtures::createInstructionDispatcher(expectedInstructionSets);
         SyncServer_Core::InstructionDispatcher * targetDispatcher = Testing::Fixtures::createInstructionDispatcher(expectedInstructionSets);
         SyncServer_Core::DatabaseManager * dbManager = Testing::Fixtures::createDatabaseManager();
-        SyncServer_Core::SecurityManager * sourceSecManager = Testing::Fixtures::createSecurityManager(sourceDispatcher, dbManager, &sourceSecurityLogger);
-        SyncServer_Core::SecurityManager * targetSecManager = Testing::Fixtures::createSecurityManager(sourceDispatcher, dbManager, &targetSecurityLogger);
-        SyncServer_Core::SessionManager * sourceSessManager = Testing::Fixtures::createSessionManager(dbManager, sourceSecManager, &sourceSessionLogger);
-        SyncServer_Core::SessionManager * targetSessManager = Testing::Fixtures::createSessionManager(dbManager, targetSecManager, &targetSessionLogger);
+        SyncServer_Core::SecurityManager * sourceSecManager = Testing::Fixtures::createSecurityManager(sourceDispatcher, dbManager, sourceSecurityLogger);
+        SyncServer_Core::SecurityManager * targetSecManager = Testing::Fixtures::createSecurityManager(sourceDispatcher, dbManager, targetSecurityLogger);
+        SyncServer_Core::SessionManager * sourceSessManager = Testing::Fixtures::createSessionManager(dbManager, sourceSecManager, sourceSessionLogger);
+        SyncServer_Core::SessionManager * targetSessManager = Testing::Fixtures::createSessionManager(dbManager, targetSecManager, targetSessionLogger);
         
         NetworkManagement_Types::DeviceIPSettings sourceSettings
         {
@@ -129,7 +129,7 @@ SCENARIO("A network manager is created and can successfully handle connections",
                 &sourceAuthStore,
                 sourceSettings,
                 keyGenerator,
-                &sourceNetworkLogger);
+                sourceNetworkLogger);
         
         auto targetManagerData = Testing::Fixtures::createNetworkManager(
                 targetDispatcher,
@@ -139,7 +139,7 @@ SCENARIO("A network manager is created and can successfully handle connections",
                 &targetAuthStore,
                 targetSettings,
                 keyGenerator,
-                &targetNetworkLogger);
+                targetNetworkLogger);
         
         SyncServer_Core::NetworkManager * sourceManager = sourceManagerData.manager;
         SyncServer_Core::NetworkManager * targetManager = targetManagerData.manager;

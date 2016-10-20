@@ -19,18 +19,11 @@
 #define	UTILITIES_STRINGS_COMMON_H
 
 #include <string>
-#include <boost/regex.hpp>
 #include <boost/thread.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/unordered_map.hpp>
-#include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_io.hpp>
-#include <boost/date_time/gregorian/gregorian_types.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
-#include "../../Common/Types.h"
 #include <cryptopp/secblock.h>
-#include <cryptopp/hex.h>
-#include <cryptopp/filters.h>
+#include "../../Common/Types.h"
 
 using Common_Types::Byte;
 using Common_Types::ByteVector;
@@ -49,16 +42,6 @@ namespace Utilities
 {
     namespace Strings
     {
-        struct CommonMaps
-        {
-            static const boost::unordered_map<UserAccessLevel, std::string> userAccessLevelToString;
-            static const boost::unordered_map<std::string, UserAccessLevel> stringToUserAccessLevel;
-            static const boost::unordered_map<SessionType, std::string> sessionTypeToString;
-            static const boost::unordered_map<std::string, SessionType> stringToSessionType;
-            static const boost::unordered_map<LogSeverity, std::string> logSeverityToString;
-            static const boost::unordered_map<std::string, LogSeverity> stringToLogSeverity;
-        };
-        
         std::string toString(bool var);
         std::string toString(int var);
         std::string toString(long var);

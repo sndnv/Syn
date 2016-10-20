@@ -16,6 +16,9 @@
  */
 
 #include "CompressionHandler.h"
+#include <boost/asio.hpp>
+#include <lz4/lz4.h>
+#include "../Strings/Common.h"
 
 void Utilities::Compression::CompressionHandler::compressData(const ByteData & inputData, const int acceleration, ByteData & compressedData)
 {

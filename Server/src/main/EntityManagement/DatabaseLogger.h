@@ -20,13 +20,10 @@
 
 #include <atomic>
 #include <string>
-#include <vector>
 
 #include <boost/thread/mutex.hpp>
-#include <boost/thread/lock_guard.hpp>
 
 #include "../Common/Types.h"
-#include "../Utilities/Strings/Common.h"
 #include "../Utilities/FileLogger.h"
 #include "../SecurityManagement/SecurityManager.h"
 #include "../SecurityManagement/Types/SecurityTokens.h"
@@ -87,7 +84,7 @@ namespace EntityManagement
              * @param params the logger configuration
              * @param debugLogger pointer to an initialised <code>FileLogger</code> (if any)
              */
-            DatabaseLogger(const DatabaseLoggerParameters & params,  Utilities::FileLogger * debugLogger = nullptr);
+            DatabaseLogger(const DatabaseLoggerParameters & params,  Utilities::FileLoggerPtr debugLogger = Utilities::FileLoggerPtr());
 
             /**
              * Clears all data structures.
@@ -123,7 +120,7 @@ namespace EntityManagement
             void registerLoggingSource(DatabaseLoggingSource & source);
             
         private:
-            Utilities::FileLogger * debugLogger;//logger for debugging
+            Utilities::FileLoggerPtr debugLogger;//logger for debugging
             
             //Required Managers
             DatabaseManager & databaseManager;
@@ -208,7 +205,7 @@ namespace EntityManagement
              */
             void logDebugMessage(const std::string & message) const
             {
-                if(debugLogger != nullptr)
+                if(debugLogger)
                     debugLogger->logMessage(Utilities::FileLogSeverity::Debug, "DatabaseLogger " + message);
             }
     };

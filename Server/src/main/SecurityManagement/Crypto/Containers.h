@@ -20,14 +20,12 @@
 
 #include <boost/thread/future.hpp>
 #include <boost/shared_ptr.hpp>
-#include <cryptopp/sha.h>
 #include <cryptopp/rsa.h>
 #include <cryptopp/authenc.h>
 #include <cryptopp/osrng.h>
 #include "../Types/Types.h"
 
 using SecurityManagement_Types::CryptoPPByte;
-using SecurityManagement_Types::HashAlgorithmType;
 using SecurityManagement_Types::SaltData;
 using SecurityManagement_Types::IVData;
 using SecurityManagement_Types::KeyData;

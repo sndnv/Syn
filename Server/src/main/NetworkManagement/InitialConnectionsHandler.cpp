@@ -16,25 +16,34 @@
  */
 
 #include "InitialConnectionsHandler.h"
+#include <boost/thread/lock_guard.hpp>
+#include "../Utilities/Strings/Common.h"
+#include "../Utilities/Strings/Security.h"
+#include "../SecurityManagement/Crypto/SaltGenerator.h"
+#include "../SecurityManagement/Crypto/PasswordGenerator.h"
+
+//Protocols
+#include "../../../external/protobuf/BaseComm.pb.h"
+#include "Protocols/Utilities.h"
+
+using NetworkManagement_Protocols::ConnectionSetupRequestSignature;
+using NetworkManagement_Protocols::InitConnectionAdditionalData;
+using NetworkManagement_Protocols::InitConnectionSetupRequest;
+using NetworkManagement_Protocols::InitConenctionSetupResponse;
 
 NetworkManagement_Handlers::InitialConnectionsHandler::InitialConnectionsHandler
 (const InitialConnectionsHandlerParameters & params, Securable & parent,
  std::function<PendingInitConnectionConfigPtr (const TransientConnectionID)> cfgRetrievalHandler,
  std::function<void (const DeviceID & deviceID, const LocalPeerAuthenticationEntry &)> authDataUpdateHandler,
- Utilities::FileLogger * debugLogger)
+ Utilities::FileLoggerPtr debugLogger)
 : debugLogger(debugLogger), deviceConfigRetrievalHandler(cfgRetrievalHandler),
   authenticationDataAdditionHandler(authDataUpdateHandler),
   parentNetworkManager(parent), securityManager(params.securityManager),
-  requestSignatureSize(params.requestSignatureSize),
+  active(true), requestSignatureSize(params.requestSignatureSize),
   keyExchange(params.keyExchange), defaultRandomPasswordSize(params.defaultRandomPasswordSize),
   maxRandomPasswordAttempts(params.maxRandomPasswordAttempts), localPeerID(params.localPeerID),
   localPeerPublicKey(params.localPeerPublicKey), localIPSettings(params.localIPSettings)
-{
-    active = true;
-
-    setupsCompleted = 0;
-    setupsFailed = 0;
-}
+{}
 
 NetworkManagement_Handlers::InitialConnectionsHandler::~InitialConnectionsHandler()
 {
@@ -342,7 +351,7 @@ NetworkManagement_Handlers::InitialConnectionsHandler::discardUnknownConnectionD
 
 const std::string NetworkManagement_Handlers::InitialConnectionsHandler::getNewServerPassword()
 {
-    return PasswordGenerator::getValidRandomASCIIPassword(
+    return SecurityManagement_Crypto::PasswordGenerator::getValidRandomASCIIPassword(
             defaultRandomPasswordSize,
             boost::bind(&SyncServer_Core::SecurityManager::hashDevicePassword, &securityManager, _1),
             maxRandomPasswordAttempts);
@@ -354,7 +363,7 @@ MixedData * NetworkManagement_Handlers::InitialConnectionsHandler::generateConne
 (const TransientConnectionID transientID, ConnectionDataPtr remotePeerData)
 {
      //builds the request signature object
-    RandomData signatureData(SaltGenerator::getRandomSalt(requestSignatureSize));
+    RandomData signatureData(SecurityManagement_Crypto::SaltGenerator::getRandomSalt(requestSignatureSize));
     ConnectionSetupRequestSignature requestSignature;
     requestSignature.set_signature_size(requestSignatureSize);
     requestSignature.set_signature_data(signatureData.BytePtr(), requestSignatureSize);

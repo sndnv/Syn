@@ -19,7 +19,6 @@
 #define	UTILITIES_STRINGS_STORAGE_H
 
 #include <string>
-#include <boost/unordered_map.hpp>
 #include "../../StorageManagement/Types/Types.h"
 
 using StorageManagement_Types::PoolMode;
@@ -32,20 +31,6 @@ namespace Utilities
 {
     namespace Strings
     {
-        struct StorageMaps
-        {
-            static const boost::unordered_map<DataPoolType, std::string> dataPoolTypeToString;
-            static const boost::unordered_map<std::string, DataPoolType> stringToDataPoolType;
-            static const boost::unordered_map<PoolMode, std::string> poolModeToString;
-            static const boost::unordered_map<std::string, PoolMode> stringToPoolMode;
-            static const boost::unordered_map<PoolState, std::string> poolStateToString;
-            static const boost::unordered_map<std::string, PoolState> stringToPoolState;
-            static const boost::unordered_map<LinkActionType, std::string> linkActionTypeToString;
-            static const boost::unordered_map<std::string, LinkActionType> stringToLinkActionType;
-            static const boost::unordered_map<LinkActionConditionType, std::string> linkActionConditionTypeToString;
-            static const boost::unordered_map<std::string, LinkActionConditionType> stringToLinkActionConditionType;
-        };
-        
         std::string toString(DataPoolType var);
         std::string toString(PoolMode var);
         std::string toString(PoolState var);

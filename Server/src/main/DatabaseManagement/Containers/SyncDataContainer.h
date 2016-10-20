@@ -21,7 +21,6 @@
 #include <string>
 #include <boost/shared_ptr.hpp>
 #include <boost/uuid/random_generator.hpp>
-#include <boost/date_time/posix_time/posix_time_types.hpp>
 #include "DataContainer.h"
 #include "../Types/Types.h"
 #include "../../Common/Types.h"

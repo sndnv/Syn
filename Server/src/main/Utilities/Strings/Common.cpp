@@ -16,8 +16,24 @@
  */
 
 #include "Common.h"
+#include <boost/regex.hpp>
+#include <boost/lexical_cast.hpp>
+#include <boost/unordered_map.hpp>
+#include <boost/date_time/gregorian/gregorian_types.hpp>
+#include <cryptopp/hex.h>
+#include <cryptopp/filters.h>
 
-using Maps = Utilities::Strings::CommonMaps;
+struct CommonMaps
+{
+    static const boost::unordered_map<UserAccessLevel, std::string> userAccessLevelToString;
+    static const boost::unordered_map<std::string, UserAccessLevel> stringToUserAccessLevel;
+    static const boost::unordered_map<SessionType, std::string> sessionTypeToString;
+    static const boost::unordered_map<std::string, SessionType> stringToSessionType;
+    static const boost::unordered_map<LogSeverity, std::string> logSeverityToString;
+    static const boost::unordered_map<std::string, LogSeverity> stringToLogSeverity;
+};
+
+using Maps = CommonMaps;
 
 const boost::unordered_map<UserAccessLevel, std::string> Maps::userAccessLevelToString
 {

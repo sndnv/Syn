@@ -45,7 +45,7 @@ namespace SecurityManagement_Crypto
              * @param message the message to be hashed
              * @return the hash generated for the specified message
              */
-            static const HashData getHash(HashAlgorithmType algorithm, const std::string message)
+            static const HashData getHash(HashAlgorithmType algorithm, const std::string & message)
             {
                 return getHash(algorithm, SaltData(), message);
             }
@@ -58,7 +58,7 @@ namespace SecurityManagement_Crypto
              * @param message the message to be hashed
              * @return the hash generated for the specified message
              */
-            static const HashData getHash(HashAlgorithmType algorithm, const SaltData & salt, const std::string message)
+            static const HashData getHash(HashAlgorithmType algorithm, const SaltData & salt, const std::string & message)
             {
                 switch(algorithm)
                 {
@@ -91,7 +91,7 @@ namespace SecurityManagement_Crypto
              * @return the hash generated for the specified message
              */
             template <typename THashAlgorithm>
-            static const HashData getHash(const std::string message, const SaltData & salt)
+            static const HashData getHash(const std::string & message, const SaltData & salt)
             {
                 HashData digest(THashAlgorithm::DIGESTSIZE);
                 
@@ -104,29 +104,29 @@ namespace SecurityManagement_Crypto
             }
             
             /** Generates a hash for the specified message and salt using the SHA224 algorithm.\n\n@return the hash generated for the specified message*/
-            static const HashData getHashSHA_224(const std::string message, const SaltData & salt)    { return getHash<CryptoPP::SHA224>(message, salt); }
+            static const HashData getHashSHA_224(const std::string & message, const SaltData & salt)    { return getHash<CryptoPP::SHA224>(message, salt); }
             /** Generates a hash for the specified message and salt using the SHA256 algorithm.\n\n@return the hash generated for the specified message*/
-            static const HashData getHashSHA_256(const std::string message, const SaltData & salt)    { return getHash<CryptoPP::SHA256>(message, salt); }
+            static const HashData getHashSHA_256(const std::string & message, const SaltData & salt)    { return getHash<CryptoPP::SHA256>(message, salt); }
             /** Generates a hash for the specified message and salt using the SHA384 algorithm.\n\n@return the hash generated for the specified message*/
-            static const HashData getHashSHA_384(const std::string message, const SaltData & salt)    { return getHash<CryptoPP::SHA384>(message, salt); }
+            static const HashData getHashSHA_384(const std::string & message, const SaltData & salt)    { return getHash<CryptoPP::SHA384>(message, salt); }
             /** Generates a hash for the specified message and salt using the SHA512 algorithm.\n\n@return the hash generated for the specified message*/
-            static const HashData getHashSHA_512(const std::string message, const SaltData & salt)    { return getHash<CryptoPP::SHA512>(message, salt); }
+            static const HashData getHashSHA_512(const std::string & message, const SaltData & salt)    { return getHash<CryptoPP::SHA512>(message, salt); }
             /** Generates a hash for the specified message and salt using the SHA3_224 algorithm.\n\n@return the hash generated for the specified message*/
-            static const HashData getHashSHA3_224(const std::string message, const SaltData & salt)   { return getHash<CryptoPP::SHA3_224>(message, salt); }
+            static const HashData getHashSHA3_224(const std::string & message, const SaltData & salt)   { return getHash<CryptoPP::SHA3_224>(message, salt); }
             /** Generates a hash for the specified message and salt using the SHA3_256 algorithm.\n\n@return the hash generated for the specified message*/
-            static const HashData getHashSHA3_256(const std::string message, const SaltData & salt)   { return getHash<CryptoPP::SHA3_256>(message, salt); }
+            static const HashData getHashSHA3_256(const std::string & message, const SaltData & salt)   { return getHash<CryptoPP::SHA3_256>(message, salt); }
             /** Generates a hash for the specified message and salt using the SHA3_384 algorithm.\n\n@return the hash generated for the specified message*/
-            static const HashData getHashSHA3_384(const std::string message, const SaltData & salt)   { return getHash<CryptoPP::SHA3_384>(message, salt); }
+            static const HashData getHashSHA3_384(const std::string & message, const SaltData & salt)   { return getHash<CryptoPP::SHA3_384>(message, salt); }
             /** Generates a hash for the specified message and salt using the SHA3_512 algorithm.\n\n@return the hash generated for the specified message*/
-            static const HashData getHashSHA3_512(const std::string message, const SaltData & salt)   { return getHash<CryptoPP::SHA3_512>(message, salt); }
+            static const HashData getHashSHA3_512(const std::string & message, const SaltData & salt)   { return getHash<CryptoPP::SHA3_512>(message, salt); }
             /** Generates a hash for the specified message and salt using the Whirlpool algorithm.\n\n@return the hash generated for the specified message*/
-            static const HashData getHashWHIRLPOOL(const std::string message, const SaltData & salt)  { return getHash<CryptoPP::Whirlpool>(message, salt); }
+            static const HashData getHashWHIRLPOOL(const std::string & message, const SaltData & salt)  { return getHash<CryptoPP::Whirlpool>(message, salt); }
             /** Generates a hash for the specified message and salt using the RIPEMD160 algorithm.\n\n@return the hash generated for the specified message*/
-            static const HashData getHashRIPEMD_160(const std::string message, const SaltData & salt) { return getHash<CryptoPP::RIPEMD160>(message, salt); }
+            static const HashData getHashRIPEMD_160(const std::string & message, const SaltData & salt) { return getHash<CryptoPP::RIPEMD160>(message, salt); }
             /** Generates a hash for the specified message and salt using the RIPEMD256 algorithm.\n\n@return the hash generated for the specified message*/
-            static const HashData getHashRIPEMD_256(const std::string message, const SaltData & salt) { return getHash<CryptoPP::RIPEMD256>(message, salt); }
+            static const HashData getHashRIPEMD_256(const std::string & message, const SaltData & salt) { return getHash<CryptoPP::RIPEMD256>(message, salt); }
             /** Generates a hash for the specified message and salt using the RIPEMD320 algorithm.\n\n@return the hash generated for the specified message*/
-            static const HashData getHashRIPEMD_320(const std::string message, const SaltData & salt) { return getHash<CryptoPP::RIPEMD320>(message, salt); }
+            static const HashData getHashRIPEMD_320(const std::string & message, const SaltData & salt) { return getHash<CryptoPP::RIPEMD320>(message, salt); }
             
         private:
             HashGenerator() {}

@@ -19,7 +19,6 @@
 #define	UTILITIES_STRINGS_DATABASE_H
 
 #include <string>
-#include <boost/unordered_map.hpp>
 #include "../../DatabaseManagement/Types/Types.h"
 
 using DatabaseManagement_Types::DatabaseObjectType;
@@ -39,32 +38,6 @@ namespace Utilities
 {
     namespace Strings
     {
-        struct DatabaseMaps
-        {
-            static const boost::unordered_map<DatabaseObjectType, std::string> databaseObjectTypesToString;
-            static const boost::unordered_map<std::string, DatabaseObjectType> stringToDatabaseObjectTypes;
-            static const boost::unordered_map<DatabaseManagerOperationMode, std::string> databaseManagerOperationModeToString;
-            static const boost::unordered_map<std::string, DatabaseManagerOperationMode> stringToDatabaseManagerOperationMode;
-            static const boost::unordered_map<DatabaseFailureAction, std::string> databaseFailureActionToString;
-            static const boost::unordered_map<std::string, DatabaseFailureAction> stringToDatabaseFailureAction;
-            static const boost::unordered_map<StatisticType, std::string> statisticTypeToString;
-            static const boost::unordered_map<std::string, StatisticType> stringToStatisticType;
-            static const boost::unordered_map<SystemParameterType, std::string> systemParameterTypeToString;
-            static const boost::unordered_map<std::string, SystemParameterType> stringToSystemParameterType;
-            static const boost::unordered_map<DataTransferType, std::string> dataTransferTypeToString;
-            static const boost::unordered_map<std::string, DataTransferType> stringToDataTransferType;
-            static const boost::unordered_map<ScheduleIntervalType, std::string> scheduleIntervalTypeToString;
-            static const boost::unordered_map<std::string, ScheduleIntervalType> stringToScheduleIntervalType;
-            static const boost::unordered_map<ConflictResolutionRule_Directory, std::string> dirResolutionRuleToString;
-            static const boost::unordered_map<std::string, ConflictResolutionRule_Directory> stringToDirResolutionRule;
-            static const boost::unordered_map<ConflictResolutionRule_File, std::string> fileResolutionRuleToString;
-            static const boost::unordered_map<std::string, ConflictResolutionRule_File> stringToFileResolutionRule;
-            static const boost::unordered_map<SyncFailureAction, std::string> syncFailureActionToString;
-            static const boost::unordered_map<std::string, SyncFailureAction> stringToSyncFailureAction;
-            static const boost::unordered_map<SyncResult, std::string> syncResultToString;
-            static const boost::unordered_map<std::string, SyncResult> stringToSyncResult;
-        };
-        
         std::string toString(DatabaseObjectType var);
         std::string toString(DatabaseManagerOperationMode var);
         std::string toString(DatabaseFailureAction var);
