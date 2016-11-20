@@ -26,14 +26,14 @@ SCENARIO("A session manager is created and can manage sessions",
     {
         Utilities::FileLoggerParameters loggerParams_1
         {
-            "test_data/SecurityManager.log",  //logFilePath
+            "./SecurityManager.log",  //logFilePath
             32*1024*1024,           //maximumFileSize
             Utilities::FileLogSeverity::Debug
         };
         
         Utilities::FileLoggerParameters loggerParams_2
         {
-            "test_data/SessionManager.log",  //logFilePath
+            "./SessionManager.log",  //logFilePath
             32*1024*1024,           //maximumFileSize
             Utilities::FileLogSeverity::Debug
         };
@@ -135,14 +135,14 @@ SCENARIO("A session manager rejects invalid session requests",
     {
         Utilities::FileLoggerParameters loggerParams_1
         {
-            "test_data/SecurityManager.log",  //logFilePath
+            "./SecurityManager.log",  //logFilePath
             32*1024*1024,           //maximumFileSize
             Utilities::FileLogSeverity::Debug
         };
         
         Utilities::FileLoggerParameters loggerParams_2
         {
-            "test_data/SessionManager.log",  //logFilePath
+            "./SessionManager.log",  //logFilePath
             32*1024*1024,           //maximumFileSize
             Utilities::FileLogSeverity::Debug
         };

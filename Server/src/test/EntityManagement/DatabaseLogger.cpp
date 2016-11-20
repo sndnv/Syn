@@ -33,7 +33,7 @@ SCENARIO("A database logger is created, registers logging sources and can proces
     {
         Utilities::FileLoggerParameters loggerParams
         {
-            "test_data/DatabaseLogger.log",  //logFilePath
+            "./DatabaseLogger.log",  //logFilePath
             32*1024*1024,                    //maximumFileSize
             Utilities::FileLogSeverity::Debug
         };

@@ -35,7 +35,7 @@ SCENARIO("A security manager is created, managed and can process requests",
     {
         Utilities::FileLoggerParameters loggerParams
         {
-            "test_data/SecurityManager.log",  //logFilePath
+            "./SecurityManager.log",  //logFilePath
             32*1024*1024,           //maximumFileSize
             Utilities::FileLogSeverity::Debug
         };
@@ -312,7 +312,7 @@ SCENARIO("A security manager rejects invalid requests",
     {
         Utilities::FileLoggerParameters loggerParams
         {
-            "test_data/SecurityManager.log",  //logFilePath
+            "./SecurityManager.log",  //logFilePath
             32*1024*1024,           //maximumFileSize
             Utilities::FileLogSeverity::Debug
         };

@@ -30,8 +30,8 @@ SCENARIO("A device manager is created and can process instructions",
     {
         Utilities::FileLoggerParameters loggerParams
         {
-            "test_data/DeviceManager.log",  //logFilePath
-            32*1024*1024,                   //maximumFileSize
+            "./DeviceManager.log",  //logFilePath
+            32*1024*1024,           //maximumFileSize
             Utilities::FileLogSeverity::Debug
         };
 

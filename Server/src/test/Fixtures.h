@@ -48,7 +48,7 @@ namespace Testing
             {
                 Utilities::FileLoggerParameters loggerParams
                 {
-                    "test_data/DatabaseManager.log",  //logFilePath
+                    "./DatabaseManager.log",  //logFilePath
                     32*1024*1024,           //maximumFileSize
                     Utilities::FileLogSeverity::Debug
                 };
@@ -76,50 +76,50 @@ namespace Testing
 
                 DatabaseManagement_Interfaces::DALPtr statisticsTableDAL(
                     new DatabaseManagement_DALs::DebugDAL(
-                        "test_data/log_stat.log",
-                        "test_data/data_stat",
+                        "./log_stat.log",
+                        "./data_stat",
                         DatabaseObjectType::STATISTICS));
 
                 DatabaseManagement_Interfaces::DALPtr systemTableDAL(
                     new DatabaseManagement_DALs::DebugDAL(
-                        "test_data/log_sys.log",
-                        "test_data/data_sys",
+                        "./log_sys.log",
+                        "./data_sys",
                         DatabaseObjectType::SYSTEM_SETTINGS));
 
                 DatabaseManagement_Interfaces::DALPtr syncFilesTableDAL(
                     new DatabaseManagement_DALs::DebugDAL(
-                        "test_data/log_sync.log",
-                        "test_data/data_sync",
+                        "./log_sync.log",
+                        "./data_sync",
                         DatabaseObjectType::SYNC_FILE));
 
                 DatabaseManagement_Interfaces::DALPtr devicesTableDAL(
                     new DatabaseManagement_DALs::DebugDAL(
-                        "test_data/log_dev.log",
-                        "test_data/data_dev",
+                        "./log_dev.log",
+                        "./data_dev",
                         DatabaseObjectType::DEVICE));
 
                 DatabaseManagement_Interfaces::DALPtr schedulesTableDAL(
                     new DatabaseManagement_DALs::DebugDAL(
-                        "test_data/log_sched.log",
-                        "test_data/data_sched",
+                        "./log_sched.log",
+                        "./data_sched",
                         DatabaseObjectType::SCHEDULE));
 
                 DatabaseManagement_Interfaces::DALPtr usersTableDAL(
                     new DatabaseManagement_DALs::DebugDAL(
-                        "test_data/log_user.log",
-                        "test_data/data_user",
+                        "./log_user.log",
+                        "./data_user",
                         DatabaseObjectType::USER));
 
                 DatabaseManagement_Interfaces::DALPtr logsTableDAL(
                     new DatabaseManagement_DALs::DebugDAL(
-                        "test_data/log_logs.log",
-                        "test_data/data_logs",
+                        "./log_logs.log",
+                        "./data_logs",
                         DatabaseObjectType::LOG));
 
                 DatabaseManagement_Interfaces::DALPtr sessionsTableDAL(
                     new DatabaseManagement_DALs::DebugDAL(
-                        "test_data/log_sess.log",
-                        "test_data/data_sess",
+                        "./log_sess.log",
+                        "./data_sess",
                         DatabaseObjectType::SESSION));
 
                 statisticsTableDAL->clearDatabase();

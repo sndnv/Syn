@@ -13,6 +13,6 @@ Client/Server & Peer-to-peer system for transferring data between peers, with em
 <h4>Required External Libraries:</h4>
 - Boost (1.62.0) - http://www.boost.org/
 - CryptoPP (5.6.2) - https://www.cryptopp.com/
-- Catch (1.2.1) - https://github.com/philsquared/Catch
-- Protobuf () - https://github.com/google/protobuf
+- Catch (1.5.7) - https://github.com/philsquared/Catch
+- Protobuf (2.6.1) - https://github.com/google/protobuf
 - LZ4 (1.7.1) - https://github.com/Cyan4973/lz4

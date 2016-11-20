@@ -33,42 +33,42 @@ SCENARIO("A network manager is created and can successfully handle connections",
         
         Utilities::FileLoggerParameters securityLoggerParams_source
         {
-            "test_data/NetworkManagement_SecurityManager_source.log",
+            "./NetworkManagement_SecurityManager_source.log",
             32*1024*1024,
             Utilities::FileLogSeverity::Debug
         };
         
         Utilities::FileLoggerParameters securityLoggerParams_target
         {
-            "test_data/NetworkManagement_SecurityManager_target.log",
+            "./NetworkManagement_SecurityManager_target.log",
             32*1024*1024,
             Utilities::FileLogSeverity::Debug
         };
         
         Utilities::FileLoggerParameters sessionLoggerParams_source
         {
-            "test_data/NetworkManagement_SessionManager_source.log",
+            "./NetworkManagement_SessionManager_source.log",
             32*1024*1024,
             Utilities::FileLogSeverity::Debug
         };
         
         Utilities::FileLoggerParameters sessionLoggerParams_target
         {
-            "test_data/NetworkManagement_SessionManager_target.log",
+            "./NetworkManagement_SessionManager_target.log",
             32*1024*1024,
             Utilities::FileLogSeverity::Debug
         };
         
         Utilities::FileLoggerParameters networkLoggerParams_source
         {
-            "test_data/NetworkManager_source.log",
+            "./NetworkManager_source.log",
             32*1024*1024,
             Utilities::FileLogSeverity::Debug
         };
         
         Utilities::FileLoggerParameters networkLoggerParams_target
         {
-            "test_data/NetworkManager_target.log",
+            "./NetworkManager_target.log",
             32*1024*1024,
             Utilities::FileLogSeverity::Debug
         };

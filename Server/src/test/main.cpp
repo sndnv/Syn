@@ -16,7 +16,7 @@
  */
 
 #define CATCH_CONFIG_RUNNER
-#include "../../external/catch/catch.hpp"
+#include <catch/catch.hpp>
 #include <string>
 #include <vector>
 #include <cstdio>
@@ -25,6 +25,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/program_options.hpp>
 #include "../main/Utilities/Strings/Common.h"
 
 const std::string getNewDirectoryName()
@@ -43,37 +44,53 @@ const std::string getNewDirectoryName()
 
 int main(int argc, char* argv[])
 {
-    int reps = 1;
+    int reps;
+    std::string testDirectoryPath;
     std::vector<int> results;
     
-    if(argc >= 3)
+    boost::program_options::options_description optDescription("Allowed options");
+    optDescription.add_options()
+            ("help", "Show help message")
+            (
+                "test-reps",
+                boost::program_options::value<int>(&reps)->default_value(1),
+                "Number of times to repeat the tests"
+            )
+            (
+                "output-path",
+                boost::program_options::value<std::string>(&testDirectoryPath)->default_value("test_data"),
+                "The directory to be used for storing test output"
+            );
+    
+    boost::program_options::variables_map params;
+    boost::program_options::store(boost::program_options::parse_command_line(argc, argv, optDescription), params);
+    boost::program_options::notify(params);    
+    
+    if(params.count("help"))
     {
-        std::string paramName = argv[argc-2];
-        if(paramName.compare("--test-reps") == 0)
-        {
-            reps = atoi(argv[argc-1]);
-            argc -= 2;
-        }
+        std::cout << optDescription << std::endl;
+        return 0;
     }
+    
+    boost::filesystem::path testDirectory(testDirectoryPath);
+    if(!boost::filesystem::exists(testDirectory) || !boost::filesystem::is_directory(testDirectory))
+    {
+        throw std::invalid_argument("Invalid test directory specified.");
+    }
+    boost::filesystem::current_path(testDirectory);
     
     Catch::Session session;
     
-    std::cout << "Starting with [" << reps << "] test repetitions." << std::endl;
+    std::cout << "Starting with [" << reps << "] test repetition(s) in directory [" << testDirectoryPath << "]." << std::endl;
     for(int i = 0; i < reps; i++)
     {
-        boost::filesystem::path testDirectory("test_data");
-        if(!boost::filesystem::exists(testDirectory) || !boost::filesystem::is_directory(testDirectory))
+        if(!boost::filesystem::is_empty("./"))
         {
-            throw std::invalid_argument("Invalid test directory specified.");
-        }
-
-        if(!boost::filesystem::is_empty(testDirectory))
-        {
-            boost::filesystem::path newDirectory("test_data/" + getNewDirectoryName());
+            boost::filesystem::path newDirectory("./" + getNewDirectoryName());
             boost::filesystem::create_directory(newDirectory);
 
             boost::filesystem::directory_iterator end;
-            for (boost::filesystem::directory_iterator itr(testDirectory); itr != end; ++itr)
+            for (boost::filesystem::directory_iterator itr("./"); itr != end; ++itr)
             {
                 boost::filesystem::path current(itr->path());
                 if(boost::filesystem::is_regular_file(current))
@@ -91,7 +108,7 @@ int main(int argc, char* argv[])
         }
 
         std::cout << "Running test #" << (i+1) << std::endl;
-        int result = session.run(argc, argv);
+        int result = session.run();
         std::cout << "Finished test #" << (i+1) << " with return code [" << result << "]" << std::endl;
         results.push_back(result);
     }

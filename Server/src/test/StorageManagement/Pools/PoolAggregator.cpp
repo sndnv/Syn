@@ -46,70 +46,70 @@ SCENARIO("Pool aggregators can be initialized and managed",
         
         StorageManagement_Pools::DiskDataPool::DiskDataPoolInitParameters initParams_1
         {
-            "test_data/test_pool_1", //poolFilePath
+            "./test_pool_1", //poolFilePath
             poolSize,   //poolSize
             false       //eraseDataOnFailure
         };
         
         StorageManagement_Pools::DiskDataPool::DiskDataPoolInitParameters initParams_2
         {
-            "test_data/test_pool_2", //poolFilePath
+            "./test_pool_2", //poolFilePath
             poolSize,   //poolSize
             false       //eraseDataOnFailure
         };
         
         StorageManagement_Pools::DiskDataPool::DiskDataPoolInitParameters initParams_3
         {
-            "test_data/test_pool_3", //poolFilePath
+            "./test_pool_3", //poolFilePath
             poolSize,   //poolSize
             false       //eraseDataOnFailure
         };
         
         StorageManagement_Pools::DiskDataPool::DiskDataPoolInitParameters initParams_4
         {
-            "test_data/test_pool_4", //poolFilePath
+            "./test_pool_4", //poolFilePath
             poolSize,   //poolSize
             false       //eraseDataOnFailure
         };
         
         StorageManagement_Pools::DiskDataPool::DiskDataPoolInitParameters initParams_5
         {
-            "test_data/test_pool_5", //poolFilePath
+            "./test_pool_5", //poolFilePath
             poolSize,   //poolSize
             false       //eraseDataOnFailure
         };
         
         StorageManagement_Pools::DiskDataPool::DiskDataPoolInitParameters initParams_6
         {
-            "test_data/test_pool_6", //poolFilePath
+            "./test_pool_6", //poolFilePath
             poolSize,   //poolSize
             false       //eraseDataOnFailure
         };
         
         StorageManagement_Pools::DiskDataPool::DiskDataPoolInitParameters initParams_7
         {
-            "test_data/test_pool_7", //poolFilePath
+            "./test_pool_7", //poolFilePath
             poolSize,   //poolSize
             false       //eraseDataOnFailure
         };
         
         StorageManagement_Pools::DiskDataPool::DiskDataPoolInitParameters initParams_8
         {
-            "test_data/test_pool_8", //poolFilePath
+            "./test_pool_8", //poolFilePath
             poolSize,   //poolSize
             false       //eraseDataOnFailure
         };
         
         StorageManagement_Pools::DiskDataPool::DiskDataPoolInitParameters initParams_9
         {
-            "test_data/test_pool_9", //poolFilePath
+            "./test_pool_9", //poolFilePath
             poolSize,   //poolSize
             false       //eraseDataOnFailure
         };
         
         StorageManagement_Pools::DiskDataPool::DiskDataPoolInitParameters initParams_10
         {
-            "test_data/test_pool_10", //poolFilePath
+            "./test_pool_10", //poolFilePath
             poolSize,   //poolSize
             false       //eraseDataOnFailure
         };
@@ -423,83 +423,83 @@ SCENARIO("Pool aggregators can store, retrieve and manage data",
         
         StorageManagement_Pools::PoolAggregator testAggregator(params);
         
-        remove("test_data/test_pool_1");
-        remove("test_data/test_pool_2");
-        remove("test_data/test_pool_3");
-        remove("test_data/test_pool_4");
-        remove("test_data/test_pool_5");
-        remove("test_data/test_pool_6");
-        remove("test_data/test_pool_7");
-        remove("test_data/test_pool_8");
-        remove("test_data/test_pool_9");
-        remove("test_data/test_pool_10");
+        remove("./test_pool_1");
+        remove("./test_pool_2");
+        remove("./test_pool_3");
+        remove("./test_pool_4");
+        remove("./test_pool_5");
+        remove("./test_pool_6");
+        remove("./test_pool_7");
+        remove("./test_pool_8");
+        remove("./test_pool_9");
+        remove("./test_pool_10");
 
         StorageManagement_Pools::DiskDataPool::DiskDataPoolInitParameters initParams_1
         {
-            "test_data/test_pool_1", //poolFilePath
+            "./test_pool_1", //poolFilePath
             poolSize,   //poolSize
             false       //eraseDataOnFailure
         };
 
         StorageManagement_Pools::DiskDataPool::DiskDataPoolInitParameters initParams_2
         {
-            "test_data/test_pool_2", //poolFilePath
+            "./test_pool_2", //poolFilePath
             poolSize,   //poolSize
             false       //eraseDataOnFailure
         };
 
         StorageManagement_Pools::DiskDataPool::DiskDataPoolInitParameters initParams_3
         {
-            "test_data/test_pool_3", //poolFilePath
+            "./test_pool_3", //poolFilePath
             poolSize,   //poolSize
             false       //eraseDataOnFailure
         };
 
         StorageManagement_Pools::DiskDataPool::DiskDataPoolInitParameters initParams_4
         {
-            "test_data/test_pool_4", //poolFilePath
+            "./test_pool_4", //poolFilePath
             poolSize,   //poolSize
             false       //eraseDataOnFailure
         };
 
         StorageManagement_Pools::DiskDataPool::DiskDataPoolInitParameters initParams_5
         {
-            "test_data/test_pool_5", //poolFilePath
+            "./test_pool_5", //poolFilePath
             poolSize,   //poolSize
             false       //eraseDataOnFailure
         };
 
         StorageManagement_Pools::DiskDataPool::DiskDataPoolInitParameters initParams_6
         {
-            "test_data/test_pool_6", //poolFilePath
+            "./test_pool_6", //poolFilePath
             poolSize,   //poolSize
             false       //eraseDataOnFailure
         };
 
         StorageManagement_Pools::DiskDataPool::DiskDataPoolInitParameters initParams_7
         {
-            "test_data/test_pool_7", //poolFilePath
+            "./test_pool_7", //poolFilePath
             poolSize,   //poolSize
             false       //eraseDataOnFailure
         };
 
         StorageManagement_Pools::DiskDataPool::DiskDataPoolInitParameters initParams_8
         {
-            "test_data/test_pool_8", //poolFilePath
+            "./test_pool_8", //poolFilePath
             poolSize,   //poolSize
             false       //eraseDataOnFailure
         };
 
         StorageManagement_Pools::DiskDataPool::DiskDataPoolInitParameters initParams_9
         {
-            "test_data/test_pool_9", //poolFilePath
+            "./test_pool_9", //poolFilePath
             poolSize,   //poolSize
             false       //eraseDataOnFailure
         };
 
         StorageManagement_Pools::DiskDataPool::DiskDataPoolInitParameters initParams_10
         {
-            "test_data/test_pool_10", //poolFilePath
+            "./test_pool_10", //poolFilePath
             poolSize,   //poolSize
             false       //eraseDataOnFailure
         };
@@ -698,7 +698,7 @@ SCENARIO("Pool aggregators can store, retrieve and manage data",
     {
         StorageManagement_Pools::DiskDataPool::DiskDataPoolLoadParameters loadParams_1
         {
-            "test_data/test_pool_1", //poolFilePath
+            "./test_pool_1", //poolFilePath
             StorageManagement_Types::PoolMode::READ_WRITE,  //mode
             false,      //eraseDataOnFailure
             0,          //bytesRead
@@ -707,7 +707,7 @@ SCENARIO("Pool aggregators can store, retrieve and manage data",
 
         StorageManagement_Pools::DiskDataPool::DiskDataPoolLoadParameters loadParams_2
         {
-            "test_data/test_pool_2", //poolFilePath
+            "./test_pool_2", //poolFilePath
             StorageManagement_Types::PoolMode::READ_WRITE,  //mode
             false,      //eraseDataOnFailure
             0,          //bytesRead
@@ -716,7 +716,7 @@ SCENARIO("Pool aggregators can store, retrieve and manage data",
 
         StorageManagement_Pools::DiskDataPool::DiskDataPoolLoadParameters loadParams_3
         {
-            "test_data/test_pool_3", //poolFilePath
+            "./test_pool_3", //poolFilePath
             StorageManagement_Types::PoolMode::READ_WRITE,  //mode
             false,      //eraseDataOnFailure
             0,          //bytesRead
@@ -725,7 +725,7 @@ SCENARIO("Pool aggregators can store, retrieve and manage data",
 
         StorageManagement_Pools::DiskDataPool::DiskDataPoolLoadParameters loadParams_4
         {
-            "test_data/test_pool_4", //poolFilePath
+            "./test_pool_4", //poolFilePath
             StorageManagement_Types::PoolMode::READ_WRITE,  //mode
             false,      //eraseDataOnFailure
             0,          //bytesRead
@@ -734,7 +734,7 @@ SCENARIO("Pool aggregators can store, retrieve and manage data",
 
         StorageManagement_Pools::DiskDataPool::DiskDataPoolLoadParameters loadParams_5
         {
-            "test_data/test_pool_5", //poolFilePath
+            "./test_pool_5", //poolFilePath
             StorageManagement_Types::PoolMode::READ_WRITE,  //mode
             false,      //eraseDataOnFailure
             0,          //bytesRead
@@ -743,7 +743,7 @@ SCENARIO("Pool aggregators can store, retrieve and manage data",
 
         StorageManagement_Pools::DiskDataPool::DiskDataPoolLoadParameters loadParams_6
         {
-            "test_data/test_pool_6", //poolFilePath
+            "./test_pool_6", //poolFilePath
             StorageManagement_Types::PoolMode::READ_WRITE,  //mode
             false,      //eraseDataOnFailure
             0,          //bytesRead
@@ -752,7 +752,7 @@ SCENARIO("Pool aggregators can store, retrieve and manage data",
 
         StorageManagement_Pools::DiskDataPool::DiskDataPoolLoadParameters loadParams_7
         {
-            "test_data/test_pool_7", //poolFilePath
+            "./test_pool_7", //poolFilePath
             StorageManagement_Types::PoolMode::READ_WRITE,  //mode
             false,      //eraseDataOnFailure
             0,          //bytesRead
@@ -761,7 +761,7 @@ SCENARIO("Pool aggregators can store, retrieve and manage data",
 
         StorageManagement_Pools::DiskDataPool::DiskDataPoolLoadParameters loadParams_8
         {
-            "test_data/test_pool_8", //poolFilePath
+            "./test_pool_8", //poolFilePath
             StorageManagement_Types::PoolMode::READ_WRITE,  //mode
             false,      //eraseDataOnFailure
             0,          //bytesRead
@@ -770,7 +770,7 @@ SCENARIO("Pool aggregators can store, retrieve and manage data",
 
         StorageManagement_Pools::DiskDataPool::DiskDataPoolLoadParameters loadParams_9
         {
-            "test_data/test_pool_9", //poolFilePath
+            "./test_pool_9", //poolFilePath
             StorageManagement_Types::PoolMode::READ_WRITE,  //mode
             false,      //eraseDataOnFailure
             0,          //bytesRead
@@ -779,7 +779,7 @@ SCENARIO("Pool aggregators can store, retrieve and manage data",
 
         StorageManagement_Pools::DiskDataPool::DiskDataPoolLoadParameters loadParams_10
         {
-            "test_data/test_pool_10", //poolFilePath
+            "./test_pool_10", //poolFilePath
             StorageManagement_Types::PoolMode::READ_WRITE,  //mode
             false,      //eraseDataOnFailure
             0,          //bytesRead

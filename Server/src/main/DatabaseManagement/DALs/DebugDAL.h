@@ -28,6 +28,7 @@
 #include <boost/unordered_map.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/tokenizer.hpp>
+#include <boost/uuid/random_generator.hpp>
 #include <queue>
 #include "../../Utilities/Tools.h"
 #include "../../Utilities/Strings/Common.h"
@@ -52,7 +53,6 @@
 #include "../Containers/VectorDataContainer.h"
 #include "../../SecurityManagement/Rules/AuthorizationRules.h"
 #include "../../InstructionManagement/Types/Types.h"
-#include "boost/uuid/random_generator.hpp"
 
 namespace Convert = Utilities::Strings;
 

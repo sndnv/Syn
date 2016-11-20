@@ -29,9 +29,9 @@ SCENARIO("Connection managers are created and can handle incoming/outgoing conne
 {
     GIVEN("a source and a target ConnectionManager")
     {
-        Utilities::FileLoggerParameters sourceLoggerParams{"test_data/ConnectionManager_source.log", 32*1024*1024, Utilities::FileLogSeverity::Debug};
-        Utilities::FileLoggerParameters targetLoggerParams{"test_data/ConnectionManager_target.log", 32*1024*1024, Utilities::FileLogSeverity::Debug};
-        Utilities::FileLoggerParameters testPoolLoggerParams{"test_data/ConnectionManager_testPool.log", 32*1024*1024, Utilities::FileLogSeverity::Debug};
+        Utilities::FileLoggerParameters sourceLoggerParams{"./ConnectionManager_source.log", 32*1024*1024, Utilities::FileLogSeverity::Debug};
+        Utilities::FileLoggerParameters targetLoggerParams{"./ConnectionManager_target.log", 32*1024*1024, Utilities::FileLogSeverity::Debug};
+        Utilities::FileLoggerParameters testPoolLoggerParams{"./ConnectionManager_testPool.log", 32*1024*1024, Utilities::FileLogSeverity::Debug};
         Utilities::FileLoggerPtr testPoolLogger(new Utilities::FileLogger(testPoolLoggerParams));
         Utilities::FileLoggerPtr sourceLogger(new Utilities::FileLogger(sourceLoggerParams));
         Utilities::FileLoggerPtr targetLogger(new Utilities::FileLogger(targetLoggerParams));

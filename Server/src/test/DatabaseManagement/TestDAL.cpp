@@ -40,7 +40,7 @@ Testing::TestDAL::TestDAL(
     {
         Utilities::FileLoggerParameters loggerParams
         {
-            "test_data/TestDAL_" + Convert::toString(dalType) + "_" + Convert::toString(dalUUID) + ".log",
+            "./TestDAL_" + Convert::toString(dalType) + "_" + Convert::toString(dalUUID) + ".log",
             32*1024*1024,
             Utilities::FileLogSeverity::Debug
         };

@@ -19,7 +19,7 @@
 #define	PROTOCOL_UTILITIES_H
 
 #include "../../SecurityManagement/Types/Types.h"
-#include "../../../../external/protobuf/BaseComm.pb.h"
+#include "../../../compiled/protobuf/BaseComm.pb.h"
 
 using NetworkManagement_Protocols::ConnectionSetupRequestSignature;
 using SecurityManagement_Types::PlaintextData;

@@ -19,7 +19,7 @@
 #define	BASICSPEC_H
 
 #include <algorithm>
-#include "../../external/catch/catch.hpp"
+#include <catch/catch.hpp>
 #include <boost/thread.hpp>
 #include <boost/shared_ptr.hpp>
 #include "../main/Common/Types.h"

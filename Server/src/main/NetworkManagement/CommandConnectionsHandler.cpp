@@ -19,7 +19,7 @@
 #include <boost/thread/lock_guard.hpp>
 
 //Protocols
-#include "../../../external/protobuf/BaseComm.pb.h"
+#include "../../compiled/protobuf/BaseComm.pb.h"
 #include "Protocols/Utilities.h"
 using NetworkManagement_Protocols::ConnectionSetupRequestSignature;
 using NetworkManagement_Protocols::CommandConnectionSetupRequest;

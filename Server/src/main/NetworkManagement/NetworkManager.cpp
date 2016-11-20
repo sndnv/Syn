@@ -25,7 +25,7 @@ namespace Instructions = InstructionManagement_Sets::NetworkManagerInstructions;
 namespace InstructionResults = InstructionManagement_Sets::NetworkManagerInstructions::Results;
 
 //Protocols
-#include "../../../external/protobuf/BaseComm.pb.h"
+#include "../../compiled/protobuf/BaseComm.pb.h"
 
 using NetworkManagement_Protocols::ConnectionSetupRequestSignature;
 using NetworkManagement_Protocols::CommandConnectionSetupRequest;

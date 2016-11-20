@@ -25,7 +25,7 @@ SCENARIO("Disk data pools can store, retrieve and manage data",
          "[DiskDataPool][DataPools][StorageManagement][Core]")
 {
     StorageManagement_Types::DataSize poolSize = 20*1024*1024;
-    std::string poolPath = "test_data/test_pool_1";
+    std::string poolPath = "./test_pool_1";
     
     GIVEN("a new DiskDataPool")
     {
@@ -183,14 +183,14 @@ SCENARIO("Disk data pools fail to initialize with invalid parameters",
     {
         StorageManagement_Pools::DiskDataPool::DiskDataPoolInitParameters initParams_1
         {
-            "test_data/test_pool_1",   //poolFilePath
+            "./test_pool_1",   //poolFilePath
             StorageManagement_Pools::DiskDataPool::OVERHEAD_POOL_MANAGEMENT, //poolSize
             false       //eraseDataOnFailure
         };
         
         StorageManagement_Pools::DiskDataPool::DiskDataPoolInitParameters initParams_2
         {
-            "test_data/test_pool_1",   //poolFilePath
+            "./test_pool_1",   //poolFilePath
             (StorageManagement_Pools::DiskDataPool::OVERHEAD_POOL_MANAGEMENT - 1), //poolSize
             false       //eraseDataOnFailure
         };

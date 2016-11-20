@@ -28,8 +28,8 @@
 #include "../InstructionManagement/Sets/NetworkManagerInstructionSet.h"
 
 //Protocols
-#include "../../../external/protobuf/BaseComm.pb.h"
-#include "../../../external/protobuf/Commands.pb.h"
+#include "../../compiled/protobuf/BaseComm.pb.h"
+#include "../../compiled/protobuf/Commands.pb.h"
 
 using Common_Types::DeviceID;
 using Common_Types::INVALID_DEVICE_ID;
