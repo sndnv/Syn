@@ -4,7 +4,7 @@ Client/Server & Peer-to-peer system for transferring data between peers, with em
 <h1></h1>
 
 <h4>Current State:</h4>
-- In development
+- Not in active development
 
 <h4>Target Hosts:</h4>
 - <b>Server:</b> Windows, Linux (C++11)<br>
